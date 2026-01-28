@@ -1,0 +1,41 @@
+#ifndef POLYMATH_H
+#define POLYMATH_H
+
+#include"integerMath.h"
+#include"helperF.h"
+
+using namespace std;
+
+struct getQuoRemDeg{
+	int degQuo;
+	int degRem;
+};
+struct getGCD{
+	int degG;
+	vector<LONG> g;
+};
+struct fullEx{
+	vector<LONG> r;
+	vector<LONG> s;
+	vector<LONG> t;
+	int degR;
+	int degS;
+	int degT;
+};
+vector<LONG> genVEC64(const int deg,const LONG p);
+vector<LONG> vecCOPY64(const vector<LONG> &v);
+void dispVEC64(const vector<LONG> &v);
+unordered_map<LONG,int> checkPOL64(const vector<LONG> &v,const LONG p);
+pair<vector<LONG>,int> pADDNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);
+int pADDIP64(vector<LONG> &a,const vector<LONG> &b,int &degA,const int degB,const LONG p);
+pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);
+int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const LONG p);
+int pMul(vector<LONG> &a,vector<LONG> &b,int &degA,int &degB,const LONG p);
+int pMulASM(vector<LONG> &a,vector<LONG> &b,int &degA,int &degB,const LONG p);
+int pMulASM2(vector<LONG> &a,vector<LONG> &b,int &degA,int &degB,const LONG p);
+LONG evalPoly(const vector<LONG> &a,LONG alpha,LONG p);
+getQuoRemDeg pDiv(vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,LONG p);
+getGCD pGCD(vector<LONG> a,vector<LONG> b,int degA,int degB,const LONG p);
+fullEx pGCDEX(vector<LONG> r0,vector<LONG> r1,int degr0,int degr1,const LONG p);
+
+#endif

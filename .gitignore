@@ -1,0 +1,36 @@
+# ----------------------------
+# BUILD OUTPUT:
+# ----------------------------
+/curr_BUILD/
+/build/
+/builds/
+/bin/
+/out/
+
+# DEAULT g++ OP:
+a.out
+**/a.out
+
+# OBJECT FILES & LIBS: 
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.lib
+
+# DEBUG - COVERAGE - PROFILING: 
+*.dSYM/
+*.gcda
+*.gcno
+*.profraw
+*.profdata
+
+# ----------------------------
+# IGNORE EDITOR - OS NOISE:
+# ----------------------------
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
