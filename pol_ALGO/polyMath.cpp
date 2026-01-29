@@ -2,7 +2,21 @@
 #include"integerMath.h"
 #include"helperF.h"
 
-using namespace std; 
+using namespace std;
+
+#define ZFMA(z,a,b) do {        \
+        unsigned long u,v;              \
+        __asm__(                        \
+        "       mulq    %%rdx           \n\t" \
+        "       addq    %%rax, %0       \n\t" \
+        "       adcq    %%rdx, %1       \n\t" \
+                : "=&r"(z[0]), "=&r"(z[1]), "=a"(u), "=d"(v) : "0"(z[0]), "1"(z[1]), "a"(a), "d"(b));\
+        } while (0)
+
+#define ZMOD(z,p) __asm__(\
+        "       divq    %4      \n\t" \
+        "       xorq    %0, %0  \n\t" \
+                : "=a"(z[1]), "=d"(z[0]) : "a"(z[0]), "d"(z[1] < p ? z[1] : z[1] % p), "r"(p))
 
 /******************************************************************************************/
 /* Polynomial routines                                                                    */
@@ -178,97 +192,111 @@ int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const
 	return degA;
 }
 
-int pMul(vector<LONG> &a,vector<LONG> &b,int &degA,int &degB,const LONG p){
-	if(degA==-1&&degB==-1){return -1;}
-	if(degB==-1){a.clear();a.shrink_to_fit();degA=degB;return degA;}
-	if(degA==-1){return -1;}
-	int maxDeg=degA+degB;
-	vector<LONG> temp(maxDeg+1,0);
+// Returns a pair containing the new vector c=(a*b) mod p
+// and the degree of c. 
+
+pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p){
+	vector<LONG> c;
+	if(degA<0 || degB<0) return {c,-1};
+	int degC=degA+degB;
+	c.resize(degC+1,0);
 	for(int i=0;i<=degA;i++){
 		for(int j=0;j<=degB;j++){
 			LONG prod=mul64b(a[i],b[j],p);
-			temp[i+j]=add64b(temp[i+j],prod,p);
+			c[i+j]=add64b(c[i+j],prod,p);
 		}
 	}
-	while(maxDeg>=0 && temp[maxDeg]==0){maxDeg--;}
-	if(maxDeg==-1){a.clear();a.shrink_to_fit();degA=maxDeg;return degA;}
-	temp.resize(maxDeg+1);
-	/*
-	vector<T>.swap switches the pointers internally. This is
-	O(1). No copying of the elements is done. 
-	*/
-	//temp.swap(a);
-	degA=maxDeg;
-	return{degA};
+	while(degC>=0 && c[degC]==0) degC--;
+	if(degC==-1){
+		c.clear();
+		return {c,degC};
+	}
+	return {c,degC};
 }
 
-int pMulASM(vector<LONG> &a,vector<LONG> &b,int &degA,int &degB,const LONG p){
-	if(degA==-1&&degB==-1){return -1;}
-	if(degB==-1){a.clear();a.shrink_to_fit();degA=degB;return degA;}
-	if(degA==-1){return -1;}
-	int maxDeg=degA+degB;
-	vector<LONG> temp(maxDeg+1,0);
-	for(int i=0;i<=degA;i++){
-		for(int j=0;j<=degB;j++){
-			LONG prod=mul64bASM(a[i],b[j],p);
-			temp[i+j]=add64b(temp[i+j],prod,p);
+// In place multiplication. Updates a and returns the new degree.
+
+int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+	if(degA<0 || degB<0) return -1;
+	int i;
+	int k;
+	int m;
+	int degC=degA+degB;
+	if(degC>degA) a.resize(degC+1);
+	/* 
+	If p<2^31 then our product fits inside 2^63 bits.
+	We essentially perform a convolution i.e. sum over i of
+	a[i]*b[k-i].
+	*/
+	if(p<2147483648LL){
+		LONG t;
+		LONG p2; 
+		p2=p<<32;
+		for(k=degC;k>=0;k--){
+			i=max(0,k-degB);
+			m=min(k,degA);
+			t=0LL; // Accumalator for the running sum.
+			while(i<m){
+				t-=a[i]*b[k-i];
+				i++; 
+				t-=a[i]*b[k-i];
+				i++;
+				t+=(t>>63)&p2;
+			}
+			if(i==m) t-=a[i]*b[k-i];
+			t=(-t)%p;
+			t+=(t>>63)&p;
+			a[k]=t;
 		}
 	}
-	while(maxDeg>=0 && temp[maxDeg]==0){maxDeg--;}
-	if(maxDeg==-1){a.clear();a.shrink_to_fit();degA=maxDeg;return degA;}
-	temp.resize(maxDeg+1);
-	/*
-	vector<T>.swap switches the pointers internally. This is
-	O(1). No copying of the elements is done. 
-	*/
-	//temp.swap(a);
-	degA=maxDeg;
-	return{degA};
-}
-
-int pMulASM2(vector<LONG> &a,vector<LONG> &b,int &degA,int &degB,const LONG p){
-	if(degA==-1&&degB==-1){return -1;}
-	if(degB==-1){a.clear();a.shrink_to_fit();degA=degB;return degA;}
-	if(degA==-1){return -1;}
-	int maxDeg=degA+degB;
-	vector<LONG> temp(maxDeg+1,0);
-	for(int i=0;i<=degA;i++){
-		for(int j=0;j<=degB;j++){
-			LONG prod=mul64bASM2(a[i],b[j],p);
-			temp[i+j]=add64b(temp[i+j],prod,p);
+	else{
+		ULNG z[2];
+		for(k=degC;k>=0;k--){
+			i=max(0,k-degB);
+			m=min(k,degA);
+			z[0]=z[1]=0LL; // 128 bit accumalators.
+			while(i<m){
+				//
+				ZFMA(z,a[i],b[k-i]);
+				i++;
+				ZFMA(z,a[i],b[k-i]);
+				i++;
+				if(z[1]>=p) z[1]-=p;
+			}
+			if(i==m) ZFMA(z,a[i],b[k-i]);
+			ZMOD(z,p);
+			a[k]=z[0];
 		}
 	}
-	while(maxDeg>=0 && temp[maxDeg]==0){maxDeg--;}
-	if(maxDeg==-1){a.clear();a.shrink_to_fit();degA=maxDeg;return degA;}
-	temp.resize(maxDeg+1);
-	/*
-	vector<T>.swap switches the pointers internally. This is
-	O(1). No copying of the elements is done. 
-	*/
-	//temp.swap(a);
-	degA=maxDeg;
-	return{degA};
+	while(degC>=0 && a[degC]==0) degC--;
+	a.resize(degC+1);
+	return degC;
 }
 
-// Horners evaluation.
-LONG evalPoly(const vector<LONG> &a,LONG alpha,LONG p){
-    LONG r=0;
-    for (int i=(int)a.size()-1;i>=0;--i){
+// Evaluates a polynomial using Horners rule.
+
+LONG evalHORN64(const vector<LONG> &a,LONG alpha,const LONG p){
+    LONG r=0LL;
+    for (int i=a.size()-1;i>=0;i--){
         r=add64b(mul64b(r,alpha,p),a[i],p);
     }
     return r;
 }
 
-struct getQuoRemDeg{
-	int degQuo;
-	int degRem;
-};
+// My implementation of division. Same idea as PDIVIP64 but
+// I am also returning the degree of both the quotient 
+// and remainder.
 
-getQuoRemDeg pDiv(vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,LONG p){
+pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p){
 	/* 
 	Changes A in place.
 	Suppose degA>=degB>=0. Then, time complexity is O((A-B+1)*(B+1)).
 	*/
+	if(degB==0){
+		cout<<"DIV by 0.\n";
+		exit(1);
+	}
+	if(degA<degB)return {0,degA};
 	LONG LTB=b[degB];
 	LONG invLTB=modinv64b(LTB,p);
 	for(int i=degA;i>=degB;i--){
@@ -292,6 +320,96 @@ getQuoRemDeg pDiv(vector<LONG> &a,const vector<LONG> &b,const int degA,const int
     while(degR>0 && a[degR]==0) --degR;
 	if(degR==0 && a[0]==0) degR=-1;
     return {degQ,degR};
+}
+
+// We divide a(x) by b(x) and put the remainder in the top 
+// half of a and quotient in the bottom half and return the 
+// degree of the remainder.
+
+int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+    int dq;
+	int dr;
+	int k;
+	int j;
+	int m; 
+	LONG t;
+	LONG inv;
+    if(degB<0){ 
+		cout<<"DIV BY 0.\n"; 
+		exit(1); 
+	}
+    if(degA<degB) return degA; 
+    if(degA==degB && b[degB]==1){
+        t=a[degA];
+        for(k=0;k<degA;k++){
+            if(b[k]){
+				a[k]=sub64b(a[k],mul64b(t,b[k],p),p);
+			}
+		}
+		for(dr=degA-1;dr>=0 && a[dr]==0;dr--);
+        return dr;
+    }
+    dq=degA-degB;
+    dr=degB-1;
+    if(b[degB]==1)inv = 1; 
+	else inv=modinv64b(b[degB],p);
+	if(p<2147483648LL){ 
+	LONG p2;
+    p2=p<<32;
+    for(k=degA;k>=0;k--){
+        t=a[k];
+        m=min(dr,k);
+        j=max(0,k-dq);
+        while(j<m){
+            t-=b[j]*a[k-j+degB]; 
+			j++;
+            t-=b[j]*a[k-j+degB]; 
+			j++;
+            t+=(t>>63)&p2;
+        }
+        if(j==m)t-=b[j]*a[k-j+degB];
+        t=t%p;
+        t+=(t>>63)&p;
+        if(k>=degB && inv!=1)t=mul64b(t,inv,p);
+        a[k]=t;
+    }
+} else {
+	ULNG z[2];
+    for(k=degA;k>=0;k--){
+        z[0]=z[1]=0LL;
+        m=min(dr,k);
+        j=max(0,k-dq);
+        while(j<m){
+            ZFMA(z,b[j],a[k-j+degB]); 
+			j++;
+            ZFMA(z,b[j],a[k-j+degB]); 
+			j++;
+            if(z[1]>=p)z[1]-=p;
+        }
+        if(j==m)ZFMA(z,b[j],a[k-j+degB]);
+        ZMOD(z,p);
+        t=a[k]-z[0];
+        t+=(t>>63)&p;
+        if(k>=degB && inv!=1)t=mul64b(t,inv,p);
+        a[k]=t;
+    }
+}
+    while(dr>=0 && a[dr]==0)dr--;
+    return(dr);
+}
+
+// Makes a polynomial monic. We can do this as we are working 
+// in Zp[x] and this is a field so inverses exist.
+
+void polMAKEMONIC64(vector<LONG> a,const LONG p){
+	int degA=a.size();
+	if(degA<0 || a[degA]==1) return;
+	LONG invTerm;
+	invTerm=modinv64b(a[degA],p);
+	for(int i=0;i<degA;i++){
+		a[i]=mul64b(invTerm,a[i],p);
+	}
+	a[degA]=1;
 }
 
 struct getGCD{
