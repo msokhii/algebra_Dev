@@ -1,3 +1,5 @@
+// Compile with g++ -I .Iheader_FILES pol_ALGO/polyMath.cpp pol_ALGO/integerMath.cpp
+
 #include<bits/stdc++.h> 
 #include"integerMath.h"
 #include"helperF.h"
@@ -542,3 +544,5 @@ int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	return{r0,s0,t0,degr0,degS0,degT0};
 }
 */
+
+
