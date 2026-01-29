@@ -6,10 +6,6 @@
 
 using namespace std;
 
-struct getGCD{
-	int degG;
-	vector<LONG> g;
-};
 struct fullEx{
 	vector<LONG> r;
 	vector<LONG> s;
@@ -27,6 +23,7 @@ int pADDIP64(vector<LONG> &a,const vector<LONG> &b,int &degA,const int degB,cons
 pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);
 int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const LONG p);
 int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
+int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int degB,const LONG p);
 pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);
 LONG evalHORN64(const vector<LONG> &a,LONG alpha,const LONG p);
 pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);

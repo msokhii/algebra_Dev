@@ -9,7 +9,7 @@ using namespace std;
 /*
 This struct is for pGCDEXTNEW.
 */
-typedef struct GCDEX{
+struct GCDEX{
 	vector<LONG> r;
 	vector<LONG> s;
 	vector<LONG> t;
@@ -17,6 +17,10 @@ typedef struct GCDEX{
 	int degS;
 	int degT;
 };
+
+#define ZMUL(z,a,b) __asm__(\
+        "       mulq    %%rdx   \n\t" \
+                : "=a"(z[0]), "=d"(z[1]) : "a"(a), "d"(b))
 
 #define ZFMA(z,a,b) do {        \
         unsigned long u,v;              \
@@ -287,6 +291,47 @@ int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	return degC;
 }
 
+int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int degB,const LONG p){
+	ULNG z[2];
+	LONG t;
+	int i;
+	/*
+	If b is the zero polynomial, then A-(ax+b)*B=A so we simply
+	return the degree of A.
+	*/
+	if(degB==-1){return degA;}
+	z[0]=z[1]=0LL;
+	/*
+	If degA<=degB, then we pad A with zereos.
+	*/
+	while(degA<=degB){a[++degA]=0;}
+	/*
+	Constant term is special in the sense b*B does not 
+	have any effect on the degrees so we can compute A=b*B directly.
+	*/
+	t=mul64b(bVal,b[0],p);
+	a[0]=sub64b(a[0],t,p);
+	/*
+	Basic for loop using 128 bit accumalators to compute 
+	A[i]-(aVal*x-bVal)*B[i].
+	*/
+	for(i=1;i<=degB;i++){
+		ZMUL(z,aVal,b[i-1]);
+		ZFMA(z,bVal,b[i]);
+		ZMOD(z,p);
+		t=a[i]-z[0];
+		a[i]=t+((t>>63)&p);
+	}
+	/*
+	Here, we are updating the new leading coefficient.
+	*/
+	t=mul64b(aVal,b[degB],p);
+	a[degB+1]=sub64b(a[degB+1],t,p);
+	// Why do we have an extra checking condition?
+	while(degA>=0 && (a[degA]==0 || a[degA]==p)){degA--;}
+	return degA;
+}
+
 // Evaluates a polynomial using Horners rule.
 
 LONG evalHORN64(const vector<LONG> &a,LONG alpha,const LONG p){
@@ -336,9 +381,9 @@ pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,co
     return {degQ,degR};
 }
 
-// We divide a(x) by b(x) and put the remainder in the top 
-// half of a and quotient in the bottom half and return the 
-// degree of the remainder.
+// We divide a(x) by b(x) and put the remainder in the bottom 
+// half of a so a[0...deg(b)-1] and quotient in the top half 
+// so a[degb...dega] and return the degree of the remainder.
 
 int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
     int dq;
@@ -353,6 +398,14 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 		exit(1); 
 	}
     if(degA<degB) return degA; 
+	/*
+	Special case: If we have degA=degB and we have a monic
+	divisor. Since, degrees are the same, the leading term 
+	of A is the quotient (call it T). So we do A-(t*B) but 
+	the first term is implicitly cancelled so we run a loop from 
+	0 to degA-1 and update A accordingly. The degree of the remainder 
+	will be degB-1 and we can then chop off the trailing zeroes.
+	*/
     if(degA==degB && b[degB]==1){
         t=a[degA];
         for(k=0;k<degA;k++){
@@ -365,11 +418,21 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
     }
     dq=degA-degB;
     dr=degB-1;
+	/* 
+	We are working in Zp[x] so inverses are guaranteed to 
+	exist. If LC(B) is monic then the inverse is simply 1. Else, 
+	we compute the inverse.
+	*/
     if(b[degB]==1)inv = 1; 
 	else inv=modinv64b(b[degB],p);
 	if(p<2147483648LL){ 
 	LONG p2;
     p2=p<<32;
+	/*
+	Same idea as multiplication. If we know p<2^31 we can use 
+	accumaltors to make things faster. The indices are 
+	extrmely confusing.
+	*/
     for(k=degA;k>=0;k--){
         t=a[k];
         m=min(dr,k);
@@ -387,7 +450,7 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
         if(k>=degB && inv!=1)t=mul64b(t,inv,p);
         a[k]=t;
     }
-} else {
+} else{
 	ULNG z[2];
     for(k=degA;k>=0;k--){
         z[0]=z[1]=0LL;
@@ -433,11 +496,11 @@ pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int 
 	// Division dominates. 
 	// Space is O((degA+1)+(degB+1)).
 	if(degA==-1){
-		makeMonic(b,degB,p);
+		polMAKEMONIC64(b,p);
 		return {b,degB};
 	}
 	if(degB==-1){
-		makeMonic(a,degA,p);
+		polMAKEMONIC64(a,p);
 		return {a,degA};
 	}
 	if(degA<degB){
@@ -467,12 +530,22 @@ int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	LONG u;
 	LONG aNew;
 	LONG bNew;
-    if(degB<0){
+    /*
+	We are dividing a by b so if degB<0 we cannot perform division so
+	we return.
+	*/
+	if(degB<0){
 		cout<<"DIV by 0.\n"; 
 		exit(1); 
 	}
+	/*
+	We are swapping pointers instead of copying arrays.
+	*/
     c=a;
 	d=b;
+	/*
+	If deg(a)<deg(b) then we swap them so deg(b)<deg(a).
+	*/
     if(degA<degB){ 
 		r=c; 
 		c=d; 
@@ -482,27 +555,28 @@ int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 		degB=degR; 
 	}
     while(1){
-        if(degB>0 && degA-degB==1) 
-		{// normal case
+		// Special case.
+        if(degB>0 && degA-degB==1){
             u=modinv64b(d[degB],p);
             aNew=mul64b(c[degA],u,p);
 			bNew=mul64b(aNew,d[degB-1],p);
             bNew=mul64b(u,sub64b(c[degA-1],bNew,p),p);  // quotient = a x + b
-            //degR=polsubmul(C,D,a,b,da,db,p);  // C = C - (a x + b) D
+            degR=polSUBMUL64(c,d,aNew,bNew,degA,degB,p);  // C = C - (a x + b) D
             if(degR>=degB)cout<<"FAIL.\n";
         }
+		// Normal case.
         else degR=polDIVIP64(c,d,degA,degB,p);
         if(degR<0){ /* D|C so gcd(A,B)=D */
-            if(d!=a) a=vecCOPY64(d);
-            polMAKEMONIC64(a,p);
+            a=d;
+			a.swap(d);
             return degB;
         }
+		// Otherwise we swap and continue the algorithm.
         r=c;
 		c=d; 
 		d=r; 
 		degA=degB; 
 		degB=degR;
-        //printf("da=%d db=%d\n",da,db);
     }
 }
 
