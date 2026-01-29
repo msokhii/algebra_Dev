@@ -31,8 +31,9 @@ pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int
 LONG evalHORN64(const vector<LONG> &a,LONG alpha,const LONG p);
 pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);
 int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
-void polMAKEMONIC64(vector<LONG> a,const LONG p);
-getGCD pGCD(vector<LONG> a,vector<LONG> b,int degA,int degB,const LONG p);
+void polMAKEMONIC64(vector<LONG> &a,const LONG p);
+pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
+int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 fullEx pGCDEX(vector<LONG> r0,vector<LONG> r1,int degr0,int degr1,const LONG p);
 
 #endif

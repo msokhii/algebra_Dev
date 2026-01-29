@@ -4,6 +4,18 @@
 
 using namespace std;
 
+/*
+This struct is for pGCDEXTNEW.
+*/
+typedef struct GCDEX{
+	vector<LONG> r;
+	vector<LONG> s;
+	vector<LONG> t;
+	int degR;
+	int degS;
+	int degT;
+};
+
 #define ZFMA(z,a,b) do {        \
         unsigned long u,v;              \
         __asm__(                        \
@@ -401,7 +413,7 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 // Makes a polynomial monic. We can do this as we are working 
 // in Zp[x] and this is a field so inverses exist.
 
-void polMAKEMONIC64(vector<LONG> a,const LONG p){
+void polMAKEMONIC64(vector<LONG> &a,const LONG p){
 	int degA=a.size();
 	if(degA<0 || a[degA]==1) return;
 	LONG invTerm;
@@ -412,56 +424,85 @@ void polMAKEMONIC64(vector<LONG> a,const LONG p){
 	a[degA]=1;
 }
 
-struct getGCD{
-	int degG;
-	vector<LONG> g;
-};
+// My version of computing the gcd(a(x),b(x)). This returns 
+// the updated vector a with the GCD and its degree.
 
-/* getGCD pGCD(vector<LONG> a,vector<LONG> b,int degA,int degB,const LONG p){
-	Division dominates. 
-	Space is O((degA+1)+(degB+1)).
+pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+	// Division dominates. 
+	// Space is O((degA+1)+(degB+1)).
 	if(degA==-1){
 		makeMonic(b,degB,p);
-		return {degB,b};
+		return {b,degB};
 	}
 	if(degB==-1){
 		makeMonic(a,degA,p);
-		return {degA,a};
+		return {a,degA};
 	}
 	if(degA<degB){
 		swap(a,b);
 		swap(degA,degB);
 	}
 	while(degB!=-1){
-		getQuoRemDeg QR=pDiv(a,b,degA,degB,p);
-        int degR=QR.degRem;
+		pair<int,int> QR=pDIVDEG(a,b,degA,degB,p);
+        int degR=QR.second;
 		a.swap(b);       
         degA=degB;
         degB=degR;
     }
-
-	// Make monic. 
-	if(degA>=0){
-        LONG LC=a[degA];
-        if(LC!=1){
-            LONG invLC=modinv64b(LC,p);
-            for(int i=0;i<=degA;i++){
-                a[i]=mul64b(a[i],invLC,p);
-            }
-        }
-    }
-    return {degA,a};
+	polMAKEMONIC64(a,p);
+	return {a,degA};
 }
-*/
 
-struct fullEx{
-	vector<LONG> r;
-	vector<LONG> s;
-	vector<LONG> t;
-	int degR;
-	int degS;
-	int degT;
-};
+// This computes the gcd(a(x),b(x)) and puts the GCD i.e. g
+// in A and returns degree of g. Both original a and b are 
+// updated and-or destroyed. 
+
+int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+    int degR;
+	vector<LONG>c; 
+	vector<LONG>d; 
+	vector<LONG>r; 
+	LONG u;
+	LONG aNew;
+	LONG bNew;
+    if(degB<0){
+		cout<<"DIV by 0.\n"; 
+		exit(1); 
+	}
+    c=a;
+	d=b;
+    if(degA<degB){ 
+		r=c; 
+		c=d; 
+		d=r; 
+		degR=degA; 
+		degA=degB; 
+		degB=degR; 
+	}
+    while(1){
+        if(degB>0 && degA-degB==1) 
+		{// normal case
+            u=modinv64b(d[degB],p);
+            aNew=mul64b(c[degA],u,p);
+			bNew=mul64b(aNew,d[degB-1],p);
+            bNew=mul64b(u,sub64b(c[degA-1],bNew,p),p);  // quotient = a x + b
+            //degR=polsubmul(C,D,a,b,da,db,p);  // C = C - (a x + b) D
+            if(degR>=degB)cout<<"FAIL.\n";
+        }
+        else degR=polDIVIP64(c,d,degA,degB,p);
+        if(degR<0){ /* D|C so gcd(A,B)=D */
+            if(d!=a) a=vecCOPY64(d);
+            polMAKEMONIC64(a,p);
+            return degB;
+        }
+        r=c;
+		c=d; 
+		d=r; 
+		degA=degB; 
+		degB=degR;
+        //printf("da=%d db=%d\n",da,db);
+    }
+}
 
 // Make this return monic r. 
 
