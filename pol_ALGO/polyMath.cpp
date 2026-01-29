@@ -59,7 +59,8 @@ vector<LONG> genVEC64(const int deg,const LONG p){
 }
 
 // Copies a vector into another vector and then returns it.
-// O(degV+1) extra space. 
+// O(degV+1) extra space.
+// Use cpp .copy() instead.
 
 vector<LONG> vecCOPY64(const vector<LONG> &v){
 	vector<LONG> temp; 
@@ -290,6 +291,8 @@ int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	a.resize(degC+1);
 	return degC;
 }
+
+// Computes A=A-(ax+b)*B efficiently using accumalators.
 
 int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int degB,const LONG p){
 	ULNG z[2];
@@ -522,63 +525,58 @@ pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int 
 // in A and returns degree of g. Both original a and b are 
 // updated and-or destroyed. 
 
-int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p) {
     int degR;
-	vector<LONG>c; 
-	vector<LONG>d; 
-	vector<LONG>r; 
-	LONG u;
-	LONG aNew;
-	LONG bNew;
-    /*
-	We are dividing a by b so if degB<0 we cannot perform division so
-	we return.
-	*/
-	if(degB<0){
-		cout<<"DIV by 0.\n"; 
-		exit(1); 
-	}
-	/*
-	We are swapping pointers instead of copying arrays.
-	*/
-    c=a;
-	d=b;
-	/*
-	If deg(a)<deg(b) then we swap them so deg(b)<deg(a).
-	*/
-    if(degA<degB){ 
-		r=c; 
-		c=d; 
-		d=r; 
-		degR=degA; 
-		degA=degB; 
-		degB=degR; 
-	}
-    while(1){
-		// Special case.
+    vector<LONG> c;
+	vector<LONG> d;
+    LONG u;
+	LONG aVal;
+	LONG bVal;
+
+    // Division by 0 polynomial.
+    if (degB<0){
+        cout<<"DIV by 0.\n";
+        exit(1);
+    }
+
+    // Switches pointers internally but destroys a,b.
+    c.swap(a);
+    d.swap(b);
+
+    // Make sure degC>=degD.
+    if(degA<degB){
+        swap(c,d);
+        swap(degA,degB);
+    }
+
+    while(true){
+        // Special case: quotient must be linear when degA=degB+1 (and degB>0).
         if(degB>0 && degA-degB==1){
             u=modinv64b(d[degB],p);
-            aNew=mul64b(c[degA],u,p);
-			bNew=mul64b(aNew,d[degB-1],p);
-            bNew=mul64b(u,sub64b(c[degA-1],bNew,p),p);  // quotient = a x + b
-            degR=polSUBMUL64(c,d,aNew,bNew,degA,degB,p);  // C = C - (a x + b) D
-            if(degR>=degB)cout<<"FAIL.\n";
+            aVal=mul64b(c[degA],u,p);
+            bVal=mul64b(aVal,d[degB-1],p);
+            bVal=mul64b(u,sub64b(c[degA-1],bVal,p),p); // quotient=ax+b.
+			degR=polSUBMUL64(c,d,aVal,bVal,degA,degB,p); // c=c-(ax+b)d.
+			if(degR>=degB){cout << "FAIL.\n";}
+        }else{
+            // General case: compute remainder of c by d (in-place in c)
+            degR=polDIVIP64(c,d,degA,degB,p);
         }
-		// Normal case.
-        else degR=polDIVIP64(c,d,degA,degB,p);
-        if(degR<0){ /* D|C so gcd(A,B)=D */
-            a=d;
-			a.swap(d);
+
+        // The remainder is zero -> gcd is d.
+        if (degR<0){
+            a.swap(d);              // move gcd into a.
+            polMAKEMONIC64(a,p);
             return degB;
         }
-		// Otherwise we swap and continue the algorithm.
-        r=c;
-		c=d; 
-		d=r; 
-		degA=degB; 
-		degB=degR;
+
+        // Else continue the algorithm.
+        swap(c,d); 
+        degA=degB;
+        degB=degR;
     }
 }
+
 
 // Make this return monic r. 
 
