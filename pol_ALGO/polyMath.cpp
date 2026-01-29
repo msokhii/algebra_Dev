@@ -292,6 +292,46 @@ int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	return degC;
 }
 
+// Computes scalar polynomial multiplication i.e.
+// A=c*A(x) where c is some scalar and returns a new vector.
+
+vector<LONG> polSCMULNEW64(vector<LONG> &a,LONG x,int degA,const LONG p){
+	vector<LONG> temp;
+	if(x==1){return;}
+	temp.resize(degA+1,0);
+	if(x==-1){
+		for(int i=0;i<=degA;i++){
+			temp[i]=neg64s(a[i],p);
+		}
+		return temp;
+	}
+	else{
+		for(int i=0;i<=degA;i++){
+			temp[i]=mul64b(a[i],x,p);
+		}
+	}
+	return temp;	
+}
+
+// Computes scalar polynomial multiplication in place i.e.
+// A=c*A(x) where c is some scalar. 
+
+void polSCMULIP64(vector<LONG> &a,LONG x,int degA,const LONG p){
+	// Since scalar value is 1 no difference.
+	if(x==1){return;}
+	// If it is negative we just use the neg function.
+	if(x==-1){
+		for(int i=0;i<=degA;i++){
+			a[i]=neg64s(a[i],p);
+		}
+	}
+	else{
+		for(int i=0;i<=degA;i++){
+			a[i]=mul64b(a[i],x,p);
+		}
+	}
+}
+
 // Computes A=A-(ax+b)*B efficiently using accumalators.
 
 int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int degB,const LONG p){
