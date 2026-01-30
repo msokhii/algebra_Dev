@@ -335,6 +335,9 @@ void polSCMULIP64(vector<LONG> &a,LONG x,int degA,const LONG p){
 // Computes A=A-(ax+b)*B efficiently using accumalators.
 
 int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int degB,const LONG p){
+	// Safety checks.
+	if(a.size()<degA+1){a.resize(degA+1,0);}
+	if(degB>=0 && b.size()<degB+1){b.resize(degB+1,0);}
 	ULNG z[2];
 	LONG t;
 	int i;
@@ -429,7 +432,10 @@ pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,co
 // so a[degb...dega] and return the degree of the remainder.
 
 int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
-    int dq;
+    // Safety checks.
+	if(a.size()<degA+1){a.resize(degA+1,0);}
+	if(degB>=0 && b.size()<degB+1){b.resize(degB+1,0);}
+	int dq;
 	int dr;
 	int k;
 	int j;
@@ -440,7 +446,19 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 		cout<<"DIV BY 0.\n"; 
 		exit(1); 
 	}
-    if(degA<degB) return degA; 
+    if(degA<degB) return degA;
+	/* if (degB == 0) {
+    // Divide by constant b0 (must be invertible mod p)
+    LONG b0 = b[0] % p; if (b0 < 0) b0 += p;
+    if (b0 == 0) { cout << "DIV BY 0.\n"; exit(1); }
+
+    LONG inv0 = modinv64b(b0, p);
+    for (int i = 0; i <= degA; i++) a[i] = mul64b(a[i], inv0, p);
+
+    // remainder is 0
+    return -1;
+}*/
+
 	/*
 	Special case: If we have degA=degB and we have a monic
 	divisor. Since, degrees are the same, the leading term 
@@ -522,7 +540,7 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 // in Zp[x] and this is a field so inverses exist.
 
 void polMAKEMONIC64(vector<LONG> &a,const LONG p){
-	int degA=a.size();
+	int degA=a.size()-1;
 	if(degA<0 || a[degA]==1) return;
 	LONG invTerm;
 	invTerm=modinv64b(a[degA],p);
@@ -597,6 +615,7 @@ int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p)
             bVal=mul64b(aVal,d[degB-1],p);
             bVal=mul64b(u,sub64b(c[degA-1],bVal,p),p); // quotient=ax+b.
 			degR=polSUBMUL64(c,d,aVal,bVal,degA,degB,p); // c=c-(ax+b)d.
+			cout<<degR<<endl;
 			if(degR>=degB){cout << "FAIL.\n";}
         }else{
             // General case: compute remainder of c by d (in-place in c)
@@ -621,7 +640,7 @@ int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p)
 // all vectors {r,s,t,degrees of all} where r vector contains the gcd of a(x),b(x).
 // This is monic.
 
-GCDEX pGCDEXSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p){
+GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p){
 	vector<LONG> s0{1};
 	vector<LONG> s1;
 	vector<LONG> t0;
@@ -663,7 +682,7 @@ GCDEX pGCDEXSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LON
 // Fast version of extended euclidean algorithm. This is done in place.
 // Also monic.
 
-GCDEX pGCDEXFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	if(degA<0 || degB<0){
 		cout<<"INPUTS MUST BE NON-ZERO.\n";
 		exit(1);
@@ -718,6 +737,7 @@ GCDEX pGCDEXFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p)
 			degR=polDIVIP64(r1,r2,degA,degB,p);
 			degQ=degA-degB;
 			vector<LONG> q;
+			q.resize(degQ+1,0);
 			for(int i=0;i<=degQ;i++){
 				q[i]=r1[degB+i];
 			}

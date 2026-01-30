@@ -34,7 +34,7 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 void polMAKEMONIC64(vector<LONG> &a,const LONG p);
 pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
-GCDEX pGCDEXSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p);
-GCDEX pGCDEXFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
+GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p);
+GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 
 #endif
