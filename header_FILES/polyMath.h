@@ -6,7 +6,7 @@
 
 using namespace std;
 
-struct fullEx{
+struct GCDEX{
 	vector<LONG> r;
 	vector<LONG> s;
 	vector<LONG> t;
@@ -14,6 +14,7 @@ struct fullEx{
 	int degS;
 	int degT;
 };
+
 vector<LONG> genVEC64(const int deg,const LONG p);
 vector<LONG> vecCOPY64(const vector<LONG> &v);
 void dispVEC64(const vector<LONG> &v);
@@ -33,6 +34,7 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 void polMAKEMONIC64(vector<LONG> &a,const LONG p);
 pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
-fullEx pGCDEX(vector<LONG> r0,vector<LONG> r1,int degr0,int degr1,const LONG p);
+GCDEX pGCDEXSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p);
+GCDEX pGCDEXFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 
 #endif

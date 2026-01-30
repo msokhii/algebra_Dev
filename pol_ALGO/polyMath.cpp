@@ -297,7 +297,7 @@ int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 
 vector<LONG> polSCMULNEW64(vector<LONG> &a,LONG x,int degA,const LONG p){
 	vector<LONG> temp;
-	if(x==1){return;}
+	if(x==1){return a;}
 	temp.resize(degA+1,0);
 	if(x==-1){
 		for(int i=0;i<=degA;i++){
@@ -617,21 +617,24 @@ int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p)
     }
 }
 
+// Slow version of the extended euclidean alogorithm. Returns 
+// all vectors {r,s,t,degrees of all} where r vector contains the gcd of a(x),b(x).
+// This is monic.
 
-// Make this return monic r. 
-
-/*fullEx pGCDEX(vector<LONG> r0,vector<LONG> r1,int degr0,int degr1,const LONG p){
-	vector<LONG> s0{1},s1;
-	vector<LONG> t0,t1{1};
+GCDEX pGCDEXSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p){
+	vector<LONG> s0{1};
+	vector<LONG> s1;
+	vector<LONG> t0;
+	vector<LONG> t1{1};
 	int degS0=0;
 	int degS1=-1;
 	int degT0=-1;
 	int degT1=1;
 	while(degr1!=-1){
 		int degB=degr1;
-		getQuoRemDeg QR=pDiv(r0,r1,degr0,degr1,p);
-		int degR=QR.degRem;
-		int degQ=QR.degQuo;
+		pair<int,int> QR=pDIVDEG(r0,r1,degr0,degr1,p);
+		int degR=QR.second;
+		int degQ=QR.first;
 		vector<LONG> q;
 		if(degQ>=0){
 			q.resize(degQ+1);
@@ -639,12 +642,12 @@ int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p)
 				q[k]=r0[degB+k];
 			}
 		}
-		auto [qs1,dqs1]=pMul(q,s1,degQ,degS1,p);
-        auto [s2,ds2]=pSub(s0,qs1,degS0,dqs1,p);
-        auto [qt1,dqt1]=pMul(q,t1,degQ,degT1,p);
-        auto [t2,dt2]=pSub(t0,qt1,degT0,dqt1,p);
-		if(degR==-1) r0.clear();
-		else r0.resize(degR+1);
+		auto [qs1,dqs1]=pMULNEW64(q,s1,degQ,degS1,p);
+        auto [s2,ds2]=pSUBNEW64(s0,qs1,degS0,dqs1,p);
+        auto [qt1,dqt1]=pMULNEW64(q,t1,degQ,degT1,p);
+        auto [t2,dt2]=pSUBNEW64(t0,qt1,degT0,dqt1,p);
+		if(degR==-1){r0.clear();}
+		else{r0.resize(degR+1);}
 		r0.swap(r1);
 		degr0=degB;
 		degr1=degR;
@@ -653,8 +656,116 @@ int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p)
         t0.swap(t1); degT0 = degT1;
         t1.swap(t2); degT1 = dt2;
 	}
+	polMAKEMONIC64(r0,p);
 	return{r0,s0,t0,degr0,degS0,degT0};
 }
-*/
 
+// Fast version of extended euclidean algorithm. This is done in place.
+// Also monic.
+
+GCDEX pGCDEXFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+	if(degA<0 || degB<0){
+		cout<<"INPUTS MUST BE NON-ZERO.\n";
+		exit(1);
+	}
+	LONG u;
+	LONG aVal;
+	LONG bVal;
+	int degR;
+	int degS;
+	int degT;
+	int degQ;
+	int maxCoeff=max(degA+1,degB+1);
+	vector<LONG> s1(maxCoeff,0);
+	vector<LONG> s2(maxCoeff,0);
+	vector<LONG> t1(maxCoeff,0);
+	vector<LONG> t2(maxCoeff,0);
+	/*
+	s1=1,s2=0
+	t1=0,t2=1
+	*/
+	s1[0]=1;
+	t2[0]=1;
+	int degs1=0;
+	int degs2=-1;
+	int degt1=-1;
+	int degt2=0;
+	vector<LONG> r1;
+	vector<LONG> r2;
+	//r1 gets a and r2 gets b. No copying only switching pointers.
+	r1.swap(a);
+	r2.swap(b);
+	// We swap everything if deg(a)<deg(b).
+	if(degA<degB){
+        swap(r1,r2);
+        swap(degA,degB);
+        swap(s1,s2);
+		swap(degs1,degs2);
+        swap(t1,t2); 
+		swap(degt1,degt2);
+    }
+	while(true){
+		if(degB>0 && degA-degB==1){
+			u=modinv64b(r2[degB],p);
+			aVal=mul64b(r1[degA],u,p);
+			bVal=mul64b(aVal,r2[degB-1],p);
+			bVal=mul64b(u,sub64b(r1[degA-1],bVal,p),p);
+			degR=polSUBMUL64(r1,r2,aVal,bVal,degA,degB,p);
+			degS=polSUBMUL64(s1,s2,aVal,bVal,degs1,degs2,p);
+			degT=polSUBMUL64(t1,t2,aVal,bVal,degt1,degt2,p);
+		}
+		else{
+			degR=polDIVIP64(r1,r2,degA,degB,p);
+			degQ=degA-degB;
+			vector<LONG> q;
+			for(int i=0;i<=degQ;i++){
+				q[i]=r1[degB+i];
+			}
+			vector<LONG> tmpS=s2;
+			vector<LONG> tmpT=t2;
+			int degtmpS=degs2;
+			int degtmpT=degt2;
+			degtmpS=pMULIP64(tmpS,q,degtmpS,degQ,p);
+			degS=pSUBIP64(s1,tmpS,degs1,degtmpS,p);
+			degtmpT=pMULIP64(tmpT,q,degtmpT,degQ,p);
+			degT=pSUBIP64(t1,tmpT,degt1,degtmpT,p);
+		}
+		if(degR<0){
+			GCDEX ret;
+			ret.r=r2;
+			ret.s=s2;
+			ret.t=t2;
+			ret.degR=degB;
+			ret.degS=degs2;
+			ret.degT=degt2;
+			if(ret.degR>=0){
+				LONG LC=ret.r[ret.degR];
+				LC%=p;
+				if(LC<0){LC+=p;}
+				if(LC!=1){
+					u=modinv64b(LC,p);
+					polSCMULIP64(ret.r,u,ret.degR,p);
+					if(ret.degS>=0){
+						polSCMULIP64(ret.s,u,ret.degS,p);
+					}
+					if(ret.degT>=0){
+						polSCMULIP64(ret.t,u,ret.degT,p);
+					}
+				}
+			}
+			return ret;
+		}
+		swap(r1,r2);
+		degA=degB;
+		degB=degR;
+		swap(s1,s2);
+		int tempS=degs2;
+		degs2=degS;
+		degs1=tempS;
+		swap(t1,t2);
+		int tempT=degt2;
+		degt2=degT;
+		degt1=tempT;
+	}
+}
 
