@@ -11,7 +11,7 @@
 #define INT128_EXTENDED 1	/* functions for __int128_t */
 
 #define INT32 int
-#define INT64 long long
+#define INT64 long long	
 #define UINT32 unsigned int
 #define UINT64 unsigned long long
 

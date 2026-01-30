@@ -7,7 +7,7 @@
 using namespace std;
 
 /*
-This struct is for pGCDEXTNEW.
+This struct is for pGCDEXTFULL.
 */
 struct GCDEX{
 	vector<LONG> r;
@@ -17,6 +17,10 @@ struct GCDEX{
 	int degS;
 	int degT;
 };
+
+/******************************************************************************************/
+/* Fast CPU routines                                                                      */
+/******************************************************************************************/
 
 #define ZMUL(z,a,b) __asm__(\
         "       mulq    %%rdx   \n\t" \
@@ -115,7 +119,7 @@ pair<vector<LONG>,int> pADDNEW64(const vector<LONG> &a,const vector<LONG> &b,con
 	return{c,degC};
 }
 
-// In place addition. Updates a and returns the new degree.
+// In place addition. Overwrites a and returns the new degree.
 
 int pADDIP64(vector<LONG> &a,const vector<LONG> &b,int &degA,const int degB,const LONG p){
 	if(degA==-1&&degB==-1) return -1;
@@ -180,7 +184,7 @@ pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,con
 	return{c,degC};
 }
 
-// In place subtraction. Updates a and returns the new degree.
+// In place subtraction. Overwrites a and returns the new degree.
 
 int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const LONG p){
 	if(degA==-1&&degB==-1) return -1;
@@ -233,7 +237,7 @@ pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int
 	return {c,degC};
 }
 
-// In place multiplication. Updates a and returns the new degree.
+// In place multiplication. Overwrites a and returns the new degree.
 
 int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	if(degA<0 || degB<0) return -1;
