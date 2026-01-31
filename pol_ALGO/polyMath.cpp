@@ -18,6 +18,19 @@ struct GCDEX{
 	int degT;
 };
 
+/*
+This struct returns all values of r,s,t at each iteration.
+*/
+struct GCDEXHIST{
+	GCDEX g;
+	vector<vector<LONG>> rTrace;
+	vector<vector<LONG>> sTrace;
+	vector<vector<LONG>> tTrace;
+	vector<int> degRT;
+	vector<int> degST;
+	vector<int> degTT;
+};
+
 /******************************************************************************************/
 /* Fast CPU routines                                                                      */
 /******************************************************************************************/
@@ -790,6 +803,127 @@ GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LON
 		int tempT=degt2;
 		degt2=degT;
 		degt1=tempT;
+	}
+}
+
+// Returns the struct GCDEXHIST that contains all values of 
+// r,s and t for each and every iteration.
+
+GCDEXHIST pGCDEXSTORE64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){	
+	if(degA<0 || degB<0 ){
+		cout<<"INPUTS MUST BE NON-ZERO.\n";
+		exit(1);
+	}
+	LONG u;
+	LONG aVal;
+	LONG bVal;
+	int degR;
+	int degQ;
+	int degS;
+	int degT;
+	vector<LONG> r1;
+	vector<LONG> r2;
+	r1=a;
+	r2=b;
+	int maxCoeff=max(degA+1,degB+1);
+	vector<LONG> s1(maxCoeff,0);
+	vector<LONG> s2(maxCoeff,0);
+	vector<LONG> t1(maxCoeff,0);
+	vector<LONG> t2(maxCoeff,0);
+	s1[0]=1;
+	t2[0]=1;
+	int degS1=0;
+	int degS2=-1;
+	int degT1=-1;
+	int degT2=0;
+	if(degA<degB){
+        swap(r1,r2);
+        swap(degA,degB);
+        swap(s1,s2);
+		swap(degS1,degS2);
+        swap(t1,t2); 
+		swap(degT1,degT2);
+    }
+	GCDEXHIST res;
+	// [&] is capture by reference.
+	// For now, I am not storing the degrees.
+	auto triple=[&](const vector<LONG> &rr,const vector<LONG> &ss,const vector<LONG> &tt,int DR,int DS,int DT)
+	{
+		res.rTrace.push_back(slicePoly(rr,DR,p));
+		res.sTrace.push_back(slicePoly(ss,DS,p));
+		res.tTrace.push_back(slicePoly(tt,DT,p));
+	};
+	// These are the first two remainders.
+	triple(r1,s1,t1,degA,degS1,degT1);
+	triple(r2,s2,t2,degB,degS2,degT2);
+	while(true){
+		if(degB>0 && degA-degB==1){
+			u=modinv64b(r2[degB],p);
+			aVal=mul64b(r1[degA],u,p);
+			bVal=mul64b(aVal,r2[degB-1],p);
+			bVal=mul64b(u,sub64b(r1[degA-1],bVal,p),p);
+			degR=polSUBMUL64(r1,r2,aVal,bVal,degA,degB,p);
+			degS=polSUBMUL64(s1,s2,aVal,bVal,degS1,degS2,p);
+			degT=polSUBMUL64(t1,t2,aVal,bVal,degT1,degT2,p);
+		}
+		else{
+			degR=polDIVIP64(r1,r2,degA,degB,p);
+			degQ=degA-degB;
+			vector<LONG> q;
+			q.resize(degQ+1,0);
+			for(int i=0;i<=degQ;i++){
+				q[i]=r1[degB+i];
+			}
+			vector<LONG> tmpS=s2;
+			vector<LONG> tmpT=t2;
+			int degtmpS=degS2;
+			int degtmpT=degT2;
+			degtmpS=pMULIP64(tmpS,q,degtmpS,degQ,p);
+			degS=pSUBIP64(s1,tmpS,degS1,degtmpS,p);
+			degtmpT=pMULIP64(tmpT,q,degtmpT,degQ,p);
+			degT=pSUBIP64(t1,tmpT,degT1,degtmpT,p);
+		}
+		if(degR>=0){
+			triple(r1,s1,t1,degA,degS1,degT1);
+		}
+		if(degR<0){
+			GCDEX ret;
+			ret.r=r2;
+			ret.s=s2;
+			ret.t=t2;
+			ret.degR=degB;
+			ret.degS=degS2;
+			ret.degT=degT2;
+			if(ret.degR>=0){
+				LONG LC=ret.r[ret.degR];
+				LC%=p;
+				if(LC<0){LC+=p;}
+				if(LC!=1){
+					u=modinv64b(LC,p);
+					polSCMULIP64(ret.r,u,ret.degR,p);
+					if(ret.degS>=0){
+						polSCMULIP64(ret.s,u,ret.degS,p);
+					}
+					if(ret.degT>=0){
+						polSCMULIP64(ret.t,u,ret.degT,p);
+					}
+				}
+			}
+			res.g=ret;
+			triple(res.g.r,res.g.s,res.g.t,res.g.degR,res.g.degS,res.g.degT);
+			return res;
+		}
+		swap(r1,r2);
+		degA=degB;
+		degB=degR;
+		swap(s1,s2);
+		int tempS=degS2;
+		degS2=degS;
+		degS1=tempS;
+		swap(t1,t2);
+		int tempT=degT2;
+		degT2=degT;
+		degT1=tempT;
 	}
 }
 

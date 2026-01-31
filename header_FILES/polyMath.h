@@ -15,6 +15,16 @@ struct GCDEX{
 	int degT;
 };
 
+struct GCDEXHIST{
+	GCDEX g;
+	vector<vector<LONG>> rTrace;
+	vector<vector<LONG>> sTrace;
+	vector<vector<LONG>> tTrace;
+	vector<int> degRT;
+	vector<int> degST;
+	vector<int> degTT;
+};
+
 vector<LONG> genVEC64(const int deg,const LONG p);
 vector<LONG> vecCOPY64(const vector<LONG> &v);
 void dispVEC64(const vector<LONG> &v);
@@ -36,5 +46,6 @@ pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int 
 int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p);
 GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
+GCDEXHIST pGCDEXSTORE64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 
 #endif

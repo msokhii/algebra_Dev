@@ -6,5 +6,5 @@
 using namespace std; 
 
 vector<LONG> ratRECON64(vector<LONG> &u,vector<LONG> &m,int nBound,int dBound,const LONG p){
-    
+    GCDEXHIST g=pGCDEXSTORE64(u,m,u.size()-1,m.size()-1,p);
 }
