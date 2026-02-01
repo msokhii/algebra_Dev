@@ -1,4 +1,4 @@
-#include<bits/stdc++.h>
+#include<iostream>
 #include<cstdint>
 #include<random>
 #include"integerMath.h"
