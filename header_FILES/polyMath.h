@@ -3,6 +3,13 @@
 
 #include"integerMath.h"
 #include"helperF.h"
+#include<vector>
+#include<cstdint> 
+#include<unordered_map>
+
+using LONG=int_fast64_t;
+using ULNG=uint_fast64_t;
+using ULNG128=__uint128_t;
 
 using namespace std;
 
