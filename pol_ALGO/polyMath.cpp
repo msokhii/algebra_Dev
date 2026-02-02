@@ -3,6 +3,9 @@
 #include<bits/stdc++.h>
 #include"integerMath.h"
 #include"helperF.h"
+#include<vector> 
+#include<unordered_map>
+#include<cstdint>
 
 using namespace std;
 
@@ -13,9 +16,20 @@ struct GCDEX{
 	vector<LONG> r;
 	vector<LONG> s;
 	vector<LONG> t;
-	int degR;
+	int degR;	
 	int degS;
 	int degT;
+};
+
+/*
+This struct is for rational function reconstruction.
+*/
+struct pairRFR{
+	vector<LONG> r;
+	vector<LONG> t;
+	int degR;
+	int degT;
+	int flag;
 };
 
 /*
@@ -926,4 +940,160 @@ GCDEXHIST pGCDEXSTORE64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const 
 		degT1=tempT;
 	}
 }
+
+pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,int N,int D,const LONG p){
+    if(degM<0 || degU<0){
+        return {{},{},-1,-1,-10};
+    }
+
+    // Helper functions (Add them in helper file.)
+
+    // gcd computed using fast extended gcd (returns monic gcd in ret.r)
+    auto gcdPoly = [&](const vector<LONG> &A, int degA,const vector<LONG> &B, int degB) -> pair<vector<LONG>,int>
+    {
+        if(degA < 0 || degB < 0) return {{}, -1};
+        vector<LONG> a=A, b=B;
+        GCDEX g = pGCDEXFULLFAST(a,b,degA,degB,p);
+        return {slicePoly(g.r,g.degR, p),g.degR}; // This is monic.
+    };
+
+    // Exact quotient Q = Num/Den (must divide exactly), using pDIVDEG.
+    auto exactQuotient = [&](const vector<LONG> &Num, int degNum,const vector<LONG> &Den, int degDen) -> pair<vector<LONG>,int>
+    {
+        if(degDen < 0) return {{}, -1};
+        vector<LONG> tmp = Num;
+        auto QR = pDIVDEG(tmp, Den, degNum, degDen, p);
+        int degQ = QR.first;
+        int degR = QR.second;
+        if(degR != -1) return {{}, -1}; // not divisible
+        vector<LONG> Q;
+        if(degQ >= 0){
+            Q.resize(degQ+1);
+            for(int k=0;k<=degQ;k++){
+                Q[k] = tmp[degDen + k];
+            }
+        }
+        return {Q, degQ};
+    };
+
+    // Make Denom monic (scale both by inv(LC(den)))
+    auto makeDenMonic = [&](vector<LONG> &num, int degNum,vector<LONG> &den, int degDen)
+    {
+        if(degDen < 0) return;
+        LONG lc = den[degDen] % p; if(lc < 0) lc += p;
+        if(lc != 1){
+            LONG inv = modinv64b(lc, p);
+            polSCMULIP64(den, inv, degDen, p);
+            if(degNum >= 0) polSCMULIP64(num, inv, degNum, p);
+        }
+    };
+
+    // Euclid Algo.
+    vector<LONG> r1=m;
+    vector<LONG> r2=u;
+    int degA=degM;
+    int degB=degU;
+    int maxCoeff=max(degA+1,degB+1);
+    vector<LONG> t1(maxCoeff,0);
+    vector<LONG> t2(maxCoeff,0);
+    t2[0]=1;
+    int degT1=-1;
+    int degT2=0;
+    if(degA<degB){
+        swap(r1,r2);
+        swap(degA,degB);
+        swap(t1,t2);
+        swap(degT1,degT2);
+    }
+    auto boundCheck=[&](int degR,int degT){
+        if(degR<=N){
+            if(D<0) return true;
+            return degT<=D; 
+        }
+        return false;
+    };
+
+    // Pre-slice m once for gcd(d,m) checks
+    vector<LONG> mTrim = slicePoly(m, degM, p);
+    while(degB!=-1){
+        if(boundCheck(degB,degT2) && degT2 >= 0){
+            vector<LONG> num = slicePoly(r2, degB, p);
+            vector<LONG> den = slicePoly(t2, degT2, p);
+            int degNum = degB;
+            int degDen = degT2;
+
+            // Enforce gcd(num,den)=1 (reduce by gcd if needed)
+            {
+                auto [g, degG] = gcdPoly(num, degNum, den, degDen);
+                if(degG > 0){
+                    auto [qn, dqn] = exactQuotient(num, degNum, g, degG);
+                    auto [qd, dqd] = exactQuotient(den, degDen, g, degG);
+                    if(dqn < 0 || dqd < 0){
+                        // should not happen if gcd is correct, treat as fail
+                        return {{},{},-1,-1,-31};
+                    }
+                    num.swap(qn); degNum = dqn;
+                    den.swap(qd); degDen = dqd;
+                }
+                // if degG==0, gcd is 1 already (since gcdPoly returns monic)
+            }
+
+            // Enforce gcd(den, m)=1 (den invertible mod m)
+            {
+                auto [gdm, degGdm] = gcdPoly(den, degDen, mTrim, degM);
+                if(degGdm > 0){
+                    // reject this candidate and keep searching
+                    // (a later remainder might have denom coprime to m)
+                    // continue loop:
+                    goto CONTINUE_EUCLID;
+                }
+            }
+
+            // Canonical form i.e. make denominator monic.
+            makeDenMonic(num, degNum, den, degDen);
+            pairRFR res;
+            res.r=num;
+            res.t=den;
+            res.degR=degNum;
+            res.degT=degDen;
+            res.flag=0;
+            return res;
+        }
+
+		CONTINUE_EUCLID:
+        	LONG uInv, aVal, bVal;
+        	int degR, degQ, degT;
+
+        	if(degB>0 && degA-degB==1){
+            	uInv=modinv64b(r2[degB],p);
+            	aVal=mul64b(r1[degA],uInv,p);
+            	bVal=mul64b(aVal,r2[degB-1],p);
+            	bVal=mul64b(uInv,sub64b(r1[degA-1],bVal,p),p);
+            	degR=polSUBMUL64(r1,r2,aVal,bVal,degA,degB,p);
+            	degT=polSUBMUL64(t1,t2,aVal,bVal,degT1,degT2,p);
+        	} else{
+            	degR=polDIVIP64(r1,r2,degA,degB,p);
+            	degQ=degA-degB;
+            	vector<LONG> q(degQ+1,0);
+            	for(int i=0;i<=degQ;i++){
+                	q[i]=r1[degB+i];
+            	}
+            	vector<LONG> tmpT=t2;
+            	int degTmpT=degT2;
+            	degTmpT=pMULIP64(tmpT,q,degTmpT,degQ,p);
+            	degT=pSUBIP64(t1,tmpT,degT1,degTmpT,p);
+        	}
+        	if(degR<0){break;}
+        	swap(r1,r2);
+        	degA=degB;
+        	degB=degR;
+			swap(t1,t2);
+        	int tmpDegT=degT2;
+        	degT2=degT;
+        	degT1=tmpDegT;
+    	}
+    return{{},{},-1,-1,-20};
+}
+
+
 
