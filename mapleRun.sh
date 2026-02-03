@@ -1,3 +1,3 @@
 set -euo pipefail 
 
-maple fileName.mpl
+maple rfrWrapperMaple.mpl

@@ -7,7 +7,7 @@
 #include<cstdint> 
 #include<unordered_map>
 
-using LONG=int_fast64_t;
+using LONG=int64_t;
 using ULNG=uint_fast64_t;
 using ULNG128=__uint128_t;
 
