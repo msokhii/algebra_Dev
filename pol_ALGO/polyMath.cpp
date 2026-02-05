@@ -954,10 +954,10 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
         if(degA < 0 || degB < 0) return {{}, -1};
         vector<LONG> a=A, b=B;
         GCDEX g = pGCDEXFULLFAST(a,b,degA,degB,p);
-        return {slicePoly(g.r,g.degR, p),g.degR}; // This is monic.
+        return {slicePoly(g.r,g.degR, p),g.degR}; // This is monic. Returns g and deg(g).
     };
 
-    // Exact quotient Q = Num/Den (must divide exactly), using pDIVDEG.
+    // Exact quotient Q = Num/Den (must divide exactly) otherwise skip, using pDIVDEG.
     auto exactQuotient = [&](const vector<LONG> &Num, int degNum,const vector<LONG> &Den, int degDen) -> pair<vector<LONG>,int>
     {
         if(degDen < 0) return {{}, -1};
@@ -973,7 +973,7 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
                 Q[k] = tmp[degDen + k];
             }
         }
-        return {Q, degQ};
+        return {Q, degQ}; // Extracting quotient coefficients into a vector Q.
     };
 
     // Make Denom monic (scale both by inv(LC(den)))
@@ -1005,6 +1005,11 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
         swap(t1,t2);
         swap(degT1,degT2);
     }
+	/*
+	We require deg(r)<=N.
+	If D>=0 then we also require deg(t)<=D.
+	If D<0 then the denominator degree is unbounded.
+	*/
     auto boundCheck=[&](int degR,int degT){
         if(degR<=N){
             if(D<0) return true;
@@ -1052,14 +1057,17 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
             // Canonical form i.e. make denominator monic.
             makeDenMonic(num, degNum, den, degDen);
             pairRFR res;
-            res.r=num;
-            res.t=den;
+			// No extra copying.
+            res.r=move(num);
+            res.t=move(den);
             res.degR=degNum;
             res.degT=degDen;
             res.flag=0;
             return res;
         }
 
+		// If something fails above, program continues execution from here.
+		// Very similar to monagans implementation.
 		CONTINUE_EUCLID:
         	LONG uInv, aVal, bVal;
         	int degR, degQ, degT;
@@ -1095,5 +1103,15 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
     return{{},{},-1,-1,-20};
 }
 
+/* 
+SHORT SUMMARY OF THE ABOVE ROUTINE: 
 
+1. We run extended euclid on (m,u) which are inputs provided by the user.
+2. We track the coefficient t such that r congruent t (mod m).
+3. Suppose, we encounter a remainder r and r and t are both small enough:
+   a: Reduce (r,t) to coprime.
+   b: Require gcd(t,m)=1. 
+   c: Make the denominator monic for uniqueness.
+   d: Return the final answer r/t.
+*/
 
