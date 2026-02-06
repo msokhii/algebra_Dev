@@ -177,39 +177,35 @@ int pADDIP64(vector<LONG> &a,const vector<LONG> &b,int &degA,const int degB,cons
 // Returns a pair containing the new vector c=(a-b) mod p
 // and the degree of c. 
 
-pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p){
-	vector<LONG> c;
-	int degC=-1;
-	if(degA==-1 && degB==-1) return{c,degC};
-	if(degA==-1){
-		c.resize(degB+1,0);
-		for(int i=0;i<=degB;i++){
-			c[i]=neg64s(b[i],p);
-		}
-		return{c,degB};
-	}
-	if(degB==-1) return{a,degA};
-	degC=max(degA,degB);
-	c.resize(degC+1,0);
-	int i=0;
-	while(i<=degA && i<=degB){
-		c[i]=sub64b(a[i],b[i],p);
-		i++;
-	}
-	for(;i<=degA;i++){
-		c[i]=neg64s(a[i],p);
-	}
-	for(;i<=degB;i++){
-		c[i]=neg64s(b[i],p);
-	}
-	while(degC>=0 && c[degC]==0) degC--;
-	if(degC==-1){
-		c.clear();
-		return{c,degC};
-	}
-	c.resize(degC+1);
-	return{c,degC};
+pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,
+                                const int degA,const int degB,const LONG p){
+    vector<LONG> c;
+    int degC=-1;
+    if(degA==-1 && degB==-1) return{c,degC};
+    if(degA==-1){
+        c.resize(degB+1,0);
+        for(int i=0;i<=degB;i++) c[i]=neg64s(b[i],p);
+        return{c,degB};
+    }
+    if(degB==-1) return{a,degA};
+
+    degC=max(degA,degB);
+    c.resize(degC+1,0);
+
+    int i=0;
+    while(i<=degA && i<=degB){
+        c[i]=sub64b(a[i],b[i],p);
+        i++;
+    }
+    for(; i<=degA; i++) c[i]=a[i];
+    for(; i<=degB; i++) c[i]=neg64s(b[i],p);
+
+    while(degC>=0 && c[degC]==0) degC--;
+    if(degC==-1){ c.clear(); return{c,degC}; }
+    c.resize(degC+1);
+    return{c,degC};
 }
+
 
 // In place subtraction. Overwrites a and returns the new degree.
 
@@ -381,7 +377,11 @@ int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int
 	/*
 	If degA<=degB, then we pad A with zereos.
 	*/
-	while(degA<=degB){a[++degA]=0;}
+	while(degA <= degB){
+    	++degA;
+    	if((int)a.size() < degA+1) a.resize(degA+1, 0);
+    	else a[degA] = 0;
+	}
 	/*
 	Constant term is special in the sense b*B does not 
 	have any effect on the degrees so we can compute A=b*B directly.
@@ -428,11 +428,18 @@ pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,co
 	Changes A in place.
 	Suppose degA>=degB>=0. Then, time complexity is O((A-B+1)*(B+1)).
 	*/
-	if(degB==0){
+	if(degB<0){
 		cout<<"DIV by 0.\n";
 		exit(1);
 	}
-	if(degA<degB)return {0,degA};
+	if(degA<degB)return {-1,degA};
+	if(degB == 0){
+    	LONG b0 = b[0] % p; if(b0 < 0) b0 += p;
+    	if(b0 == 0){ cout<<"DIV by 0.\n"; exit(1); }
+    	LONG inv0 = modinv64b(b0, p);
+    	for(int i=0;i<=degA;i++) a[i] = mul64b(a[i], inv0, p);
+    	return {degA, -1};
+	}
 	LONG LTB=b[degB];
 	LONG invLTB=modinv64b(LTB,p);
 	for(int i=degA;i>=degB;i--){

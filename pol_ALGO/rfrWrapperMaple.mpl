@@ -24,7 +24,7 @@ mRATRECON := define_external(
 
 # EXAMPLE: 
 
-degU := 4: degM := 5:
+(* degU := 4: degM := 5:
 mLen := degM+1: uLen := degU+1:
 
 M := Array(0..mLen-1, datatype=integer[8], fill=0):
@@ -45,8 +45,46 @@ dOUT := Array(0..dOLEN-1, datatype=integer[8], fill=0):
 degNOUT := 0:
 degDOUT := 0:
 
-rc := mRATRECON(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,degNOUT,dOLEN,dOUT,degDOUT):
+rc := mRATRECON(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,'degNOUT',dOLEN,dOUT,'degDOUT'):
+degNOUT;
+degDOUT;
 
 print("rc", rc):
 print("nOUT full", [seq(nOUT[i], i=0..nOLEN-1)]):
 print("dOUT full", [seq(dOUT[i], i=0..dOLEN-1)]):
+M;
+U; *)
+
+# TESTING PROCEDURE 1: 
+# Something wrong with deg>60.
+
+d := 20000;
+pp := 2305843009213693951;
+printf("DEGREE CHOSEN:%d\n",d);
+NN := randpoly(x,degree=d,dense) mod pp;
+DD := randpoly(x,degree=d,dense) mod pp:
+while Gcd(NN,DD) mod pp <> 1 do 
+    DD := randpoly(x,degree=d,dense) mod pp:
+od;
+DD := DD/lcoeff(DD) mod pp;
+MM := mul((x-i),i=1..2*d+1);
+MM := Expand(MM) mod pp:
+g := Gcdex(DD,MM,x,'SS') mod pp:
+printf("gcd(DD,MM) mod 101 = %a\n", g);
+UU := Rem(SS*NN,MM,x) mod pp:
+degU := degree(UU);
+degM := degree(MM);
+printf("TRUE DEGREE OF U:%d\nDEGREE OF M:%d\n",degU,degM);
+M := Array(0..degM, [seq(coeff(MM,x,i),i=0..degM)], datatype=integer[8]):
+U := Array(0..degU, [seq(coeff(UU,x,i),i=0..degU)], datatype=integer[8]): 
+nOUT := Array(0..degM, datatype=integer[8] ):
+dOUT := Array(0..degM, datatype=integer[8] ):
+rc := mRATRECON(degM+1,degM,M,degU+1,degU,U,d,d,pp,d+1,nOUT,'degNOUT',d+1,dOUT,'degDOUT'):
+degDOUT;
+degNOUT;
+printf("COMPUTED DEGREE OF N:%d\nDEGREE OF D:%d\n",degNOUT,degDOUT);
+NNarr := Array(0..degM, [seq(coeff(NN, x, i), i=0..degNOUT)], datatype=integer[8]):
+DDarr := Array(0..degM, [seq(coeff(DD, x, i), i=0..degDOUT)], datatype=integer[8]):
+nOUT-NNarr;
+dOUT-DDarr;
+
