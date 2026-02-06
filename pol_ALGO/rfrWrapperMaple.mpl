@@ -56,35 +56,74 @@ M;
 U; *)
 
 # TESTING PROCEDURE 1: 
-# Something wrong with deg>60.
 
-d := 20000;
-pp := 2305843009213693951;
-printf("DEGREE CHOSEN:%d\n",d);
-NN := randpoly(x,degree=d,dense) mod pp;
+d := 5000;
+# 2305843009213699951
+pp := 2305843009213699951; # This is 2^61-1.
+
+printf("DEGREE CHOSEN:%d\nPRIME CHOSEN:%a",d,pp);
+
+NN := randpoly(x,degree=d,dense) mod pp:
 DD := randpoly(x,degree=d,dense) mod pp:
+
 while Gcd(NN,DD) mod pp <> 1 do 
     DD := randpoly(x,degree=d,dense) mod pp:
-od;
-DD := DD/lcoeff(DD) mod pp;
-MM := mul((x-i),i=1..2*d+1);
+od:
+
+DD := DD/lcoeff(DD) mod pp:
+MM := mul((x-i),i=1..2*d+1):
 MM := Expand(MM) mod pp:
 g := Gcdex(DD,MM,x,'SS') mod pp:
-printf("gcd(DD,MM) mod 101 = %a\n", g);
+printf("GCD(DD,MM) mod %a = %a\n",pp,g);
 UU := Rem(SS*NN,MM,x) mod pp:
-degU := degree(UU);
-degM := degree(MM);
-printf("TRUE DEGREE OF U:%d\nDEGREE OF M:%d\n",degU,degM);
+degU := degree(UU):
+degM := degree(MM):
+
 M := Array(0..degM, [seq(coeff(MM,x,i),i=0..degM)], datatype=integer[8]):
 U := Array(0..degU, [seq(coeff(UU,x,i),i=0..degU)], datatype=integer[8]): 
+
+# OUTPUT BUFFER INITIALIZATION.
 nOUT := Array(0..degM, datatype=integer[8] ):
 dOUT := Array(0..degM, datatype=integer[8] ):
+
+
 rc := mRATRECON(degM+1,degM,M,degU+1,degU,U,d,d,pp,d+1,nOUT,'degNOUT',d+1,dOUT,'degDOUT'):
-degDOUT;
-degNOUT;
+
 printf("COMPUTED DEGREE OF N:%d\nDEGREE OF D:%d\n",degNOUT,degDOUT);
 NNarr := Array(0..degM, [seq(coeff(NN, x, i), i=0..degNOUT)], datatype=integer[8]):
 DDarr := Array(0..degM, [seq(coeff(DD, x, i), i=0..degDOUT)], datatype=integer[8]):
-nOUT-NNarr;
-dOUT-DDarr;
+# MY COMPUTATION: 
+#nOUT; 
+#dOUT;
+
+# MAPLE: 
+# NN;
+# DD;
+
+# MY CHECKS SHOULD BE 0.
+#nOUT-NNarr;
+#dOUT-DDarr;
+
+#MAPLE CHECK: 
+mapRat := Ratrecon(UU,MM,x,d,d) mod pp:
+
+with(Statistics): 
+iter := 20:
+
+TC := Vector(iter):
+TM := Vector(iter):
+
+for j from 1 to iter do:
+	t := time():
+	repMRC := mRATRECON(degM+1,degM,M,degU+1,degU,U,d,d,pp,d+1,nOUT,'degNOUT',d+1,dOUT,'degDOUT'):
+	TC[j] := time()-t:
+
+	t := time():
+	repMPLRC := Ratrecon(UU,MM,x,d,d) mod pp:
+	TM[j] := time()-t:
+od:
+
+printf("MY TIMES: %a\n",convert(TC,list));
+printf("MAPLE TIMES: %a\n",convert(TM,list));
+
 
