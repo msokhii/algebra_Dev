@@ -57,7 +57,7 @@ U; *)
 
 # TESTING PROCEDURE 1: 
 
-d := 1000;
+d := 10;
 # 2305843009213699951
 pp := 2305843009213699951; # This is 2^61-1.
 
@@ -126,7 +126,7 @@ od:
 printf("MY TIMES: %a\n",convert(TC,list));
 printf("MAPLE TIMES: %a\n",convert(TM,list));
 
-(* with(plots):
+with(plots):
 
 dataC := [seq([j, TC[j]], j=1..iter)]:
 dataM := [seq([j, TM[j]], j=1..iter)]:
@@ -139,4 +139,4 @@ display([pC, pM],
         legend=["C wrapper","Maple Ratrecon"]);
 
 Histogram(convert(TC, list), title="C wrapper times"):
-Histogram(convert(TM, list), title="Maple Ratrecon times"): *)
+Histogram(convert(TM, list), title="Maple Ratrecon times"): 
