@@ -57,16 +57,17 @@ U; *)
 
 # TESTING PROCEDURE 1: 
 
-d := 10;
+d := 1000:
 # 2305843009213699951
-pp := 2305843009213699951; # This is 2^61-1.
 
+# pp := nextprime(2305843009213699951): # This is 2^61-1.
+pp := prevprime(2^63-1):
 printf("DEGREE CHOSEN:%d\nPRIME CHOSEN:%a",d,pp);
 
 NN := randpoly(x,degree=d,dense) mod pp:
 DD := randpoly(x,degree=d,dense) mod pp:
 
-while Gcd(NN,DD) mod pp <> 1 do 
+while Gcd(NN,DD) mod pp <> 1 do
     DD := randpoly(x,degree=d,dense) mod pp:
 od:
 
@@ -80,7 +81,7 @@ degU := degree(UU):
 degM := degree(MM):
 
 M := Array(0..degM, [seq(coeff(MM,x,i),i=0..degM)], datatype=integer[8]):
-U := Array(0..degU, [seq(coeff(UU,x,i),i=0..degU)], datatype=integer[8]): 
+U := Array(0..degU, [seq(coeff(UU,x,i),i=0..degU)], datatype=integer[8]):
 
 # OUTPUT BUFFER INITIALIZATION.
 nOUT := Array(0..degM, datatype=integer[8] ):
@@ -89,7 +90,10 @@ dOUT := Array(0..degM, datatype=integer[8] ):
 
 rc := mRATRECON(degM+1,degM,M,degU+1,degU,U,d,d,pp,d+1,nOUT,'degNOUT',d+1,dOUT,'degDOUT'):
 
-printf("COMPUTED DEGREE OF N:%d\nDEGREE OF D:%d\n",degNOUT,degDOUT);
+# DEGREES: 
+degNOUT;
+degDOUT;
+
 NNarr := Array(0..degM, [seq(coeff(NN, x, i), i=0..degNOUT)], datatype=integer[8]):
 DDarr := Array(0..degM, [seq(coeff(DD, x, i), i=0..degDOUT)], datatype=integer[8]):
 # MY COMPUTATION: 
@@ -107,26 +111,28 @@ DDarr := Array(0..degM, [seq(coeff(DD, x, i), i=0..degDOUT)], datatype=integer[8
 #MAPLE CHECK: 
 mapRat := Ratrecon(UU,MM,x,d,d) mod pp:
 
-with(Statistics): 
-iter := 20:
+with(Statistics):
+iter := 1:
 
 TC := Vector(iter):
 TM := Vector(iter):
 
 for j from 1 to iter do:
-	t := time():
-	repMRC := mRATRECON(degM+1,degM,M,degU+1,degU,U,d,d,pp,d+1,nOUT,'degNOUT',d+1,dOUT,'degDOUT'):
-	TC[j] := time()-t:
+        t := time():
+        repMRC := mRATRECON(degM+1,degM,M,degU+1,degU,U,d,d,pp,d+1,nOUT,'degNOUT',d+1,dOUT,'degDOUT'):
+        TC[j] := time()-t:
 
-	t := time():
-	repMPLRC := Ratrecon(UU,MM,x,d,d) mod pp:
-	TM[j] := time()-t:
+        t := time():
+        repMPLRC := Ratrecon(UU,MM,x,d,d) mod pp:
+        TM[j] := time()-t:
 od:
 
-printf("MY TIMES: %a\n",convert(TC,list));
-printf("MAPLE TIMES: %a\n",convert(TM,list));
+printf("MY TIMES: \n");
+convert(TC,list);
+printf("MAPLE TIMES: \n");
+convert(TM,list);
 
-with(plots):
+(*with(plots):
 
 dataC := [seq([j, TC[j]], j=1..iter)]:
 dataM := [seq([j, TM[j]], j=1..iter)]:
@@ -136,7 +142,7 @@ pM := pointplot(dataM, connect=true, symbol=soliddiamond):
 
 display([pC, pM],
         labels=["trial","seconds"],
-        legend=["C wrapper","Maple Ratrecon"]);
+               legend=["C wrapper","Maple Ratrecon"]);
 
 Histogram(convert(TC, list), title="C wrapper times"):
-Histogram(convert(TM, list), title="Maple Ratrecon times"): 
+Histogram(convert(TM, list), title="Maple Ratrecon times"):*)
