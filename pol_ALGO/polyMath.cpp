@@ -6,6 +6,7 @@
 #include<vector> 
 #include<unordered_map>
 #include<cstdint>
+#include"depreIntMath.hpp"
 
 using namespace std;
 
@@ -113,6 +114,22 @@ void dispVEC64(const vector<LONG> &v){
 		cout<<v[i]<<"*x^"<<i<<" + "<<"";
 	}
 	cout<<" ]"<<'\n';
+}
+
+// Computes a^n mod p. Here, 0<=a<p<2^63.
+
+LONG powmodP64(LONG a,LONG n,LONG p,recint P){
+	LONG r;
+	LONG s;
+	a+=(a>>63)&p;
+	if(n==0){return 1;}
+	if(n==1){return a;}
+	for(r=1,s=a;n>0;n/=2){
+		if(n&1){
+			r=mulrec64(r,s,P);
+			s=mulrec64(s,s,P);
+		}
+	}
 }
 
 // Returns a pair containing the new vector c=(a+b) mod p
