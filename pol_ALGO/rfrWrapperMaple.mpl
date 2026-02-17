@@ -59,9 +59,9 @@ U; *)
 amp := 1:
 iter2 := 5:
 for i from 1 to iter2 do
-	d := 100*amp:
+	d := 100:
 	amp := amp*2:
-	pp := prevprime(2^32-1):
+	pp := prevprime(2^63-1):
 	printf("DEGREE CHOSEN:%d\nPRIME CHOSEN:%a",d,pp);
 
 	NN := randpoly(x,degree=d,dense) mod pp:
@@ -112,7 +112,7 @@ for i from 1 to iter2 do
 	mapRat := Ratrecon(UU,MM,x,d,d) mod pp:
 
 	with(Statistics):
-	iter := 5:
+	iter := 3:
 
 	TC := Vector(iter):
 	TM := Vector(iter):
@@ -132,7 +132,7 @@ for i from 1 to iter2 do
 	printf("MAPLE TIMES: \n");
 	convert(TM,list);
 	print(d);
-	f := fopen("rfrTiming2.txt",APPEND,TEXT):
+	f := fopen("rfrTimingMaple.txt",APPEND,TEXT):
 	fprintf(f,"DEGREE -> %a\n\n",d);
 	fprintf(f,"CPP ROUTINE TIMINGS -> %a\nMAPLE ROUTINE TIMINGS -> %a\n\n",TC,TM);
 	fclose(f):

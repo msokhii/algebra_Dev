@@ -118,6 +118,8 @@ void dispVEC64(const vector<LONG> &v){
 
 // Computes a^n mod p. Here, 0<=a<p<2^63.
 
+/* 
+
 LONG powmodP64(LONG a,LONG n,LONG p,recint P){
 	LONG r;
 	LONG s;
@@ -131,6 +133,8 @@ LONG powmodP64(LONG a,LONG n,LONG p,recint P){
 		}
 	}
 }
+	
+*/
 
 // Returns a pair containing the new vector c=(a+b) mod p
 // and the degree of c. 
