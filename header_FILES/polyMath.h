@@ -1,3 +1,4 @@
+#pragma once
 #ifndef POLYMATH_H
 #define POLYMATH_H
 
@@ -11,7 +12,19 @@ using LONG=int64_t;
 using ULNG=uint_fast64_t;
 using ULNG128=__uint128_t;
 
+using INT32  = int32_t;
+using INT64  = int64_t;
+using UINT32 = uint32_t;
+using UINT64 = uint64_t;
+
 using namespace std;
+
+struct recint {
+  UINT64 s;   /* shift */
+  UINT64 v;   /* reciprocal */
+  UINT64 d0;  /* divisor shifted up */
+  UINT64 d1;
+};
 
 struct GCDEX{
 	vector<LONG> r;
@@ -44,6 +57,7 @@ vector<LONG> genVEC64(const int deg,const LONG p);
 vector<LONG> vecCOPY64(const vector<LONG> &v);
 void dispVEC64(const vector<LONG> &v);
 unordered_map<LONG,int> checkPOL64(const vector<LONG> &v,const LONG p);
+LONG powmodP64(LONG a,LONG n,LONG p,recint P);
 pair<vector<LONG>,int> pADDNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);
 int pADDIP64(vector<LONG> &a,const vector<LONG> &b,int &degA,const int degB,const LONG p);
 pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);

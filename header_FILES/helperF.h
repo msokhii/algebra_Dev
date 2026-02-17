@@ -1,3 +1,4 @@
+#pragma once
 #ifndef HELPER_F
 #define HELPER_F
 

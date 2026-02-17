@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INTEGERMATH_H
 #define INTEGERMATH_H
 
