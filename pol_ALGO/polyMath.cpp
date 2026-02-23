@@ -432,10 +432,10 @@ int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int
 
 // Evaluates a polynomial using Horners rule.
 
-LONG evalHORN64(const vector<LONG> &a,LONG alpha,const LONG p){
-    LONG r=0LL;
-    for (int i=a.size()-1;i>=0;i--){
-        r=add64b(mul64b(r,alpha,p),a[i],p);
+LONG evalHORN64(const vector<LONG>& a,LONG alpha,LONG p){
+    LONG r = 0LL;
+	for (int k=a.size();k-->0;){
+        r=add64b(mul64b(r,alpha,p),a[k],p);
     }
     return r;
 }
