@@ -2,6 +2,7 @@
 #define RATRECON_H
 
 #include"integerMath.h"
+#include<vector>
 
 using namespace std; 
 

@@ -58,7 +58,7 @@ U; *)
 # TESTING PROCEDURE 1: 
 amp := 1:
 iter2 := 5:
-for i from 1 to iter2 do
+for i from 1 to 1 do
 	d := 100:
 	amp := amp*2:
 	pp := prevprime(2^63-1):
@@ -112,7 +112,7 @@ for i from 1 to iter2 do
 	mapRat := Ratrecon(UU,MM,x,d,d) mod pp:
 
 	with(Statistics):
-	iter := 3:
+	iter := 1:
 
 	TC := Vector(iter):
 	TM := Vector(iter):

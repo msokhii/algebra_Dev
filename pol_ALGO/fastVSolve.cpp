@@ -11,7 +11,9 @@ void vSOLVER64(vector<LONG> &m,vector<LONG> &y,const int n,vector<LONG> &a,vecto
     int j;
     LONG u;
     LONG s;
-    vector<LONG> A{2};
+    vector<LONG> A(2,0);
+
+    A[1]=1;
     M[0]=1;
     A[0]=1;
 
