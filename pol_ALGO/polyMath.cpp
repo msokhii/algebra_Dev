@@ -340,6 +340,57 @@ int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	return degC;
 }
 
+int pMULIP64VANDER(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p) {
+    // Computes: b <- a * b   (in-place on b)
+    // a is treated as the left factor (degree degA)
+    // b is treated as the right factor and output (degree degB -> degA+degB)
+
+    if (degA < 0 || degB < 0) {
+        b.clear();
+        return -1;
+    }
+
+    if ((int)a.size() < degA + 1) a.resize(degA + 1, 0);
+    if ((int)b.size() < degB + 1) b.resize(degB + 1, 0);
+
+    auto normp = [p](LONG x) -> LONG {
+        x %= p;
+        if (x < 0) x += p;
+        return x;
+    };
+
+    // Copy inputs (safe even if someone accidentally aliases a and b)
+    vector<LONG> A(a.begin(), a.begin() + degA + 1);
+    vector<LONG> B(b.begin(), b.begin() + degB + 1);
+
+    for (int i = 0; i <= degA; ++i) A[i] = normp(A[i]);
+    for (int j = 0; j <= degB; ++j) B[j] = normp(B[j]);
+
+    int degC = degA + degB;
+    vector<LONG> C(degC + 1, 0);
+
+    // Convolution: C[k] = sum_{i=0}^degA A[i] * B[k-i]
+    for (int i = 0; i <= degA; ++i) {
+        if (A[i] == 0) continue;
+        for (int j = 0; j <= degB; ++j) {
+            if (B[j] == 0) continue;
+            C[i + j] = add64b(C[i + j], mul64bASM(A[i], B[j], p), p);
+        }
+    }
+
+    // Trim trailing zeros
+    while (degC >= 0 && C[degC] == 0) --degC;
+
+    if (degC < 0) {
+        b.assign(1, 0);
+        return -1;
+    }
+
+    C.resize(degC + 1);
+    b.swap(C);
+    return degC;
+}
+
 // Computes scalar polynomial multiplication i.e.
 // A=c*A(x) where c is some scalar and returns a new vector.
 
@@ -432,12 +483,22 @@ int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int
 
 // Evaluates a polynomial using Horners rule.
 
-LONG evalHORN64(const vector<LONG>& a,LONG alpha,LONG p){
+LONG evalHORN64(vector<LONG>& a,LONG alpha,LONG p){
     LONG r = 0LL;
 	for (int k=a.size();k-->0;){
         r=add64b(mul64b(r,alpha,p),a[k],p);
     }
     return r;
+}
+
+LONG pEVAL64(vector<LONG> &a,int d,LONG x,const LONG p){
+	int i;
+	LONG r;
+	if(d==-1){return 0;}
+	for(r=a[d],i=d-1;i>=0;i--){
+		r=add64b(a[i],mul64b(x,r,p),p);
+	}
+	return r;
 }
 
 // My implementation of division. Same idea as PDIVIP64 but
