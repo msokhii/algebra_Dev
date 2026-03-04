@@ -12,7 +12,7 @@ mVSOLVE := define_external(
     LIB=lib
 ):
 
-VandermondeSolve := proc( v::{Vector,list}, m::{Vector,list}, p::prime, shift::integer:=0 )
+VandermondeSolve := proc(m::{Vector,list},v::{Vector,list}, p::prime, shift::integer:=0 )
 local t,i,j,M,x,a,q,r,s,temp;
    t := numelems(v);
    if numelems(m) <> t then error "v and m must be the same size"; fi;
@@ -63,10 +63,13 @@ t := nops(e);
 m := [seq( alpha &^ e[i] mod p, i=1..t )]:
 c := rand(1000):
 f := add( c()*x^e[i], i=1..t ):
+f;
 v := [seq( Eval(f,x=modp(alpha &^ i,p)) mod p, i=0..t-1 )]:
 a := VandermondeSolve( m,v, p ):
+a;
 add( a[i]*x^e[i], i=1..t ) - f;
 a := VandermondeSolve1( m,v, p ):
+a;
 add( a[i]*x^e[i], i=1..t ) - f;
 
 t := 100:
