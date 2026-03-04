@@ -1,51 +1,52 @@
+(* First need to compile run.sh and runWrap2.sh and then call maple _FILE_NAME_ *)
+
 restart:
-
-libV := "/local-scratch/localhome/mss59/Desktop/research_Works/development/pol_ALGO/wrapOBJ2.so":
-libR := "/local-scratch/localhome/mss59/Desktop/research_Works/development/pol_ALGO/wrapOBJ.so":
-
-mVSOLVE := define_external(
-    'vSOLVER64C',
-    RR::ARRAY(0..nn-1,datatype=integer[8]),
-    LL::ARRAY(0..nn-1,datatype=integer[8]),
-    nn::integer[4],
-    aa::ARRAY(0..nn-1,datatype=integer[8]),
-    XX::ARRAY(0..nn,datatype=integer[8]),
-    shift::integer[4],
-    pp::integer[8],
-    LIB=libV
-):
-
-mRATRECON := define_external(
-    'ratRECON_C',
-    mLen::integer[4],
-    degM::integer[4],
-    M::ARRAY(0..mLen-1, datatype=integer[8]),
-    uLen::integer[4],
-    degU::integer[4],
-    U::ARRAY(0..uLen-1, datatype=integer[8]),
-    N::integer[4],
-    DBound::integer[4],
-    p::integer[8],
-    nOLEN::integer[4],
-    nOUT::ARRAY(0..nOLEN-1, datatype=integer[8]),
-    degNOUT::REF(integer[4]),
-    dOLEN::integer[4],
-    dOUT::ARRAY(0..dOLEN-1, datatype=integer[8]),
-    degDOUT::REF(integer[4]),
-    RETURN::integer[4],
-    LIB=libR
-):
 
 with(NumberTheory):
 with(LinearAlgebra):
 
-# ============================================================
-# Timing utilities + CSV logging
-# ============================================================
+libV := "/local-scratch/localhome/mss59/Desktop/research_Works/development/so_Files/fastVSolve.so":
+libR := "/local-scratch/localhome/mss59/Desktop/research_Works/development/so_Files/rfr.so":
+
+(* Using 0-based indexing *)
+mVSOLVE := define_external(
+                           'vSOLVER64C',
+                           RR::ARRAY(0..nn-1,datatype=integer[8]),
+                           LL::ARRAY(0..nn-1,datatype=integer[8]),
+                           nn::integer[4],
+                           aa::ARRAY(0..nn-1,datatype=integer[8]),
+                           XX::ARRAY(0..nn,datatype=integer[8]),
+                           shift::integer[4],
+                           pp::integer[8],
+                           LIB=libV
+):
+
+(* Using 0-based indexing *)
+mRATRECON := define_external(
+                            'ratRECON_C',
+                            mLen::integer[4],
+                            degM::integer[4],
+                            M::ARRAY(0..mLen-1, datatype=integer[8]),
+                            uLen::integer[4],
+                            degU::integer[4],
+                            U::ARRAY(0..uLen-1, datatype=integer[8]),
+                            N::integer[4],
+                            DBound::integer[4],
+                            p::integer[8],
+                            nOLEN::integer[4],
+                            nOUT::ARRAY(0..nOLEN-1, datatype=integer[8]),
+                            degNOUT::REF(integer[4]),
+                            dOLEN::integer[4],
+                            dOUT::ARRAY(0..dOLEN-1, datatype=integer[8]),
+                            degDOUT::REF(integer[4]),
+                            RETURN::integer[4],
+                            LIB=libR
+):
+
 TIM := table():
 CALLIDX := table():
-CSVFILE := "timing_calls.csv":
-SUMMARYFILE := "timing_results.txt":
+CSVFILE := "calls.csv":
+SUMMARYFILE := "summary.txt":
 
 TimingReset := proc()
 global TIM, CALLIDX, CSVFILE;
@@ -118,20 +119,20 @@ WriteTimings := proc(fname::string,
 global TIM, CSVFILE;
 local fd;
 
-    fd := fopen(fname, WRITE, TEXT):
+    fd := fopen(fname,WRITE,TEXT):
 
-    fprintf(fd, "====================================================\n"):
-    fprintf(fd, "Timing summary (CPU seconds)\n"):
-    fprintf(fd, "====================================================\n\n"):
+    fprintf(fd,"====================================================\n"):
+    fprintf(fd,"Timing summary in CPU seconds.\n"):
+    fprintf(fd,"====================================================\n\n"):
 
-    fprintf(fd, "Prime p                = %a\n", p):
-    fprintf(fd, "T                      = %a\n", T):
-    fprintf(fd, "termsN                 = %a\n", termsN):
-    fprintf(fd, "termsD                 = %a\n", termsD):
-    fprintf(fd, "deg numerator bound N  = %a\n", N):
-    fprintf(fd, "deg denominator bound D= %a\n", DD):
-    fprintf(fd, "numCount               = %a\n", numCount):
-    fprintf(fd, "denCount               = %a\n\n", denCount):
+    fprintf(fd,"Prime P                   -> = %a\n",p):
+    fprintf(fd,"T (Assuming we know this) -> = %a\n",T):
+    fprintf(fd,"Terms in Numerator        -> = %a\n",termsN):
+    fprintf(fd,"Terms in Denominator      -> = %a\n",termsD):
+    fprintf(fd,"Deg. numerator bound N    -> = %a\n",N):
+    fprintf(fd,"Deg. denominator bound D  -> = %a\n",DD):
+    fprintf(fd,"Numerator Count           -> = %a\n",numCount):
+    fprintf(fd,"Denominator Count         -> = %a\n\n",denCount):
 
     fprintf(fd, "1) C++ wrapper RatRecon (Ratrecon1 total)\n"):
     fprintf(fd, "   calls = %d\n", TIM["rr_cpp_calls"]):
@@ -191,6 +192,7 @@ end proc:
 
 TimingReset():
 
+(* Michaels Code *)
 VSolveMap := proc(m::{Vector,list}, v::{Vector,list}, p::prime, shift::integer:=0 )
 local t,i,j,M,x,a,q,r,s;
 
@@ -386,25 +388,25 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
     return nn/dd;
 end proc:
 
-p := prevprime(2^31-1):
-printf("Prime chosen: %a\n",p):
-
-RF := rand():
-n := randpoly([x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8]],terms=RF()) mod p:
-d := randpoly([x[1],x[2],x[3],x[4],x[5],x[6]],terms=RF()) mod p:
+p := prevprime(2^63-1):
+# RF := rand():
+n := randpoly([seq(x[i],i=1..50)],terms=1000) mod p:
+d := randpoly([seq(x[i],i=1..50)],terms=1000) mod p:
 
 f := n/d:
 
+(* Assuming we know this. *)
 termsN := nops(n):
 termsD := nops(d):
 
 T := max(termsN,termsD):
 
+(* Assuming we know this. *)
 N := degree(n):
 DD := degree(d):
 
 test := gcd(n,d):
-printf("GCD of NUM and DENUM: %a\n",test):
+test;
 
 BLACKBOXF := proc(paramA::list(integer), p)
 local sigmaVal,result,i;
@@ -508,7 +510,7 @@ local alphaVal,TVal,interpVal,ratReconVal,mapRatRecon,M,rr,i,j,
         od:
 
         if not ok then
-            error "C rational reconstruction failed at j=%1 after %2 tries; last rc=%3",
+            error "CPP ratRecon wrapper failed at j=%1 after %2 tries; last rc=%3",
                   j, maxTries, lastRatReconRC;
         fi;
     od:
@@ -736,12 +738,12 @@ local i, idx, lam, lamInv, newNum, newDen;
     fi:
 
     if idx = 0 then
-        error "cannot normalize: all denominator coefficients are 0";
+        error "Cannot normalize -> all denominator coefficients are 0";
     fi:
 
     lam := denCoeff[idx] mod p:
     if lam = 0 then
-        error "cannot normalize: chosen denominator coefficient is 0";
+        error "Cannot normalize -> all chosen denominator coefficient is 0";
     fi:
 
     lamInv := 1/lam mod p:
@@ -757,7 +759,7 @@ local lam, lamInv;
 
     lam := COEFFFROMROOT(dPoly, denRoots[idx]) mod p:
     if lam = 0 then
-        error "original denominator normalization coefficient is 0";
+        error "Original denominator normalization coefficient is 0";
     fi:
 
     lamInv := 1/lam mod p:
@@ -765,10 +767,6 @@ local lam, lamInv;
     return expand(lamInv*nPoly) mod p, expand(lamInv*dPoly) mod p;
 end proc:
 
-# ------------------------------------------------------------
-# Coefficient recovery with timing
-# NOTE: correct order is (roots, values, p, shift)
-# ------------------------------------------------------------
 t0 := TIC():
 LVanNum := VandermondeSolve1( [seq(vNumer[i],i=1..numCount)],numRoots, p, 1):
 dt := TIC()-t0:
