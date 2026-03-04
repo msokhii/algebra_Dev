@@ -1,4 +1,4 @@
-lib := "/local-scratch/localhome/mss59/Desktop/research_Works/development/pol_ALGO/wrapOBJ.so":
+lib := "/local-scratch/localhome/mss59/Desktop/research_Works/development/so_Files/rfr.so":
 
 mRATRECON := define_external(
     'ratRECON_C',
@@ -57,9 +57,9 @@ U; *)
 
 # TESTING PROCEDURE 1: 
 amp := 1:
-iter2 := 5:
-for i from 1 to 1 do
-	d := 100:
+iter2 := 15:
+for i from 1 to iter2 do
+	d := 100*amp:
 	amp := amp*2:
 	pp := prevprime(2^63-1):
 	printf("DEGREE CHOSEN:%d\nPRIME CHOSEN:%a",d,pp);
@@ -68,7 +68,7 @@ for i from 1 to 1 do
 	DD := randpoly(x,degree=d,dense) mod pp:
 
 	while Gcd(NN,DD) mod pp <> 1 do
-		DD := randpoly(x,degree=d,dense) mod pp:
+		DD := randpoly(x,degree=d) mod pp:
 	od:
 
 	DD := DD/lcoeff(DD) mod pp:
@@ -112,7 +112,7 @@ for i from 1 to 1 do
 	mapRat := Ratrecon(UU,MM,x,d,d) mod pp:
 
 	with(Statistics):
-	iter := 1:
+	iter := 5:
 
 	TC := Vector(iter):
 	TM := Vector(iter):
@@ -132,7 +132,7 @@ for i from 1 to 1 do
 	printf("MAPLE TIMES: \n");
 	convert(TM,list);
 	print(d);
-	f := fopen("rfrTimingMaple.txt",APPEND,TEXT):
+	f := fopen("rfrTimingMAPLESERVER.txt",APPEND,TEXT):
 	fprintf(f,"DEGREE -> %a\n\n",d);
 	fprintf(f,"CPP ROUTINE TIMINGS -> %a\nMAPLE ROUTINE TIMINGS -> %a\n\n",TC,TM);
 	fclose(f):
