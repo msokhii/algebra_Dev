@@ -264,7 +264,7 @@ local t,i,R,y,a,M,t0_ext,dt_ext;
     return [seq(a[i], i=0..t-1)];
 end proc:
 
-POLYTOARR0 := proc(poly::{polynom,integer}, var::name, deg::integer, p::prime)
+POLYTOARR0 := proc(poly, var, deg, p)
 local A,i;
 
     A := Array(0..deg, datatype=integer[8]);
@@ -275,7 +275,12 @@ local A,i;
     return A;
 end proc:
 
-ARRTOPOLY0 := proc(A::Array, deg::integer, var::name, p::prime)
+ARRTOPOLYNEW := proc(A,deg,var) option inline;
+local i:
+    return add(A[i]var^i,i=0..deg);
+end proc:
+
+ARRTOPOLY0 := proc(A, deg, var, p)
 local i, out;
 
     if deg < 0 then
@@ -290,7 +295,7 @@ local i, out;
     return expand(out) mod p;
 end proc:
 
-ArrayDegree0 := proc(A::Array, len::posint)
+ArrayDegree0 := proc(A, len)
 local i;
     for i from len-1 by -1 to 0 do
         if A[i] <> 0 then
@@ -302,8 +307,8 @@ end proc:
 
 lastRatReconRC := 0:
 
-Ratrecon1 := proc(Uin::{polynom,integer}, Min::{polynom,integer}, var::name,
-                  N::nonnegint, DBound::nonnegint, p::prime)
+Ratrecon1 := proc(Uin, Min, var,
+                  N, DBound, p)
 global lastRatReconRC;
 local Upoly, Mpoly, degU, degM, uLen, mLen,
       UArr, MArr, nOLEN, dOLEN, nOUT, dOUT,
@@ -378,8 +383,8 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
         return FAIL;
     fi:
 
-    nn := ARRTOPOLY0(nOUT,degNOUT,var,p):
-    dd := ARRTOPOLY0(dOUT,degDOUT,var,p):
+    nn := ARRTOPOLYNEW(nOUT,degNOUT,var,p):
+    dd := ARRTOPOLYNEW(dOUT,degDOUT,var,p):
 
     if dd = 0 then
         return FAIL;
@@ -390,8 +395,8 @@ end proc:
 
 p := prevprime(2^63-1):
 # RF := rand():
-n := randpoly([seq(x[i],i=1..50)],terms=1000) mod p:
-d := randpoly([seq(x[i],i=1..50)],terms=1000) mod p:
+n := randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
+d := randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
 
 f := n/d:
 
@@ -530,8 +535,8 @@ ratNumer := table():
 ratDenum := table():
 
 for i from 1 to nops(ratReconVal) do
-    ratNumer[i] := numer(ratReconVal[i]) mod p:
-    ratDenum[i] := denom(ratReconVal[i]) mod p:
+    ratNumer[i] := numer(ratReconVal[i]):
+    ratDenum[i] := denom(ratReconVal[i]):
 od:
 
 ratNumer := convert(ratNumer,list):
