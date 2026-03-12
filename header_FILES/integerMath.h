@@ -17,12 +17,12 @@ static inline LONG add64b(LONG a,LONG b,LONG p){
     r+=(r>>63)&p;
     return r;
 };
-LONG sub64b(LONG a,LONG b,LONG p){
+static inline LONG sub64b(LONG a,LONG b,LONG p){
     LONG r=(a-b);
     r+=(r>>63)&p;
     return r;
 };
-LONG mul64b(LONG a,LONG b,LONG p){
+static inline LONG mul64b(LONG a,LONG b,LONG p){
     ULNG128 res=(ULNG128)a*b;
     ULNG r =(ULNG)(res%p);
     return r;
