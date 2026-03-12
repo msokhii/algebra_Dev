@@ -22,6 +22,9 @@ pair<vector<LONG>,int> newtonInterp(vector<LONG> &x,vector<LONG> &y,const int n,
         if(prod==0){exit(1);}
         b[j]=mul64b(sub64b(y[j],s,p),modinv64b(prod,p),p);
     }
+    /*
+    d is the degree of the interpolating polynomial.
+    */
     d=n-1;
     while(d>=0&&b[d]==0){d--;}
     /*

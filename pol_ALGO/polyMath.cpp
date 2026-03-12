@@ -735,7 +735,6 @@ int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p)
             bVal=mul64b(aVal,d[degB-1],p);
             bVal=mul64b(u,sub64b(c[degA-1],bVal,p),p); // quotient=ax+b.
 			degR=polSUBMUL64(c,d,aVal,bVal,degA,degB,p); // c=c-(ax+b)d.
-			cout<<degR<<endl;
 			if(degR>=degB){cout << "FAIL.\n";}
         }else{
             // General case: compute remainder of c by d (in-place in c)
@@ -1030,6 +1029,201 @@ GCDEXHIST pGCDEXSTORE64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const 
 	}
 }
 
+static inline void makeDenMonicIP64(vector<LONG> &num, int degNum,
+                                    vector<LONG> &den, int degDen,
+                                    const LONG p){
+    if(degDen < 0) return;
+
+    LONG lc = den[degDen] % p;
+    if(lc < 0) lc += p;
+
+    if(lc != 1){
+        LONG inv = modinv64b(lc, p);
+        polSCMULIP64(den, inv, degDen, p);
+        if(degNum >= 0){
+            polSCMULIP64(num, inv, degNum, p);
+        }
+    }
+}
+
+static inline bool exactDivIP64(vector<LONG> &num, int &degNum,
+                                const vector<LONG> &den, int degDen,
+                                const LONG p){
+    if(degDen < 0) return false;
+    if(degNum < degDen) return false;
+
+    auto QR = pDIVDEG(num, den, degNum, degDen, p);
+    int degQ = QR.first;
+    int degR = QR.second;
+
+    if(degR != -1){
+        return false;
+    }
+
+    if(degQ < 0){
+        num.clear();
+        degNum = -1;
+        return true;
+    }
+
+    // quotient lives in num[degDen .. degDen+degQ]
+    for(int k = 0; k <= degQ; k++){
+        num[k] = num[degDen + k];
+    }
+    num.resize(degQ + 1);
+    degNum = degQ;
+    return true;
+}
+
+
+
+pairRFR ratRecon(const vector<LONG> &m,
+                 const vector<LONG> &u,
+                 int degM,
+                 int degU,
+                 int N,
+                 int D,
+                 const LONG p){
+
+    if(degM < 0 || degU < 0){
+        return {{},{},-1,-1,-10};
+    }
+
+    auto boundCheck = [&](int degR, int degT) -> bool {
+        if(degR > N) return false;
+        if(D < 0) return true;
+        return degT <= D;
+    };
+
+    // Trimmed working copies of m and u
+    vector<LONG> r1(m.begin(), m.begin() + degM + 1);
+    vector<LONG> r2(u.begin(), u.begin() + degU + 1);
+    vector<LONG> mTrim = r1;
+
+    int degA = degM;
+    int degB = degU;
+
+    int maxCoeff = max(degM + 1, degU + 1);
+
+    vector<LONG> t1(maxCoeff, 0);
+    vector<LONG> t2(maxCoeff, 0);
+    t2[0] = 1;
+
+    int degT1 = -1;
+    int degT2 = 0;
+
+    // Reusable buffers for Euclid loop
+    vector<LONG> q(maxCoeff, 0);
+    vector<LONG> tmpT(maxCoeff, 0);
+
+    if(degA < degB){
+        swap(r1, r2);
+        swap(degA, degB);
+        swap(t1, t2);
+        swap(degT1, degT2);
+    }
+
+    while(degB != -1){
+
+        if(boundCheck(degB, degT2) && degT2 >= 0){
+
+            vector<LONG> num(r2.begin(), r2.begin() + degB + 1);
+            vector<LONG> den(t2.begin(), t2.begin() + degT2 + 1);
+            int degNum = degB;
+            int degDen = degT2;
+
+            // Reduce gcd(num, den) if needed, using ordinary gcd only
+            {
+                vector<LONG> g1 = num;
+                vector<LONG> g2 = den;
+                int degG = polGCD64(g1, g2, degNum, degDen, p);
+
+                if(degG > 0){
+                    g1.resize(degG + 1);
+
+                    if(!exactDivIP64(num, degNum, g1, degG, p)){
+                        return {{},{},-1,-1,-31};
+                    }
+                    if(!exactDivIP64(den, degDen, g1, degG, p)){
+                        return {{},{},-1,-1,-31};
+                    }
+                }
+            }
+
+            // Require gcd(den, m) = 1, again using ordinary gcd only
+            {
+                vector<LONG> dcopy = den;
+                vector<LONG> mcopy = mTrim;
+                int degGdm = polGCD64(dcopy, mcopy, degDen, degM, p);
+
+                if(degGdm <= 0){
+                    makeDenMonicIP64(num, degNum, den, degDen, p);
+
+                    pairRFR res;
+                    res.r = move(num);
+                    res.t = move(den);
+                    res.degR = degNum;
+                    res.degT = degDen;
+                    res.flag = 0;
+                    return res;
+                }
+            }
+        }
+
+        LONG uInv, aVal, bVal;
+        int degR, degQ, degT;
+
+        if(degB > 0 && degA - degB == 1){
+            uInv = modinv64b(r2[degB], p);
+            aVal = mul64b(r1[degA], uInv, p);
+            bVal = mul64b(aVal, r2[degB - 1], p);
+            bVal = mul64b(uInv, sub64b(r1[degA - 1], bVal, p), p);
+
+            degR = polSUBMUL64(r1, r2, aVal, bVal, degA, degB, p);
+            degT = polSUBMUL64(t1, t2, aVal, bVal, degT1, degT2, p);
+        }
+        else{
+            degR = polDIVIP64(r1, r2, degA, degB, p);
+            degQ = degA - degB;
+
+            for(int i = 0; i <= degQ; i++){
+                q[i] = r1[degB + i];
+            }
+
+            if(degT2 >= 0){
+                for(int i = 0; i <= degT2; i++){
+                    tmpT[i] = t2[i];
+                }
+
+                int degTmpT = degT2;
+                degTmpT = pMULIP64(tmpT, q, degTmpT, degQ, p);
+                degT = pSUBIP64(t1, tmpT, degT1, degTmpT, p);
+            }
+            else{
+                degT = degT1;
+            }
+        }
+
+        if(degR < 0){
+            break;
+        }
+
+        swap(r1, r2);
+        degA = degB;
+        degB = degR;
+
+        swap(t1, t2);
+        int oldDegT2 = degT2;
+        degT2 = degT;
+        degT1 = oldDegT2;
+    }
+
+    return {{},{},-1,-1,-20};
+}
+
+
+
+/*
 pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,int N,int D,const LONG p){
     if(degM<0 || degU<0){
         return {{},{},-1,-1,-10};
@@ -1098,7 +1292,6 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
 	We require deg(r)<=N.
 	If D>=0 then we also require deg(t)<=D.
 	If D<0 then the denominator degree is unbounded.
-	*/
     auto boundCheck=[&](int degR,int degT){
         if(degR<=N){
             if(D<0) return true;
@@ -1191,6 +1384,8 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
     	}
     return{{},{},-1,-1,-20};
 }
+
+*/
 
 /* 
 SHORT SUMMARY OF THE ABOVE ROUTINE: 
