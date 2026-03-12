@@ -1680,3 +1680,8 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     degTOut = -1;
     return -20;
 }
+
+/* 
+FIXED SIZE ARRAY ROUTINES:
+*/
+

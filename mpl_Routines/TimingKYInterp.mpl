@@ -341,7 +341,7 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
     degDOUT := -1:
 
     t0_ext := TIC():
-    
+    to 1000 do:
     rc := mRATRECON(
         mLen, degM, MArr,
         uLen, degU, UArr,
@@ -349,7 +349,9 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
         nOLEN, nOUT, degNOUT,
         dOLEN, dOUT, degDOUT
     ):
+    od:
     dt_ext := TIC()-t0_ext:
+    printf("TIME -> 10.6f\n",dt_ext/1000);
     TADD("rr_cpp_ext_total","rr_cpp_ext_calls", dt_ext):
     LogCSV("rr_cpp_ext", "-", "-", "proc",
            cat("degU=", convert(degU,string), ";degM=", convert(degM,string)),
@@ -389,8 +391,8 @@ end proc:
 
 p := prevprime(2^63-1):
 # RF := rand():
-n := randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
-d := randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
+n := x[1]^5+randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
+d := x[1]^5+randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
 
 f := n/d:
 
