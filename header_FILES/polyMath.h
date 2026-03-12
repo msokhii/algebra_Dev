@@ -78,5 +78,12 @@ int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p);
 GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 GCDEXHIST pGCDEXSTORE64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
+pairRFR ratReconFast(const vector<LONG> &m,
+                     const vector<LONG> &u,
+                     int degM,
+                     int degU,
+                     int N,
+                     int D,
+                     const LONG p);
 pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,int N,int D,const LONG p);
 #endif

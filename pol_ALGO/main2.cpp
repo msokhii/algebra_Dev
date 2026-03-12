@@ -86,13 +86,16 @@ int main(){
     cout<<"\n";
 
 
-    for(int i=0;i<1000;i++){
-        auto temp1=chrono::high_resolution_clock::now();
-        pairRFR res=ratRecon(m,u.first,degM,degU,N,D,p);
-        auto temp2=chrono::high_resolution_clock::now();
-        auto total_ns=chrono::duration_cast<chrono::nanoseconds>(temp2-temp1).count();
-        cout<<"TIME: "<<total_ns<<"\n";
-    }
+    const int NUM = 100000;
+
+    for(int i=0; i<NUM; i++){
+        auto t1 = chrono::high_resolution_clock::now();
+        pairRFR res = ratReconFast(m, u.first, degM, degU, N, D, p);
+        auto t2 = chrono::high_resolution_clock::now();
+        auto total_ns = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count();
+        cout << "Average ns: " << (double)total_ns / NUM << "\n";
+    }   
+   
     
     /*
     

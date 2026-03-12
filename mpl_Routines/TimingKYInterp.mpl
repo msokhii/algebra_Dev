@@ -48,7 +48,7 @@ CALLIDX := table():
 CSVFILE := "calls.csv":
 SUMMARYFILE := "summary.txt":
 
-TimingReset := proc()
+TimingReset := proc() option inline;
 global TIM, CALLIDX, CSVFILE;
 local fd;
 
@@ -77,17 +77,17 @@ local fd;
     fclose(fd):
 end proc:
 
-TIC := proc()
+TIC := proc() option inline;
     return kernelopts(cputime);
 end proc:
 
-TADD := proc(keyTotal::string, keyCalls::string, dt::numeric)
+TADD := proc(keyTotal::string, keyCalls::string, dt::numeric) option inline;
 global TIM;
     TIM[keyTotal] := TIM[keyTotal] + dt:
     TIM[keyCalls] := TIM[keyCalls] + 1:
 end proc:
 
-AVGSAFE := proc(total::numeric, calls::nonnegint)
+AVGSAFE := proc(total::numeric, calls::nonnegint) option inline;
     if calls = 0 then
         return 0.0;
     else
@@ -96,7 +96,7 @@ AVGSAFE := proc(total::numeric, calls::nonnegint)
 end proc:
 
 LogCSV := proc(event::string, j::{integer,string}, tries::{integer,string},
-               side::string, extra::string, dt::numeric)
+               side::string, extra::string, dt::numeric) option inline;
 global CALLIDX, CSVFILE;
 local fd, idx;
 
@@ -115,7 +115,7 @@ WriteTimings := proc(fname::string,
                      numCount::posint, denCount::posint,
                      sameRF::{truefalse,boolean},
                      sameNum::{truefalse,boolean},
-                     sameDen::{truefalse,boolean})
+                     sameDen::{truefalse,boolean}) option inline;
 global TIM, CSVFILE;
 local fd;
 
@@ -193,7 +193,7 @@ end proc:
 TimingReset():
 
 (* Michaels Code *)
-VSolveMap := proc(m::{Vector,list}, v::{Vector,list}, p::prime, shift::integer:=0 )
+VSolveMap := proc(m, v, p, shift::integer:=0 ) option inline;
 local t,i,j,M,x,a,q,r,s;
 
    t := numelems(v);
@@ -232,7 +232,7 @@ local t,i,j,M,x,a,q,r,s;
    return a;
 end proc:
 
-VandermondeSolve1 := proc(m::{Vector,list}, v::{Vector,list}, p::prime, shift::integer:=0)
+VandermondeSolve1 := proc(m, v, p, shift::integer:=0) option inline;
 local t,i,R,y,a,M,t0_ext,dt_ext;
 
     t := numelems(v);
@@ -264,7 +264,7 @@ local t,i,R,y,a,M,t0_ext,dt_ext;
     return [seq(a[i], i=0..t-1)];
 end proc:
 
-POLYTOARR0 := proc(poly, var, deg, p)
+POLYTOARR0 := proc(poly, var, deg, p) option inline;
 local A,i;
 
     A := Array(0..deg, datatype=integer[8]);
@@ -277,7 +277,7 @@ end proc:
 
 ARRTOPOLYNEW := proc(A,deg,var) option inline;
 local i:
-    return add(A[i]var^i,i=0..deg);
+    add(A[i]*var^i,i=0..deg);
 end proc:
 
 ARRTOPOLY0 := proc(A, deg, var, p)
@@ -295,7 +295,7 @@ local i, out;
     return expand(out) mod p;
 end proc:
 
-ArrayDegree0 := proc(A, len)
+ArrayDegree0 := proc(A, len) option inline;
 local i;
     for i from len-1 by -1 to 0 do
         if A[i] <> 0 then
@@ -308,14 +308,14 @@ end proc:
 lastRatReconRC := 0:
 
 Ratrecon1 := proc(Uin, Min, var,
-                  N, DBound, p)
+                  N, DBound, p) option inline;
 global lastRatReconRC;
 local Upoly, Mpoly, degU, degM, uLen, mLen,
       UArr, MArr, nOLEN, dOLEN, nOUT, dOUT,
       degNOUT, degDOUT, rc, nn, dd, i, t0_ext, dt_ext;
 
-    Upoly := expand(Uin) mod p:
-    Mpoly := expand(Min) mod p:
+    Upoly := Uin:
+    Mpoly := Min:
 
     degU := degree(Upoly,var):
     degM := degree(Mpoly,var):
@@ -337,17 +337,11 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
     nOUT := Array(0..nOLEN-1, datatype=integer[8]):
     dOUT := Array(0..dOLEN-1, datatype=integer[8]):
 
-    for i from 0 to nOLEN-1 do
-        nOUT[i] := 0;
-    od:
-    for i from 0 to dOLEN-1 do
-        dOUT[i] := 0;
-    od:
-
     degNOUT := -1:
     degDOUT := -1:
 
     t0_ext := TIC():
+    
     rc := mRATRECON(
         mLen, degM, MArr,
         uLen, degU, UArr,
@@ -383,8 +377,8 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
         return FAIL;
     fi:
 
-    nn := ARRTOPOLYNEW(nOUT,degNOUT,var,p):
-    dd := ARRTOPOLYNEW(dOUT,degDOUT,var,p):
+    nn := ARRTOPOLYNEW(nOUT,degNOUT,var):
+    dd := ARRTOPOLYNEW(dOUT,degDOUT,var):
 
     if dd = 0 then
         return FAIL;

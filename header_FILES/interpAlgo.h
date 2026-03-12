@@ -1,5 +1,5 @@
 #ifndef INTERPALGO_H
-#define INTERALGO_H
+#define INTERPALGO_H
 
 #include"integerMath.h"
 #include"helperF.h"

@@ -28,7 +28,7 @@ extern "C" int ratRECON_C(int mLen,
     vector<LONG> u;
     m.assign(M,M+(degM+1));
     u.assign(U,U+(degU+1));
-    pairRFR res=ratRecon(m,u,degM,degU,N,D,p);
+    pairRFR res=ratReconFast(m,u,degM,degU,N,D,p);
     if(res.flag!=0){return res.flag;}
     if(res.degR+1>nOutLen){return -1;}
     if(res.degT+1>dOutLen){return -2;}

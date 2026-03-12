@@ -1075,6 +1075,119 @@ static inline bool exactDivIP64(vector<LONG> &num, int &degNum,
     return true;
 }
 
+pairRFR ratReconFast(const vector<LONG> &m,
+                     const vector<LONG> &u,
+                     int degM,
+                     int degU,
+                     int N,
+                     int D,
+                     const LONG p){
+
+    if(degM < 0 || degU < 0){
+        return {{},{},-1,-1,-10};
+    }
+
+    auto boundCheck = [&](int degR, int degT) -> bool {
+        if(degR > N) return false;
+        if(D < 0) return true;
+        return degT <= D;
+    };
+
+    // Working copies trimmed once
+    vector<LONG> r1(m.begin(), m.begin() + degM + 1);
+    vector<LONG> r2(u.begin(), u.begin() + degU + 1);
+
+    int degA = degM;
+    int degB = degU;
+
+    int maxCoeff = max(degM + 1, degU + 1);
+
+    vector<LONG> t1(maxCoeff, 0);
+    vector<LONG> t2(maxCoeff, 0);
+    t2[0] = 1;
+
+    int degT1 = -1;
+    int degT2 = 0;
+
+    // Reusable buffers
+    vector<LONG> q(maxCoeff, 0);
+    vector<LONG> tmpT(maxCoeff, 0);
+
+    if(degA < degB){
+        swap(r1, r2);
+        swap(degA, degB);
+        swap(t1, t2);
+        swap(degT1, degT2);
+    }
+
+    while(degB != -1){
+
+        if(boundCheck(degB, degT2) && degT2 >= 0){
+            vector<LONG> num(r2.begin(), r2.begin() + degB + 1);
+            vector<LONG> den(t2.begin(), t2.begin() + degT2 + 1);
+
+            makeDenMonicIP64(num, degB, den, degT2, p);
+
+            pairRFR res;
+            res.r = move(num);
+            res.t = move(den);
+            res.degR = degB;
+            res.degT = degT2;
+            res.flag = 0;
+            return res;
+        }
+
+        LONG uInv, aVal, bVal;
+        int degR, degQ, degT;
+
+        if(degB > 0 && degA - degB == 1){
+            uInv = modinv64b(r2[degB], p);
+            aVal = mul64b(r1[degA], uInv, p);
+            bVal = mul64b(aVal, r2[degB - 1], p);
+            bVal = mul64b(uInv, sub64b(r1[degA - 1], bVal, p), p);
+
+            degR = polSUBMUL64(r1, r2, aVal, bVal, degA, degB, p);
+            degT = polSUBMUL64(t1, t2, aVal, bVal, degT1, degT2, p);
+        }
+        else{
+            degR = polDIVIP64(r1, r2, degA, degB, p);
+            degQ = degA - degB;
+
+            for(int i = 0; i <= degQ; i++){
+                q[i] = r1[degB + i];
+            }
+
+            if(degT2 >= 0){
+                for(int i = 0; i <= degT2; i++){
+                    tmpT[i] = t2[i];
+                }
+
+                int degTmpT = degT2;
+                degTmpT = pMULIP64(tmpT, q, degTmpT, degQ, p);
+                degT = pSUBIP64(t1, tmpT, degT1, degTmpT, p);
+            }
+            else{
+                degT = degT1;
+            }
+        }
+
+        if(degR < 0){
+            break;
+        }
+
+        swap(r1, r2);
+        degA = degB;
+        degB = degR;
+
+        swap(t1, t2);
+        int oldDegT2 = degT2;
+        degT2 = degT;
+        degT1 = oldDegT2;
+    }
+
+    return {{},{},-1,-1,-20};
+}
+
 
 
 pairRFR ratRecon(const vector<LONG> &m,
