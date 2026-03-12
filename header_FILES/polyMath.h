@@ -26,6 +26,28 @@ struct recint {
   UINT64 d1;
 };
 
+struct RatReconFastWS{
+    int cap;
+    vector<LONG> r1;
+    vector<LONG> r2;
+    vector<LONG> t1;
+    vector<LONG> t2;
+    vector<LONG> q;
+    vector<LONG> tmpT;
+
+    RatReconFastWS(): cap(0) {}
+
+    void init(int n){
+        cap = n;
+        r1.resize(cap);
+        r2.resize(cap);
+        t1.resize(cap);
+        t2.resize(cap);
+        q.resize(cap);
+        tmpT.resize(cap);
+    }
+};
+
 struct GCDEX{
 	vector<LONG> r;
 	vector<LONG> s;
@@ -85,5 +107,17 @@ pairRFR ratReconFast(const vector<LONG> &m,
                      int N,
                      int D,
                      const LONG p);
+int ratReconFastKernelWS(const vector<LONG> &m,
+                         const vector<LONG> &u,
+                         int degM,
+                         int degU,
+                         int N,
+                         int D,
+                         const LONG p,
+                         RatReconFastWS &W,
+                         LONG *rOut,
+                         int &degROut,
+                         LONG *tOut,
+                         int &degTOut);
 pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,int N,int D,const LONG p);
 #endif

@@ -85,16 +85,41 @@ int main(){
     dispVEC64(m);
     cout<<"\n";
 
+    RatReconFastWS W;
+    W.init(degM + degU + 4);
+
+    vector<LONG> rOut(W.cap, 0);
+    vector<LONG> tOut(W.cap, 0);
+
+    int degR = -1;
+    int degT = -1;
+    int flag = -999;
 
     const int NUM = 100000;
 
-    for(int i=0; i<NUM; i++){
-        auto t1 = chrono::high_resolution_clock::now();
-        pairRFR res = ratReconFast(m, u.first, degM, degU, N, D, p);
-        auto t2 = chrono::high_resolution_clock::now();
-        auto total_ns = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count();
-        cout << "Average ns: " << (double)total_ns / NUM << "\n";
-    }   
+auto t1 = chrono::high_resolution_clock::now();
+
+for(int i=0; i<NUM; i++){
+    flag = ratReconFastKernelWS(
+        m,
+        u.first,
+        degM,
+        degU,
+        N,
+        D,
+        p,
+        W,
+        rOut.data(),
+        degR,
+        tOut.data(),
+        degT
+    );
+}
+
+auto t2 = chrono::high_resolution_clock::now();
+
+auto total_ns = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count();
+cout << "Average ns: " << (double)total_ns / NUM << "\n"; 
    
     
     /*

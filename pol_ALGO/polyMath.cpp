@@ -10,6 +10,28 @@
 
 using namespace std;
 
+struct RatReconFastWS{
+    int cap;
+    vector<LONG> r1;
+    vector<LONG> r2;
+    vector<LONG> t1;
+    vector<LONG> t2;
+    vector<LONG> q;
+    vector<LONG> tmpT;
+
+    RatReconFastWS(): cap(0) {}
+
+    void init(int n){
+        cap = n;
+        r1.resize(cap);
+        r2.resize(cap);
+        t1.resize(cap);
+        t2.resize(cap);
+        q.resize(cap);
+        tmpT.resize(cap);
+    }
+};
+
 /*
 This struct is for pGCDEXTFULL.
 */
@@ -1512,3 +1534,149 @@ SHORT SUMMARY OF THE ABOVE ROUTINE:
    d: Return the final answer r/t.
 */
 
+static inline void makeDenMonicOut64(LONG *num, int degNum,
+                                     LONG *den, int degDen,
+                                     const LONG p){
+    if(degDen < 0) return;
+
+    LONG lc = den[degDen] % p;
+    if(lc < 0) lc += p;
+
+    if(lc != 1){
+        LONG inv = modinv64b(lc, p);
+        for(int i=0;i<=degDen;i++){
+            den[i] = mul64b(den[i], inv, p);
+        }
+        for(int i=0;i<=degNum;i++){
+            num[i] = mul64b(num[i], inv, p);
+        }
+    }
+}
+
+int ratReconFastKernelWS(const vector<LONG> &m,
+                         const vector<LONG> &u,
+                         int degM,
+                         int degU,
+                         int N,
+                         int D,
+                         const LONG p,
+                         RatReconFastWS &W,
+                         LONG *rOut,
+                         int &degROut,
+                         LONG *tOut,
+                         int &degTOut){
+
+    if(degM < 0 || degU < 0){
+        degROut = -1;
+        degTOut = -1;
+        return -10;
+    }
+
+    auto boundCheck = [&](int degR, int degT)->bool{
+        if(degR > N) return false;
+        if(D < 0) return true;
+        return degT <= D;
+    };
+
+    // make sure workspace is large enough
+    // this is intentionally generous so tmpT*q stays inside capacity more often
+    int need = degM + degU + 4;
+    if(W.cap < need){
+        W.init(need);
+    }
+
+    // reset only what must be reset
+    fill(W.t1.begin(), W.t1.end(), 0);
+    fill(W.t2.begin(), W.t2.end(), 0);
+
+    // copy inputs into workspace
+    for(int i=0;i<=degM;i++){
+        W.r1[i] = m[i];
+    }
+    for(int i=0;i<=degU;i++){
+        W.r2[i] = u[i];
+    }
+
+    W.t2[0] = 1;
+
+    int degA = degM;
+    int degB = degU;
+    int degT1 = -1;
+    int degT2 = 0;
+
+    if(degA < degB){
+        swap(W.r1, W.r2);
+        swap(degA, degB);
+        swap(W.t1, W.t2);
+        swap(degT1, degT2);
+    }
+
+    while(degB != -1){
+
+        if(boundCheck(degB, degT2) && degT2 >= 0){
+            degROut = degB;
+            degTOut = degT2;
+
+            for(int i=0;i<=degROut;i++){
+                rOut[i] = W.r2[i];
+            }
+            for(int i=0;i<=degTOut;i++){
+                tOut[i] = W.t2[i];
+            }
+
+            makeDenMonicOut64(rOut, degROut, tOut, degTOut, p);
+            return 0;
+        }
+
+        LONG uInv, aVal, bVal;
+        int degR, degQ, degT;
+
+        if(degB > 0 && degA - degB == 1){
+            uInv = modinv64b(W.r2[degB], p);
+            aVal = mul64b(W.r1[degA], uInv, p);
+            bVal = mul64b(aVal, W.r2[degB-1], p);
+            bVal = mul64b(uInv, sub64b(W.r1[degA-1], bVal, p), p);
+
+            degR = polSUBMUL64(W.r1, W.r2, aVal, bVal, degA, degB, p);
+            degT = polSUBMUL64(W.t1, W.t2, aVal, bVal, degT1, degT2, p);
+        }
+        else{
+            degR = polDIVIP64(W.r1, W.r2, degA, degB, p);
+            degQ = degA - degB;
+
+            for(int i=0;i<=degQ;i++){
+                W.q[i] = W.r1[degB + i];
+            }
+
+            if(degT2 >= 0){
+                for(int i=0;i<=degT2;i++){
+                    W.tmpT[i] = W.t2[i];
+                }
+
+                int degTmpT = degT2;
+                degTmpT = pMULIP64(W.tmpT, W.q, degTmpT, degQ, p);
+                degT = pSUBIP64(W.t1, W.tmpT, degT1, degTmpT, p);
+            }
+            else{
+                degT = degT1;
+            }
+        }
+
+        if(degR < 0){
+            break;
+        }
+
+        swap(W.r1, W.r2);
+        degA = degB;
+        degB = degR;
+
+        swap(W.t1, W.t2);
+        int oldDegT2 = degT2;
+        degT2 = degT;
+        degT1 = oldDegT2;
+    }
+
+    degROut = -1;
+    degTOut = -1;
+    return -20;
+}
