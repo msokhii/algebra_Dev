@@ -811,6 +811,7 @@ int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p)
 // all vectors {r,s,t,degrees of all} where r vector contains the gcd of a(x),b(x).
 // This is monic.
 
+/* 
 GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const LONG p){
 	vector<LONG> s0{1};
 	vector<LONG> s1;
@@ -833,7 +834,7 @@ GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const
 			}
 		}
 		auto [qs1,dqs1]=pMULNEW64(q,s1,degQ,degS1,p);
-        auto [s2,ds2]=pSUBNEW64(s0,qs1,degS0,dqs1,p);
+        auto [s2,ds2]=pSUBNEW64(polfms64s(LONG *A, LONG *B, LONG *C, int da, int db, int dc, LONG p),qs1,degS0,dqs1,p);
         auto [qt1,dqt1]=pMULNEW64(q,t1,degQ,degT1,p);
         auto [t2,dt2]=pSUBNEW64(t0,qt1,degT0,dqt1,p);
 		if(degR==-1){r0.clear();}
@@ -849,6 +850,8 @@ GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const
 	polMAKEMONIC64(r0,p);
 	return{r0,s0,t0,degr0,degS0,degT0};
 }
+
+*/
 
 // Fast version of extended euclidean algorithm. This is done in place.
 // Also monic.
@@ -1601,12 +1604,6 @@ int ratReconFastKernelWS(const vector<LONG> &m,
         return -10; // Bad input.
     }
 
-    auto boundCheck = [&](int degR, int degT)->bool{
-        if(degR > N) return false;
-        if(D < 0) return true;
-        return degT <= D;
-    };
-
     // reset only what must be reset
     // fill(W.t1.begin(), W.t1.end(), 0);
     // fill(W.t2.begin(), W.t2.end(), 0);
@@ -1639,7 +1636,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
 
     while(degB != -1){
 
-        if(boundCheck(degB, degT2) && degT2 >= 0){
+        if(degB <= N && degT2 >= 0 && (D < 0 || degT2 <= D)){
             degROut = degB;
             degTOut = degT2;
 
@@ -1684,7 +1681,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
 
             if(degT2 >= 0){
                 
-                /* for(int i=0;i<=degT2;i++){
+                for(int i=0;i<=degT2;i++){
                     W.tmpT[i] = W.t2[i];
                 }
                 
@@ -1694,8 +1691,8 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                 int degTmpT = degT2;
                 degTmpT = pMULIP64(W.tmpT, W.q, degTmpT, degQ, p);
                 degT = pSUBIP64(W.t1, W.tmpT, degT1, degTmpT, p);
-                */
-                degT = polfms64s(W.t2.data(), W.q.data(), W.t1.data(), degT2, degQ, degT1, p);
+                
+                // degT = polfms64s(W.t2.data(), W.q.data(), W.t1.data(), degT2, degQ, degT1, p);
             }
             else{
                 degT = degT1;
