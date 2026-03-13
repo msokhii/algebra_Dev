@@ -1654,21 +1654,21 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             degR = polDIVIP64(W.r1, W.r2, degA, degB, p);
             degQ = degA - degB;
 
-            /*
+            
             for(int i=0;i<=degQ;i++){
                 W.q[i] = W.r1[degB + i];
             }
-            */
-            std::copy_n(W.r1.data() + degB, degQ + 1, W.q.data());
+            
+            // std::copy_n(W.r1.data() + degB, degQ + 1, W.q.data());
 
             if(degT2 >= 0){
-                /*
+                
                 for(int i=0;i<=degT2;i++){
                     W.tmpT[i] = W.t2[i];
                 }
-                */
+                
 
-                std::copy_n(W.t2.data(), degT2 + 1, W.tmpT.data());
+                // std::copy_n(W.t2.data(), degT2 + 1, W.tmpT.data());
 
                 int degTmpT = degT2;
                 degTmpT = pMULIP64(W.tmpT, W.q, degTmpT, degQ, p);
