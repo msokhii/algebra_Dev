@@ -1,4 +1,5 @@
-#include<bits/stdc++.h> 
+#include<vector>
+#include<cstdint>
 #include"integerMath.h"
 #include"helperF.h"
 
