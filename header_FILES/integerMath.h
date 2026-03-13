@@ -1,8 +1,7 @@
-#pragma once
-#ifndef INTEGERMATH_H
-#define INTEGERMATH_H
+#pragma once 
 
 #include<cstdint>
+using namespace std;
 
 using LONG=int64_t;
 using ULNG=uint_fast64_t;
@@ -60,5 +59,3 @@ static inline LONG modinv64b(LONG c,LONG p){
     if(c1<0) c1+=p;
     return c1;
 };
-
-#endif

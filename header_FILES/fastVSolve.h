@@ -1,11 +1,11 @@
 #pragma once
-#ifndef FASTVSOLVE_H
-#define FASTVSOLVE_H
 
 #include<cstdint>
 #include<vector>
 #include"integerMath.h"
 #include"polyMath.h"
+
+using namespace std; 
 
 using LONG=int64_t;
 using ULNG=uint_fast64_t;
@@ -20,5 +20,3 @@ void vSOLVER64(
     int shift,
     LONG p
 );
-
-#endif

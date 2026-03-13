@@ -1,12 +1,12 @@
 #pragma once
-#ifndef POLYMATH_H
-#define POLYMATH_H
 
 #include"integerMath.h"
 #include"helperF.h"
 #include<vector>
 #include<cstdint> 
 #include<unordered_map>
+
+using namespace std;
 
 using LONG=int64_t;
 using ULNG=uint_fast64_t;
@@ -16,8 +16,6 @@ using INT32  = int32_t;
 using INT64  = int64_t;
 using UINT32 = uint32_t;
 using UINT64 = uint64_t;
-
-using namespace std;
 
 struct recint {
   UINT64 s;   /* shift */
@@ -120,4 +118,3 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                          LONG *tOut,
                          int &degTOut);
 pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,int N,int D,const LONG p);
-#endif
