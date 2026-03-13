@@ -1566,7 +1566,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     if(degM < 0 || degU < 0){
         degROut = -1;
         degTOut = -1;
-        return -10;
+        return -10; // Bad input.
     }
 
     auto boundCheck = [&](int degR, int degT)->bool{
@@ -1576,8 +1576,8 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     };
 
     // reset only what must be reset
-    fill(W.t1.begin(), W.t1.end(), 0);
-    fill(W.t2.begin(), W.t2.end(), 0);
+    // fill(W.t1.begin(), W.t1.end(), 0);
+    // fill(W.t2.begin(), W.t2.end(), 0);
 
     /* copy inputs into workspace
     for(int i=0;i<=degM;i++){
@@ -1589,10 +1589,9 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     */
 
     // Test Version.
-    std::copy_n(m.data(), degM + 1, W.r1.data());
-    std::copy_n(u.data(), degU + 1, W.r2.data());   
-
-    W.t2[0] = 1;
+    std::copy_n(m.data(),degM+1,W.r1.data());
+    std::copy_n(u.data(),degU+1,W.r2.data());   
+    W.t2[0]=1;
 
     int degA = degM;
     int degB = degU;
@@ -1677,7 +1676,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
         degA = degB;
         degB = degR;
 
-        swap(W.t1, W.t2);
+        (W.t1, W.t2);
         int oldDegT2 = degT2;
         degT2 = degT;
         degT1 = oldDegT2;

@@ -64,50 +64,18 @@ int main(){
     int degR=-1;
     int degT=-1;
     int flag=-999;
-    const int NUM=1000000;
-    auto t1=chrono::high_resolution_clock::now();
+    const int NUM=100000;
+    auto start=chrono::high_resolution_clock::now();
 
     for(int i=0;i<NUM;i++){
-        flag = ratReconFastKernelWS(
-        m,
-        u.first,
-        degX,
-        degU,
-        degN,
-        degD,
-        p,
-        W,
-        rOut.data(),
-        degR,
-        tOut.data(),
-        degT
-    );
-      //  auto t2=chrono::high_resolution_clock::now();
-      //  auto totalNano=chrono::duration_cast<chrono::nanoseconds>(t2-t1).count();
-      //  double microS=totalNano/1000.0;
-      //  cout<<fixed<<setprecision(3);
-// cout<<"TIME (MICRO SECS.) -> "<<microS<<"\degN";
-}
-
-auto t2 = chrono::high_resolution_clock::now();
-
-auto total_ns = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count();
-cout << "Average ms: " << (double)total_ns / NUM / 1000.0 <<"\n"; 
-   
-   /* 
-    auto temp2=chrono::high_resolution_clock::now();
-
-    double avg_ns=static_cast<double>(total_ns)/1000.0;
-    double avg_us=avg_ns/1000.0;
-    double avg_ms=avg_ns/1.0e6;
-
-    cout<<"TOTAL TIME: "<<total_ns<<"\degN";
-    cout<<"APC (ns): "<<avg_ns<<"\degN";
-    cout<<"APC (us): "<<avg_us<<"\degN";
-    cout<<"APC (ms): "<<avg_ms<<"\degN";
-
-    */
-
+        flag=ratReconFastKernelWS(m,u.first,degX,degU,
+        degN,degD,p,W,rOut.data(),degR,tOut.data(),
+        degT);
+    }
+    printf("%d\n",flag);
+    auto stop=chrono::high_resolution_clock::now();
+    auto total=chrono::duration_cast<chrono::microseconds>
+    (stop-start).count();
+    std::cout<<"Average micro(s): "<<(double)total/NUM<<"\n"; 
     return 0;
-
 }
