@@ -1631,8 +1631,8 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             }
             */
 
-            std::copy_n(W.r2.data(), degROut + 1, rOut.data());
-            std::copy_n(W.t2.data(), degTOut + 1, tOut.data());
+            std::copy_n(W.r2.data(), degROut + 1, rOut);
+            std::copy_n(W.t2.data(), degTOut + 1, tOut);
 
             makeDenMonicOut64(rOut, degROut, tOut, degTOut, p);
             return 0;
@@ -1667,7 +1667,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                     W.tmpT[i] = W.t2[i];
                 }
                 */
-               
+
                 std::copy_n(W.t2.data(), degT2 + 1, W.tmpT.data());
 
                 int degTmpT = degT2;
