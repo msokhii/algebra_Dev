@@ -29,13 +29,14 @@ int main(){
     int degN=5;
     int degD=5;
     const int NUM=1000000; // Total calls.
+    const int iter=10;
     ofstream logFile("cppTimings.txt");
     logFile<<"Benchmark:\n";
     logFile<<"Prime p: "<<p<<"\n";
     logFile<<"Calls: "<<NUM<<"\n";
     logFile<<"Iteration degN degD TimeVecBuild avgTimeCall\n";
 
-    for(int i=0;i<5;i++){
+    for(int i=0;i<iter;i++){
         int degX=degN+degD+1;
         // Fixed size vectors for numerator and denominator.
         auto vecBuildTimeStart=chrono::steady_clock::now();
@@ -70,8 +71,8 @@ int main(){
         int degT=-1;
         int flag=-999;
         auto vecBuildTimeStop=chrono::steady_clock::now();
-        auto vecTotalTime=chrono::duration_cast<chrono::microseconds>
-        (vecBuildTimeStop-vecBuildTimeStart).count();
+        double vecTotalTime=chrono::duration<double,
+        std::micro>(vecBuildTimeStop-vecBuildTimeStart).count();
         auto start=chrono::steady_clock::now();
         for(int i=0;i<NUM;i++){
             flag=ratReconFastKernelWS(m,u.first,degX,degU,
@@ -83,7 +84,9 @@ int main(){
         (stop-start).count();
         double avgCallTime=static_cast<double>(total)/NUM;
 
-        logFile<<i<<" "<<degN<<" "<<degD<<" "<<vecTotalTime<<" "<<avgCallTime<<"\n";
+        logFile<<i<<"       "<<degN<<"      "
+        <<degD<<"       "<<vecTotalTime<<"      "
+        <<avgCallTime<<"\n";
         degN *=2;
         degD *=2;
     }
