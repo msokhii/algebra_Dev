@@ -2,7 +2,6 @@
 #include<vector>
 #include<cstdint>
 #include"integerMath.h"
-#include"helperF.h"
 
 using namespace std; 
 

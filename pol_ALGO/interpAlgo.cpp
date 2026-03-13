@@ -2,10 +2,8 @@
 #include<cstdint>
 #include<cstdlib>
 #include"integerMath.h"
-#include"helperF.h"
 
-using namespace std; 
-
+using namespace std;
 pair<vector<LONG>,int> newtonInterp(vector<LONG> &x,vector<LONG> &y,const int n,const LONG p){
     // if(n<1){return {y.empty(),-1};}
     int d,i,j;

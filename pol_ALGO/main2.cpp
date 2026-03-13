@@ -29,7 +29,7 @@ int main(){
     int degN=5;
     int degD=5;
     const int NUM=1000000; // Total calls.
-    const int iter=8;
+    const int iter=1;
     ofstream logFile("cppTimings.txt");
     logFile<<"Benchmark:\n";
     logFile<<"Prime p: "<<p<<"\n";

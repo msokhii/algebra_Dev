@@ -1,0 +1,5 @@
+Benchmark:
+Prime p: 9223372036854775783
+Calls: 1000000
+Iteration degN degD TimeVecBuild avgTimeCall
+0       5      5       17.908      5.53179

@@ -43,7 +43,8 @@ mRATRECON := define_external(
                             LIB=libR
 );
 
-# mRATRECON := subsop(1=(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,degNOUT,dOLEN,dOUT,degDOUT),op(mRATRECON));
+# Remove type checking.
+mRATRECON := subsop(1=(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,degNOUT,dOLEN,dOUT,degDOUT),op(mRATRECON));
 
 TIM := table():
 CALLIDX := table():

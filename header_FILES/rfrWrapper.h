@@ -1,8 +1,7 @@
-#ifndef RFRWRAPPER_H
-#define RFRWRAPPER_H
+#pragma once
 
 #include <cstdint>
-
+using namespace std;
 using LONG = int64_t;
 
 #ifdef __cplusplus
@@ -27,6 +26,4 @@ int ratRECON_C(int mLen,
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

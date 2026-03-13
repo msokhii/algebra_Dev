@@ -2,7 +2,6 @@
 
 #include<iostream>
 #include"integerMath.h"
-#include"helperF.h"
 #include<vector> 
 #include<unordered_map>
 #include<cstdint>
@@ -92,49 +91,8 @@ struct GCDEXHIST{
 /* Polynomial routines                                                                    */
 /******************************************************************************************/
 
-// Generates a vector of size deg+1. Values in the vector
-// are generated in random mod p and live in [0..p). 
-
-vector<LONG> genVEC64(const int deg,const LONG p){
-	vector<LONG> v;
-	/*
-	Time complexity: O(d+1). 
-	Space complexity: O(d+1).
-	Auxillary space: O(1).
-	*/
-	if(deg==-1){return v;}
-	v.resize(deg+1);
-	for(int i=0;i<=deg;i++){
-		v[i]=rand64s(p);
-	}
-	return v;
-}
-
-// Copies a vector into another vector and then returns it.
-// O(degV+1) extra space.
-// Use cpp .copy() instead.
-
-vector<LONG> vecCOPY64(const vector<LONG> &v){
-	vector<LONG> temp; 
-	temp=v;
-	return temp;
-}
-
 // Prints out the coefficient array of a polynomial from 
 // low to high (a0+a1x^1+a2x^2+...+anx^n).
-
-void dispVEC64(const vector<LONG> &v){
-	if(v.size()==0) cout<<"O"<<"\n";
-	cout<<"[ ";
-	for(int i=0;i<v.size();i++){
-		if(i==v.size()-1){
-			cout<<v[i]<<"*x^"<<i<<"";
-			break;
-		}
-		cout<<v[i]<<"*x^"<<i<<" + "<<"";
-	}
-	cout<<" ]"<<'\n';
-}
 
 // Computes a^n mod p. Here, 0<=a<p<2^63.
 
@@ -965,7 +923,7 @@ GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LON
 
 // Returns the struct GCDEXHIST that contains all values of 
 // r,s and t for each and every iteration.
-
+/* 
 GCDEXHIST pGCDEXSTORE64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){	
 	if(degA<0 || degB<0 ){
 		cout<<"INPUTS MUST BE NON-ZERO.\n";
@@ -1083,6 +1041,7 @@ GCDEXHIST pGCDEXSTORE64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const 
 		degT1=tempT;
 	}
 }
+*/
 
 static inline void makeDenMonicIP64(vector<LONG> &num, int degNum,
                                     vector<LONG> &den, int degDen,

@@ -5,6 +5,7 @@
 #include<vector>
 #include<cstdint> 
 #include<unordered_map>
+#include<iostream>
 
 using namespace std;
 
@@ -70,9 +71,37 @@ struct pairRFR{
 	int flag;
 };
 
-vector<LONG> genVEC64(const int deg,const LONG p);
-vector<LONG> vecCOPY64(const vector<LONG> &v);
-void dispVEC64(const vector<LONG> &v);
+static inline vector<LONG> genVEC64(const int deg,const LONG p){
+    vector<LONG> v;
+	/*
+	Time complexity: O(d+1). 
+	Space complexity: O(d+1).
+	Auxillary space: O(1).
+	*/
+	if(deg==-1){return v;}
+	v.resize(deg+1);
+	for(int i=0;i<=deg;i++){
+		v[i]=rand64s(p);
+	}
+	return v;
+};
+static inline vector<LONG> vecCOPY64(const vector<LONG> &v){
+    vector<LONG> temp; 
+	temp=v;
+	return temp;
+};
+static inline void dispVEC64(const vector<LONG> &v){
+    if(v.size()==0) cout<<"O"<<"\n";
+	cout<<"[ ";
+	for(int i=0;i<v.size();i++){
+		if(i==v.size()-1){
+			cout<<v[i]<<"*x^"<<i<<"";
+			break;
+		}
+		cout<<v[i]<<"*x^"<<i<<" + "<<"";
+	}
+	cout<<" ]"<<'\n';
+};
 unordered_map<LONG,int> checkPOL64(const vector<LONG> &v,const LONG p);
 LONG powmodP64(LONG a,LONG n,LONG p,recint P);
 pair<vector<LONG>,int> pADDNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);
