@@ -35,8 +35,8 @@ int buildModulus64(vector<LONG> &m, const vector<LONG> &xs, const LONG p){
 int main(){
 
     LONG p=9223372036854775783; // This is prevprime(2^63-1).
-    const int N=5;
-    const int D=5;
+    const int N=10;
+    const int D=10;
     const int K=N+D+1;
 
     vector<LONG> r(N+1,0);
