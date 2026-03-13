@@ -1,5 +1,6 @@
 #include<vector>
 #include<cstdint>
+#include<cstdlib>
 #include"integerMath.h"
 #include"helperF.h"
 
