@@ -5,8 +5,8 @@ restart:
 with(NumberTheory):
 with(LinearAlgebra):
 
-libV := "/local-scratch/localhome/mss59/Desktop/research_Works/development/so_Files/fastVSolve.so":
-libR := "/local-scratch/localhome/mss59/Desktop/research_Works/development/so_Files/rfr.so":
+libV := "/cecm/home/mss59/Desktop/update/pol_ALGO/fastVSolve.so":
+libR := "/cecm/home/mss59/Desktop/update/pol_ALGO/rfr.so":
 
 (* Using 0-based indexing *)
 mVSOLVE := define_external(
@@ -41,7 +41,9 @@ mRATRECON := define_external(
                             degDOUT::REF(integer[4]),
                             RETURN::integer[4],
                             LIB=libR
-):
+);
+
+# mRATRECON := subsop(1=(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,degNOUT,dOLEN,dOUT,degDOUT),op(mRATRECON));
 
 TIM := table():
 CALLIDX := table():
@@ -341,7 +343,7 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
     degDOUT := -1:
 
     t0_ext := TIC():
-    to 1000 do:
+    to 10^6 do:
     rc := mRATRECON(
         mLen, degM, MArr,
         uLen, degU, UArr,
@@ -351,12 +353,13 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
     ):
     od:
     dt_ext := TIC()-t0_ext:
-    printf("TIME -> 10.6f\n",dt_ext/1000);
+    printf("DEGNOUT = %d, DEGDOUT = %d, TIME -> %.9f\n",degNOUT,degDOUT,dt_ext/10^6);
+    quit;
     TADD("rr_cpp_ext_total","rr_cpp_ext_calls", dt_ext):
     LogCSV("rr_cpp_ext", "-", "-", "proc",
            cat("degU=", convert(degU,string), ";degM=", convert(degM,string)),
            dt_ext):
-
+    
     lastRatReconRC := rc:
 
     if rc <> 0 then

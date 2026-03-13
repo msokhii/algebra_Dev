@@ -7,6 +7,7 @@
 #include<cstdint>
 #include<time.h>
 #include<chrono>
+#include<iomanip>
 
 using namespace std; 
 
@@ -34,8 +35,8 @@ int buildModulus64(vector<LONG> &m, const vector<LONG> &xs, const LONG p){
 int main(){
 
     LONG p=9223372036854775783; // This is prevprime(2^63-1).
-    const int N=5;
-    const int D=5;
+    const int N=20;
+    const int D=20;
     const int K=N+D+1;
 
     vector<LONG> r(N+1,0);
@@ -45,12 +46,13 @@ int main(){
         t[i]=rand64s(p);
     }
 
-    cout<<"NUMERATOR: \n";
+    
+    /* cout<<"NUMERATOR: \n";
     dispVEC64(r);
     cout<<"\n";
     cout<<"DENOMINATOR: \n";
     dispVEC64(t);
-    cout<<"\n";
+    cout<<"\n";*/
 
     vector<LONG> x(K,0);
     for(int i=0;i<K;i++){
@@ -64,26 +66,26 @@ int main(){
         y[i]=mul64b(nTemp,modinv64b(dTemp,p),p);
     }
 
-    cout<<"X VALUES: \n";
+    /* cout<<"X VALUES: \n";
     dispVEC64(x);
     cout<<"\n";
     cout<<"Y VALUES: \n";
     dispVEC64(y);
-    cout<<"\n";
+    cout<<"\n"; */
 
     pair<vector<LONG>,int> u=newtonInterp(x,y,K,p);
     int degU=u.second;
     
-    cout<<"U VECTOR: \n";
+    /* cout<<"U VECTOR: \n";
     dispVEC64(u.first);
-    cout<<"\n";
+    cout<<"\n"; */
     
     vector<LONG> m;
     int degM=buildModulus64(m,x,p);
 
-    cout<<"M VECTOR: \n";
+    /* cout<<"M VECTOR: \n";
     dispVEC64(m);
-    cout<<"\n";
+    cout<<"\n"; */
 
     RatReconFastWS W;
     W.init(degM + degU + 4);
@@ -95,12 +97,13 @@ int main(){
     int degT = -1;
     int flag = -999;
 
-    const int NUM = 100000;
+    const int NUM = 1000000;
 
 auto t1 = chrono::high_resolution_clock::now();
 
 for(int i=0; i<NUM; i++){
-    flag = ratReconFastKernelWS(
+        auto t1=chrono::high_resolution_clock::now();
+        flag = ratReconFastKernelWS(
         m,
         u.first,
         degM,
@@ -114,12 +117,17 @@ for(int i=0; i<NUM; i++){
         tOut.data(),
         degT
     );
+      //  auto t2=chrono::high_resolution_clock::now();
+      //  auto totalNano=chrono::duration_cast<chrono::nanoseconds>(t2-t1).count();
+      //  double microS=totalNano/1000.0;
+      //  cout<<fixed<<setprecision(3);
+// cout<<"TIME (MICRO SECS.) -> "<<microS<<"\n";
 }
 
 auto t2 = chrono::high_resolution_clock::now();
 
 auto total_ns = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count();
-cout << "Average ns: " << (double)total_ns / NUM << "\n"; 
+cout << "Average ms: " << (double)total_ns / NUM / 1000.0 << "\n"; 
    
     
     /*
