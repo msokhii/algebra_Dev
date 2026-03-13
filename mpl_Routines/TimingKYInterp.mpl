@@ -5,8 +5,8 @@ restart:
 with(NumberTheory):
 with(LinearAlgebra):
 
-libV := "/cecm/home/mss59/Desktop/update/pol_ALGO/fastVSolve.so":
-libR := "/cecm/home/mss59/Desktop/update/pol_ALGO/rfr.so":
+libV := "/cecm/home/mss59/Desktop/devOps/pol_ALGO/fastVSolve.so":
+libR := "/cecm/home/mss59/Desktop/devOps/pol_ALGO/rfr.so":
 
 (* Using 0-based indexing *)
 mVSOLVE := define_external(
@@ -395,8 +395,8 @@ end proc:
 
 p := prevprime(2^63-1):
 # RF := rand():
-n := x[1]^5+randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
-d := x[1]^5+randpoly([seq(x[i],i=1..5)],terms=250,degree=5) mod p:
+n := x[1]^5+randpoly([seq(x[i],i=1..2)],terms=11,degree=5) mod p:
+d := x[1]^5+randpoly([seq(x[i],i=1..2)],terms=11,degree=5) mod p:
 
 f := n/d:
 
