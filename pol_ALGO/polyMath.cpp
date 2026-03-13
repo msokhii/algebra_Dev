@@ -1604,6 +1604,12 @@ int ratReconFastKernelWS(const vector<LONG> &m,
         return -10; // Bad input.
     }
 
+    auto boundCheck = [&](int degR, int degT)->bool{
+        if(degR > N) return false;
+        if(D < 0) return true;
+        return degT <= D;
+    };
+
     // reset only what must be reset
     // fill(W.t1.begin(), W.t1.end(), 0);
     // fill(W.t2.begin(), W.t2.end(), 0);
@@ -1636,7 +1642,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
 
     while(degB != -1){
 
-        if(degB <= N && degT2 >= 0 && (D < 0 || degT2 <= D)){
+        if(boundCheck(degB, degT2) && degT2 >= 0){
             degROut = degB;
             degTOut = degT2;
 
