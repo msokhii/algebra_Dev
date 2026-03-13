@@ -1589,13 +1589,18 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     fill(W.t1.begin(), W.t1.end(), 0);
     fill(W.t2.begin(), W.t2.end(), 0);
 
-    // copy inputs into workspace
+    /* copy inputs into workspace
     for(int i=0;i<=degM;i++){
         W.r1[i] = m[i];
     }
     for(int i=0;i<=degU;i++){
         W.r2[i] = u[i];
     }
+    */
+
+    // Test Version.
+    std::copy_n(m.data(), degM + 1, W.r1.data());
+    std::copy_n(u.data(), degU + 1, W.r2.data());   
 
     W.t2[0] = 1;
 
