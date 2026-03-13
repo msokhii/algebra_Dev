@@ -11,105 +11,71 @@
 
 using namespace std; 
 
-int buildModulus64(vector<LONG> &m, const vector<LONG> &xs, const LONG p){
-    m.clear();
-    m.push_back(1);              // m(x) = 1
-    int degM = 0;
-
-    for(int i = 0; i < (int)xs.size(); i++){
-        LONG xi = xs[i] % p;
-        if(xi < 0) xi += p;
-
-        // lin(x) = x - xi = (-xi mod p) + x
-        vector<LONG> lin(2);
-        lin[0] = (xi == 0 ? 0 : p - xi);
-        lin[1] = 1;
-
-        degM = pMULIP64(m, lin, degM, 1, p);
-        if(degM < 0) return -1;
-    }
-
+int mkM(vector<LONG>&m,const vector<LONG> &xs,const LONG p){    
+    int degM=0;
+    std::vector<LONG>linF(2,0);
+    linF[1]=1;
+    for(int i=0;i<xs.size();i++){
+        linF[0]=(xs[i]==0?0:p-xs[i]);
+        degM=pMULIP64(m,linF,degM,1,p);
+    };
     return degM;
 }
 
 int main(){
 
     LONG p=9223372036854775783; // This is prevprime(2^63-1).
-    const int N=5;
-    const int D=5;
-    const int K=N+D+1;
+    const int degN=5;
+    const int degD=5;
+    const int degX=degN+degD+1;
 
-    vector<LONG> r(N+1,0);
-    vector<LONG> t(D+1,0);
-    for(int i=0;i<=N;i++){
-        r[i]=rand64s(p);
-        t[i]=rand64s(p);
+    // Fixed size vectors for numerator and denominator.
+    std::vector<LONG>n(degN+1,0);
+    std::vector<LONG>d(degD+1,0);
+    // Populating vectors where 0<=x<p.
+    for(int i=0;i<=degN;i++){
+        n[i]=rand64s(p);
+        d[i]=rand64s(p);
     }
-
-    
-    /* cout<<"NUMERATOR: \n";
-    dispVEC64(r);
-    cout<<"\n";
-    cout<<"DENOMINATOR: \n";
-    dispVEC64(t);
-    cout<<"\n";*/
-
-    vector<LONG> x(K,0);
-    for(int i=0;i<K;i++){
+    // We need degN+degD+1=degX distinct points for interpolation. 
+    std::vector<LONG>x(degX,0);
+    for(int i=0;i<degX;i++){
         x[i]=i;
     }
-
-    vector<LONG> y(K,0);
-    for(int i=0;i<K;i++){
-        LONG nTemp=pEVAL64(r,N,x[i],p);
-        LONG dTemp=pEVAL64(t,D,x[i],p);
-        y[i]=mul64b(nTemp,modinv64b(dTemp,p),p);
+    // We want f(x_i)=y_i for i=0..degX-1. 
+    std::vector<LONG>y(degX,0);
+    for(int i=0;i<degX;i++){
+        y[i]=mul64b(pEVAL64(n,degN,x[i],p),modinv64b(pEVAL64(d,degD,x[i],p),p),p);
     }
-
-    /* cout<<"X VALUES: \n";
-    dispVEC64(x);
-    cout<<"\n";
-    cout<<"Y VALUES: \n";
-    dispVEC64(y);
-    cout<<"\n"; */
-
-    pair<vector<LONG>,int> u=newtonInterp(x,y,K,p);
+    // U=Interpolation(X,Y,degX,p).
+    pair<vector<LONG>,int>u=newtonInterp(x,y,degX,p);
     int degU=u.second;
-    
-    /* cout<<"U VECTOR: \n";
-    dispVEC64(u.first);
-    cout<<"\n"; */
-    
-    vector<LONG> m;
-    int degM=buildModulus64(m,x,p);
+    // M=Product from i=0 to degX of (x-x_i).
+    std::vector<LONG>m(degX+1,0);
+    m[0]=1;
+    int degM=mkM(m,x,p);
 
-    /* cout<<"M VECTOR: \n";
-    dispVEC64(m);
-    cout<<"\n"; */
+    printf("sizeN: %zu,sizeD: %zu,sizeX: %zu,sizeY: %zu,sizeU: %zu,sizeM: %zu\n",
+    n.size(),d.size(),x.size(),y.size(),u.first.size(),m.size());
 
     RatReconFastWS W;
-    W.init(degM + degU + 4);
+    W.init(degM+1);
+    vector<LONG>rOut(W.cap,0);
+    vector<LONG>tOut(W.cap,0);
+    int degR=-1;
+    int degT=-1;
+    int flag=-999;
+    const int NUM=1000000;
+    auto t1=chrono::high_resolution_clock::now();
 
-    vector<LONG> rOut(W.cap, 0);
-    vector<LONG> tOut(W.cap, 0);
-
-    int degR = -1;
-    int degT = -1;
-    int flag = -999;
-
-    const int NUM = 1000000;
-
-auto t1 = chrono::high_resolution_clock::now();
-
-for(int i=0; i<NUM; i++){
-        auto t1=chrono::high_resolution_clock::now();
+    for(int i=0;i<NUM;i++){
         flag = ratReconFastKernelWS(
         m,
         u.first,
-        degM,
+        degX,
         degU,
-        N,
-        D,
+        degN,
+        degD,
         p,
         W,
         rOut.data(),
@@ -121,27 +87,25 @@ for(int i=0; i<NUM; i++){
       //  auto totalNano=chrono::duration_cast<chrono::nanoseconds>(t2-t1).count();
       //  double microS=totalNano/1000.0;
       //  cout<<fixed<<setprecision(3);
-// cout<<"TIME (MICRO SECS.) -> "<<microS<<"\n";
+// cout<<"TIME (MICRO SECS.) -> "<<microS<<"\degN";
 }
 
 auto t2 = chrono::high_resolution_clock::now();
 
 auto total_ns = chrono::duration_cast<chrono::nanoseconds>(t2 - t1).count();
-cout << "Average ms: " << (double)total_ns / NUM / 1000.0 << "\n"; 
+cout << "Average ms: " << (double)total_ns / NUM / 1000.0 <<"\n"; 
    
-    
-    /*
-    
+   /* 
     auto temp2=chrono::high_resolution_clock::now();
 
     double avg_ns=static_cast<double>(total_ns)/1000.0;
     double avg_us=avg_ns/1000.0;
     double avg_ms=avg_ns/1.0e6;
 
-    cout<<"TOTAL TIME: "<<total_ns<<"\n";
-    cout<<"APC (ns): "<<avg_ns<<"\n";
-    cout<<"APC (us): "<<avg_us<<"\n";
-    cout<<"APC (ms): "<<avg_ms<<"\n";
+    cout<<"TOTAL TIME: "<<total_ns<<"\degN";
+    cout<<"APC (ns): "<<avg_ns<<"\degN";
+    cout<<"APC (us): "<<avg_us<<"\degN";
+    cout<<"APC (ms): "<<avg_ms<<"\degN";
 
     */
 

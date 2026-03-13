@@ -1580,7 +1580,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
 
     // make sure workspace is large enough
     // this is intentionally generous so tmpT*q stays inside capacity more often
-    int need = degM + degU + 1;
+    int need=degM+1;
     if(W.cap < need){
         W.init(need);
     }
