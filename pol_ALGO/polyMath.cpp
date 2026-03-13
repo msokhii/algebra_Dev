@@ -7,6 +7,7 @@
 #include<unordered_map>
 #include<cstdint>
 #include"depreIntMath.hpp"
+#include"algorithm"
 
 using namespace std;
 
@@ -1423,7 +1424,6 @@ pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,i
         swap(t1,t2);
         swap(degT1,degT2);
     }
-	/*
 	We require deg(r)<=N.
 	If D>=0 then we also require deg(t)<=D.
 	If D<0 then the denominator degree is unbounded.
