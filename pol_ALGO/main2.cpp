@@ -58,10 +58,9 @@ int main(){
     printf("sizeN: %zu,sizeD: %zu,sizeX: %zu,sizeY: %zu,sizeU: %zu,sizeM: %zu\n",
     n.size(),d.size(),x.size(),y.size(),u.first.size(),m.size());
 
-    RatReconFastWS W;
-    W.init(degM+1);
-    vector<LONG>rOut(W.cap,0);
-    vector<LONG>tOut(W.cap,0);
+    RatReconFastWS W(degM);
+    vector<LONG>rOut(degM+1,0);
+    vector<LONG>tOut(degM+1,0);
     int degR=-1;
     int degT=-1;
     int flag=-999;

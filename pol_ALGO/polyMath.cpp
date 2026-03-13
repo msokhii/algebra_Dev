@@ -12,7 +12,6 @@
 using namespace std;
 
 struct RatReconFastWS{
-    int cap;
     vector<LONG> r1;
     vector<LONG> r2;
     vector<LONG> t1;
@@ -20,16 +19,14 @@ struct RatReconFastWS{
     vector<LONG> q;
     vector<LONG> tmpT;
 
-    RatReconFastWS(): cap(0) {}
-
-    void init(int n){
-        cap = n;
-        r1.resize(cap);
-        r2.resize(cap);
-        t1.resize(cap);
-        t2.resize(cap);
-        q.resize(cap);
-        tmpT.resize(cap);
+    RatReconFastWS(int degM){
+        int n=degM+1;
+        r1.resize(n,0);
+        r2.resize(n,0);
+        t1.assign(n,0);
+        t2.assign(n,0);
+        q.assign(n,0);
+        tmpT.assign(n,0);
     }
 };
 
@@ -1577,13 +1574,6 @@ int ratReconFastKernelWS(const vector<LONG> &m,
         if(D < 0) return true;
         return degT <= D;
     };
-
-    // make sure workspace is large enough
-    // this is intentionally generous so tmpT*q stays inside capacity more often
-    int need=degM+1;
-    if(W.cap < need){
-        W.init(need);
-    }
 
     // reset only what must be reset
     fill(W.t1.begin(), W.t1.end(), 0);

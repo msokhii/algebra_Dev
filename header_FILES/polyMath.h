@@ -25,7 +25,6 @@ struct recint {
 };
 
 struct RatReconFastWS{
-    int cap;
     vector<LONG> r1;
     vector<LONG> r2;
     vector<LONG> t1;
@@ -33,16 +32,14 @@ struct RatReconFastWS{
     vector<LONG> q;
     vector<LONG> tmpT;
 
-    RatReconFastWS(): cap(0) {}
-
-    void init(int n){
-        cap = n;
-        r1.resize(cap);
-        r2.resize(cap);
-        t1.resize(cap);
-        t2.resize(cap);
-        q.resize(cap);
-        tmpT.resize(cap);
+    RatReconFastWS(int degM){
+        int n=degM+1;
+        r1.resize(n,0);
+        r2.resize(n,0);
+        t1.assign(n,0);
+        t2.assign(n,0);
+        q.assign(n,0);
+        tmpT.assign(n,0);
     }
 };
 
