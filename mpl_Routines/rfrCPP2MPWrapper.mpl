@@ -1,4 +1,4 @@
-lib := "/local-scratch/localhome/mss59/Desktop/research_Works/development/so_Files/rfr.so":
+lib := "/cecm/home/mss59/Desktop/update/pol_ALGO/rfr.so":
 
 mRATRECON := define_external(
     'ratRECON_C',
@@ -57,7 +57,7 @@ U; *)
 
 # TESTING PROCEDURE 1: 
 amp := 1:
-iter2 := 15:
+iter2 := 10:
 for i from 1 to iter2 do
 	d := 100*amp:
 	amp := amp*2:
@@ -109,10 +109,10 @@ for i from 1 to iter2 do
 	dOUT-DDarr;
 
 	#MAPLE CHECK: 
-	mapRat := Ratrecon(UU,MM,x,d,d) mod pp:
+#	mapRat := Ratrecon(UU,MM,x,d,d) mod pp:
 
 	with(Statistics):
-	iter := 5:
+	iter := 1:
 
 	TC := Vector(iter):
 	TM := Vector(iter):
@@ -122,9 +122,9 @@ for i from 1 to iter2 do
         	repMRC := mRATRECON(degM+1,degM,M,degU+1,degU,U,d,d,pp,d+1,nOUT,'degNOUT',d+1,dOUT,'degDOUT'):
         	TC[j] := time()-t:
 
-        	t := time():
-        	repMPLRC := Ratrecon(UU,MM,x,d,d) mod pp:
-        	TM[j] := time()-t:
+#        	t := time():
+ #       	repMPLRC := Ratrecon(UU,MM,x,d,d) mod pp:
+ #       	TM[j] := time()-t:
 	od:
 
 	printf("MY TIMES: \n");
