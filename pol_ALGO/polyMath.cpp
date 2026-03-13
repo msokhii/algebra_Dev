@@ -360,6 +360,38 @@ int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	return degC;
 }
 
+int polfms64s(LONG *A, LONG *B, LONG *C, int da, int db, int dc, LONG p)
+{   // polynomial fused multiply subtract: C -= A*B
+    int i,k,m; ULNG z[2];
+    if( da<0 || db<0 ) return dc;
+
+    for( k=0; k<=da+db; k++ ) {
+        i = max(0, k-db);
+        m = min(k, da);
+        z[0] = z[1] = 0ll;
+
+        while( i<m ) {
+            ZFMA(z, A[i],   B[k-i]); i++;
+            ZFMA(z, A[i],   B[k-i]); i++;
+            if( z[1] >= p ) z[1] -= p;
+        }
+        if( i==m ) ZFMA(z, A[i], B[k-i]);
+
+        ZMOD(z, p);
+
+        if( k > dc ) {
+            C[k] = (z[0] == 0 ? 0 : p - z[0]);
+        } else {
+            C[k] = sub64b(C[k], z[0], p);
+        }
+    }
+
+    for( dc=max(dc, da+db); dc>=0 && C[dc]==0; dc-- );
+    return dc;
+}
+
+
+
 int pMULIP64VANDER(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p) {
     // Computes: b <- a * b   (in-place on b)
     // a is treated as the left factor (degree degA)
@@ -1652,7 +1684,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
 
             if(degT2 >= 0){
                 
-                for(int i=0;i<=degT2;i++){
+                /* for(int i=0;i<=degT2;i++){
                     W.tmpT[i] = W.t2[i];
                 }
                 
@@ -1662,6 +1694,8 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                 int degTmpT = degT2;
                 degTmpT = pMULIP64(W.tmpT, W.q, degTmpT, degQ, p);
                 degT = pSUBIP64(W.t1, W.tmpT, degT1, degTmpT, p);
+                */
+                degT = polfms64s(W.t2.data(), W.q.data(), W.t1.data(), degT2, degQ, degT1, p);
             }
             else{
                 degT = degT1;
@@ -1676,7 +1710,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
         degA = degB;
         degB = degR;
 
-        (W.t1, W.t2);
+        swap(W.t1, W.t2);
         int oldDegT2 = degT2;
         degT2 = degT;
         degT1 = oldDegT2;

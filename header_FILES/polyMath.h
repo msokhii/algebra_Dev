@@ -85,6 +85,7 @@ int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int
 pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);
 vector<LONG> polSCMULNEW64(vector<LONG> &a,LONG x,int degA,const LONG p);
 void polSCMULIP64(vector<LONG> &a,LONG x,int degA,const LONG p);
+int polfms64s(LONG *A, LONG *B, LONG *C, int da, int db, int dc, LONG p);
 LONG evalHORN64(vector<LONG> &a,LONG alpha,const LONG p);
 LONG pEVAL64(vector<LONG> &a,int d,LONG x,const LONG p);
 pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);
