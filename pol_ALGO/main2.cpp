@@ -58,12 +58,13 @@ int main(){
             y[i]=mul64b(pEVAL64(n,degN,x[i],p),modinv64b(pEVAL64(d,degD,x[i],p),p),p);
         }
         // U=Interpolation(X,Y,degX,p).
+        vector<LONG> b(degX);
         auto interpTimeStart=chrono::steady_clock::now();
-        pair<vector<LONG>,int>u=newtonInterp(x,y,degX,p);
+        int u=newtonInterp(x,y,degX,p,b.data());
         auto interpTimeStop=chrono::steady_clock::now();
         double interpTimeFinal=chrono::duration<double,
         std::micro>(interpTimeStop-interpTimeStart).count();
-        int degU=u.second;
+        int degU=u;
         // M=Product from i=0 to degX of (x-x_i).
         std::vector<LONG>m(degX+1,0);
         m[0]=1;
@@ -79,7 +80,7 @@ int main(){
         // std::micro>(vecBuildTimeStop-vecBuildTimeStart).count();
         auto start=chrono::steady_clock::now();
         for(int i=0;i<NUM;i++){
-            flag=ratReconFastKernelWS(m,u.first,degX,degU,
+            flag=ratReconFastKernelWS(m,b,degX,degU,
             degN,degD,p,W,rOut.data(),degR,tOut.data(),
             degT);
         }
