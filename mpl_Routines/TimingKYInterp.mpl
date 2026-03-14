@@ -5,8 +5,8 @@ restart:
 with(NumberTheory):
 with(LinearAlgebra):
 
-libV := "/cecm/home/mss59/Desktop/devOps/pol_ALGO/fastVSolve.so":
-libR := "/cecm/home/mss59/Desktop/devOps/pol_ALGO/rfr.so":
+libV := "/cecm/home/mss59/Desktop/update/pol_ALGO/fastVSolve.so":
+libR := "/cecm/home/mss59/Desktop/update/pol_ALGO/rfr.so":
 
 (* Using 0-based indexing *)
 mVSOLVE := define_external(
@@ -43,157 +43,12 @@ mRATRECON := define_external(
                             LIB=libR
 );
 
-# Remove type checking.
+# Remove type checking
 mRATRECON := subsop(1=(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,degNOUT,dOLEN,dOUT,degDOUT),op(mRATRECON));
-
-TIM := table():
-CALLIDX := table():
-CSVFILE := "calls.csv":
-SUMMARYFILE := "summary.txt":
-
-TimingReset := proc() option inline;
-global TIM, CALLIDX, CSVFILE;
-local fd;
-
-    TIM["rr_cpp_total"] := 0.0:         TIM["rr_cpp_calls"] := 0:
-    TIM["rr_cpp_ext_total"] := 0.0:     TIM["rr_cpp_ext_calls"] := 0:
-
-    TIM["rr_map_total"] := 0.0:         TIM["rr_map_calls"] := 0:
-
-    TIM["factor_total"] := 0.0:         TIM["factor_calls"] := 0:
-
-    TIM["vsolve_cpp_total"] := 0.0:     TIM["vsolve_cpp_calls"] := 0:
-    TIM["vsolve_cpp_ext_total"] := 0.0: TIM["vsolve_cpp_ext_calls"] := 0:
-
-    TIM["vsolve_map_total"] := 0.0:     TIM["vsolve_map_calls"] := 0:
-
-    CALLIDX["rr_cpp"] := 0:
-    CALLIDX["rr_cpp_ext"] := 0:
-    CALLIDX["rr_map"] := 0:
-    CALLIDX["factor"] := 0:
-    CALLIDX["vsolve_cpp"] := 0:
-    CALLIDX["vsolve_cpp_ext"] := 0:
-    CALLIDX["vsolve_map"] := 0:
-
-    fd := fopen(CSVFILE, WRITE, TEXT):
-    fprintf(fd, "event,call_index,j,tries,side,extra,dt\n"):
-    fclose(fd):
-end proc:
 
 TIC := proc() option inline;
     return kernelopts(cputime);
 end proc:
-
-TADD := proc(keyTotal::string, keyCalls::string, dt::numeric) option inline;
-global TIM;
-    TIM[keyTotal] := TIM[keyTotal] + dt:
-    TIM[keyCalls] := TIM[keyCalls] + 1:
-end proc:
-
-AVGSAFE := proc(total::numeric, calls::nonnegint) option inline;
-    if calls = 0 then
-        return 0.0;
-    else
-        return total/calls;
-    fi;
-end proc:
-
-LogCSV := proc(event::string, j::{integer,string}, tries::{integer,string},
-               side::string, extra::string, dt::numeric) option inline;
-global CALLIDX, CSVFILE;
-local fd, idx;
-
-    CALLIDX[event] := CALLIDX[event] + 1:
-    idx := CALLIDX[event]:
-
-    fd := fopen(CSVFILE, APPEND, TEXT):
-    fprintf(fd, "%s,%d,%a,%a,%s,%s,%g\n",
-            event, idx, j, tries, side, extra, dt):
-    fclose(fd):
-end proc:
-
-WriteTimings := proc(fname::string,
-                     p::prime, T::posint, termsN::posint, termsD::posint,
-                     N::nonnegint, DD::nonnegint,
-                     numCount::posint, denCount::posint,
-                     sameRF::{truefalse,boolean},
-                     sameNum::{truefalse,boolean},
-                     sameDen::{truefalse,boolean}) option inline;
-global TIM, CSVFILE;
-local fd;
-
-    fd := fopen(fname,WRITE,TEXT):
-
-    fprintf(fd,"====================================================\n"):
-    fprintf(fd,"Timing summary in CPU seconds.\n"):
-    fprintf(fd,"====================================================\n\n"):
-
-    fprintf(fd,"Prime P                   -> = %a\n",p):
-    fprintf(fd,"T (Assuming we know this) -> = %a\n",T):
-    fprintf(fd,"Terms in Numerator        -> = %a\n",termsN):
-    fprintf(fd,"Terms in Denominator      -> = %a\n",termsD):
-    fprintf(fd,"Deg. numerator bound N    -> = %a\n",N):
-    fprintf(fd,"Deg. denominator bound D  -> = %a\n",DD):
-    fprintf(fd,"Numerator Count           -> = %a\n",numCount):
-    fprintf(fd,"Denominator Count         -> = %a\n\n",denCount):
-
-    fprintf(fd, "1) C++ wrapper RatRecon (Ratrecon1 total)\n"):
-    fprintf(fd, "   calls = %d\n", TIM["rr_cpp_calls"]):
-    fprintf(fd, "   total = %g\n", TIM["rr_cpp_total"]):
-    fprintf(fd, "   avg   = %g\n\n",
-            AVGSAFE(TIM["rr_cpp_total"], TIM["rr_cpp_calls"])):
-
-    fprintf(fd, "   C++ external call only (mRATRECON)\n"):
-    fprintf(fd, "   calls = %d\n", TIM["rr_cpp_ext_calls"]):
-    fprintf(fd, "   total = %g\n", TIM["rr_cpp_ext_total"]):
-    fprintf(fd, "   avg   = %g\n\n",
-            AVGSAFE(TIM["rr_cpp_ext_total"], TIM["rr_cpp_ext_calls"])):
-
-    fprintf(fd, "2) Maple RatRecon\n"):
-    fprintf(fd, "   calls = %d\n", TIM["rr_map_calls"]):
-    fprintf(fd, "   total = %g\n", TIM["rr_map_total"]):
-    fprintf(fd, "   avg   = %g\n\n",
-            AVGSAFE(TIM["rr_map_total"], TIM["rr_map_calls"])):
-
-    fprintf(fd, "3) Maple Factor(annP) mod p\n"):
-    fprintf(fd, "   calls = %d\n", TIM["factor_calls"]):
-    fprintf(fd, "   total = %g\n", TIM["factor_total"]):
-    fprintf(fd, "   avg   = %g\n\n",
-            AVGSAFE(TIM["factor_total"], TIM["factor_calls"])):
-
-    fprintf(fd, "4) C++ wrapper vSolve (VandermondeSolve1 total)\n"):
-    fprintf(fd, "   calls = %d\n", TIM["vsolve_cpp_calls"]):
-    fprintf(fd, "   total = %g\n", TIM["vsolve_cpp_total"]):
-    fprintf(fd, "   avg   = %g\n\n",
-            AVGSAFE(TIM["vsolve_cpp_total"], TIM["vsolve_cpp_calls"])):
-
-    fprintf(fd, "   C++ external call only (mVSOLVE)\n"):
-    fprintf(fd, "   calls = %d\n", TIM["vsolve_cpp_ext_calls"]):
-    fprintf(fd, "   total = %g\n", TIM["vsolve_cpp_ext_total"]):
-    fprintf(fd, "   avg   = %g\n\n",
-            AVGSAFE(TIM["vsolve_cpp_ext_total"], TIM["vsolve_cpp_ext_calls"])):
-
-    fprintf(fd, "5) Maple vSolve (VSolveMap)\n"):
-    fprintf(fd, "   calls = %d\n", TIM["vsolve_map_calls"]):
-    fprintf(fd, "   total = %g\n", TIM["vsolve_map_total"]):
-    fprintf(fd, "   avg   = %g\n\n",
-            AVGSAFE(TIM["vsolve_map_total"], TIM["vsolve_map_calls"])):
-
-    fprintf(fd, "CSV per-call log file = %s\n\n", CSVFILE):
-
-    fprintf(fd, "====================================================\n"):
-    fprintf(fd, "Final correctness checks\n"):
-    fprintf(fd, "====================================================\n"):
-    fprintf(fd, "Same rational function?                    -> %a\n", sameRF):
-    fprintf(fd, "Recovered numerator matches normalized?   -> %a\n", sameNum):
-    fprintf(fd, "Recovered denominator matches normalized? -> %a\n", sameDen):
-
-    fclose(fd):
-    printf("Wrote timing summary to: %s\n", fname):
-    printf("Wrote per-call CSV log to: %s\n", CSVFILE):
-end proc:
-
-TimingReset():
 
 (* Michaels Code *)
 VSolveMap := proc(m, v, p, shift::integer:=0 ) option inline;
@@ -257,12 +112,7 @@ local t,i,R,y,a,M,t0_ext,dt_ext;
     for i from 0 to t do
         M[i] := 0;
     od:
-
-    t0_ext := TIC():
     mVSOLVE(R,y,t,a,M,shift,p):
-    dt_ext := TIC()-t0_ext:
-    TADD("vsolve_cpp_ext_total","vsolve_cpp_ext_calls", dt_ext):
-    LogCSV("vsolve_cpp_ext", "-", "-", "proc", sprintf("t=%d", t), dt_ext):
 
     return [seq(a[i], i=0..t-1)];
 end proc:
@@ -356,10 +206,6 @@ local Upoly, Mpoly, degU, degM, uLen, mLen,
     dt_ext := TIC()-t0_ext:
     printf("DEGNOUT = %d, DEGDOUT = %d, TIME -> %.9f\n",degNOUT,degDOUT,dt_ext/10^6);
     quit;
-    TADD("rr_cpp_ext_total","rr_cpp_ext_calls", dt_ext):
-    LogCSV("rr_cpp_ext", "-", "-", "proc",
-           cat("degU=", convert(degU,string), ";degM=", convert(degM,string)),
-           dt_ext):
     
     lastRatReconRC := rc:
 
@@ -395,8 +241,8 @@ end proc:
 
 p := prevprime(2^63-1):
 # RF := rand():
-n := x[1]^5+randpoly([seq(x[i],i=1..2)],terms=11,degree=5) mod p:
-d := x[1]^5+randpoly([seq(x[i],i=1..2)],terms=11,degree=5) mod p:
+n := x[1]^5+randpoly([seq(x[i],i=1..5)],terms=11,degree=5) mod p:
+d := x[1]^5+randpoly([seq(x[i],i=1..5)],terms=11,degree=5) mod p:
 
 f := n/d:
 
@@ -499,14 +345,14 @@ local alphaVal,TVal,interpVal,ratReconVal,mapRatRecon,M,rr,i,j,
             t0 := TIC():
             rr := Ratrecon1(interpVal,M,z,N,DD,p):
             dt := TIC()-t0:
-            TADD("rr_cpp_total","rr_cpp_calls", dt):
-            LogCSV("rr_cpp", j, tries, "loop", "Ratrecon1_total", dt):
+            # TADD("rr_cpp_total","rr_cpp_calls", dt):
+            # LogCSV("rr_cpp", j, tries, "loop", "Ratrecon1_total", dt):
 
-            t0 := TIC():
-            mapRatRecon[j] := Ratrecon(interpVal,M,z,N,DD) mod p:
-            dt := TIC()-t0:
-            TADD("rr_map_total","rr_map_calls", dt):
-            LogCSV("rr_map", j, tries, "loop", "Maple_Ratrecon", dt):
+            # t0 := TIC():
+            # mapRatRecon[j] := Ratrecon(interpVal,M,z,N,DD) mod p:
+            # dt := TIC()-t0:
+            # TADD("rr_map_total","rr_map_calls", dt):
+            # LogCSV("rr_map", j, tries, "loop", "Maple_Ratrecon", dt):
 
             if rr <> FAIL then
                 ratReconVal[j] := rr:
@@ -772,30 +618,17 @@ local lam, lamInv;
     return expand(lamInv*nPoly) mod p, expand(lamInv*dPoly) mod p;
 end proc:
 
-t0 := TIC():
 LVanNum := VandermondeSolve1( [seq(vNumer[i],i=1..numCount)],numRoots, p, 1):
-dt := TIC()-t0:
-TADD("vsolve_cpp_total","vsolve_cpp_calls", dt):
-LogCSV("vsolve_cpp", "-", "-", "numer", sprintf("count=%d", numCount), dt):
 
-t0 := TIC():
 LVanDenom := VandermondeSolve1([seq(vDenom[i],i=1..denCount)],denomRoots, p, 1):
-dt := TIC()-t0:
-TADD("vsolve_cpp_total","vsolve_cpp_calls", dt):
-LogCSV("vsolve_cpp", "-", "-", "denom", sprintf("count=%d", denCount), dt):
 
-t0 := TIC():
+
+
+
 LVanNumMap := VSolveMap([seq(vNumer[i],i=1..numCount)],numRoots, p, 1):
-dt := TIC()-t0:
-TADD("vsolve_map_total","vsolve_map_calls", dt):
-LogCSV("vsolve_map", "-", "-", "numer", sprintf("count=%d", numCount), dt):
 
-t0 := TIC():
+
 LVanDenomMap := VSolveMap([seq(vDenom[i],i=1..denCount)],denomRoots, p, 1):
-dt := TIC()-t0:
-TADD("vsolve_map_total","vsolve_map_calls", dt):
-LogCSV("vsolve_map", "-", "-", "denom", sprintf("count=%d", denCount), dt):
-
 LVanNum, LVanDenom, normIdx := NORMALIZEPAIR(LVanNum, LVanDenom, denomRoots, p):
 
 recNum := BUILDSPARSE(LVanNum, numRoots):
@@ -810,8 +643,3 @@ sameDen := evalb(expand(recDen - dNorm) mod p = 0):
 printf("Same rational function? -> %a\n", sameRF):
 printf("Recovered numerator matches normalized original? -> %a\n", sameNum):
 printf("Recovered denominator matches normalized original? -> %a\n", sameDen):
-
-WriteTimings(SUMMARYFILE,
-             p, T, termsN, termsD, N, DD,
-             numCount, denCount,
-             sameRF, sameNum, sameDen):
