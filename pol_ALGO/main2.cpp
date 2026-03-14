@@ -60,7 +60,7 @@ int main(){
         // U=Interpolation(X,Y,degX,p).
         vector<LONG> b(degX);
         auto interpTimeStart=chrono::steady_clock::now();
-        int u=newtonInterp(x,y,degX,p,b.data());
+        int u=newtonInterp(x.data(),y.data(),degX,p,b.data());
         auto interpTimeStop=chrono::steady_clock::now();
         double interpTimeFinal=chrono::duration<double,
         std::micro>(interpTimeStop-interpTimeStart).count();

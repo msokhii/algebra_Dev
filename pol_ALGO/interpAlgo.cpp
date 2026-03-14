@@ -4,11 +4,11 @@
 #include"integerMath.h"
 
 using namespace std;
-int newtonInterp(const vector<LONG>&x, 
-                                    const vector<LONG>&y,
-                                    const int n,
-                                    const LONG p,
-                                    LONG *b){
+int newtonInterp(LONG *x, 
+                 LONG *y,
+                 const int n,
+                 const LONG p,
+                 LONG *b){
     // if(n<1){return {y.empty(),-1};}
     int d,i,j;
     LONG prod;
