@@ -241,8 +241,8 @@ end proc:
 
 p := prevprime(2^63-1):
 # RF := rand():
-n := x[1]^40+randpoly([seq(x[i],i=1..2)],terms=81,degree=40) mod p:
-d := x[1]^40+randpoly([seq(x[i],i=1..2)],terms=81,degree=40) mod p:
+n := x[1]^160+randpoly([seq(x[i],i=1..2)],terms=100,degree=160) mod p:
+d := x[1]^160+randpoly([seq(x[i],i=1..2)],terms=100,degree=160) mod p:
 
 f := n/d:
 
