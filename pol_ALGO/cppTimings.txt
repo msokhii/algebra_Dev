@@ -1,10 +1,7 @@
 Benchmark:
 Prime p: 9223372036854775783
 Calls: 100000
-Iteration degN degD TimeVecBuild avgTimeCall MapleWrapCall
-0       5      5       10.93      1.63082      3.15
-1       10      10       17.27      3.26545     4.79
-2       20      20       46.873      7.10277     8.9
-3       40      40       142.105      18.839      20.57
-4       80      80       508.047      56.6197      59.72
-5       160      160       1879.28      190.284     193.28
+Iteration degN degD InterpTime avgTimeCall
+0       5      5       21.869      5.55495
+1       10      10       15.781      12.9861
+2       20      20       64.133      35.2

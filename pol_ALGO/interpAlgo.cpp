@@ -10,7 +10,7 @@ pair<vector<LONG>,int> newtonInterp(vector<LONG> &x,vector<LONG> &y,const int n,
     LONG prod;
     LONG t;
     LONG s;
-    vector<LONG> b(y.size(),0); //O(n) extra space?
+    vector<LONG>b(y.size(),0); 
     b[0]=y[0];
     for(j=1;j<n;j++){
         s=b[0];

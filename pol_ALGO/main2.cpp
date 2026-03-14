@@ -29,17 +29,17 @@ int main(){
     int degN=5;
     int degD=5;
     const int NUM=100000; // Total calls.
-    const int iter=6;
+    const int iter=3;
     ofstream logFile("cppTimings.txt");
     logFile<<"Benchmark:\n";
     logFile<<"Prime p: "<<p<<"\n";
     logFile<<"Calls: "<<NUM<<"\n";
-    logFile<<"Iteration degN degD TimeVecBuild avgTimeCall\n";
+    logFile<<"Iteration degN degD InterpTime avgTimeCall\n";
 
     for(int i=0;i<iter;i++){
         int degX=degN+degD+1;
         // Fixed size vectors for numerator and denominator.
-        auto vecBuildTimeStart=chrono::steady_clock::now();
+        // auto vecBuildTimeStart=chrono::steady_clock::now();
         std::vector<LONG>n(degN+1,0);
         std::vector<LONG>d(degD+1,0);
         // Populating vectors where 0<=x<p.
@@ -58,7 +58,11 @@ int main(){
             y[i]=mul64b(pEVAL64(n,degN,x[i],p),modinv64b(pEVAL64(d,degD,x[i],p),p),p);
         }
         // U=Interpolation(X,Y,degX,p).
+        auto interpTimeStart=chrono::steady_clock::now();
         pair<vector<LONG>,int>u=newtonInterp(x,y,degX,p);
+        auto interpTimeStop=chrono::steady_clock::now();
+        double interpTimeFinal=chrono::duration<double,
+        std::micro>(interpTimeStop-interpTimeStart).count();
         int degU=u.second;
         // M=Product from i=0 to degX of (x-x_i).
         std::vector<LONG>m(degX+1,0);
@@ -70,9 +74,9 @@ int main(){
         int degR=-1;
         int degT=-1;
         int flag=-999;
-        auto vecBuildTimeStop=chrono::steady_clock::now();
-        double vecTotalTime=chrono::duration<double,
-        std::micro>(vecBuildTimeStop-vecBuildTimeStart).count();
+        // auto vecBuildTimeStop=chrono::steady_clock::now();
+        // double vecTotalTime=chrono::duration<double,
+        // std::micro>(vecBuildTimeStop-vecBuildTimeStart).count();
         auto start=chrono::steady_clock::now();
         for(int i=0;i<NUM;i++){
             flag=ratReconFastKernelWS(m,u.first,degX,degU,
@@ -85,7 +89,7 @@ int main(){
         double avgCallTime=static_cast<double>(total)/NUM;
 
         logFile<<i<<"       "<<degN<<"      "
-        <<degD<<"       "<<vecTotalTime<<"      "
+        <<degD<<"       "<<interpTimeFinal<<"      "
         <<avgCallTime<<"\n";
         degN *=2;
         degD *=2;
