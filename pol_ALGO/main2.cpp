@@ -29,7 +29,7 @@ int main(){
     int degN=5;
     int degD=5;
     const int NUM=1000000; // Total calls.
-    const int iter=4;
+    const int iter=3;
     ofstream logFile("cppTimings.txt");
     logFile<<"Benchmark:\n";
     logFile<<"Prime p: "<<p<<"\n";
@@ -58,9 +58,8 @@ int main(){
             y[i]=mul64b(pEVAL64(n,degN,x[i],p),modinv64b(pEVAL64(d,degD,x[i],p),p),p);
         }
         // U=Interpolation(X,Y,degX,p).
-        vector<LONG> b(degX);
         auto interpTimeStart=chrono::steady_clock::now();
-        int u=newtonInterp(x.data(),y.data(),degX,p,b.data());
+        int u=newtonInterp(x.data(),y.data(),degX,p);
         auto interpTimeStop=chrono::steady_clock::now();
         double interpTimeFinal=chrono::duration<double,
         std::micro>(interpTimeStop-interpTimeStart).count();
@@ -80,7 +79,7 @@ int main(){
         // std::micro>(vecBuildTimeStop-vecBuildTimeStart).count();
         auto start=chrono::steady_clock::now();
         for(int i=0;i<NUM;i++){
-            flag=ratReconFastKernelWS(m,b,degX,degU,
+            flag=ratReconFastKernelWS(m,y,degX,degU,
             degN,degD,p,W,rOut.data(),degR,tOut.data(),
             degT);
         }
