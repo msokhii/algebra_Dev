@@ -18,7 +18,7 @@ int mkM(vector<LONG>&m,const vector<LONG> &xs,const LONG p){
     linF[1]=1;
     for(int i=0;i<xs.size();i++){
         linF[0]=(xs[i]==0?0:p-xs[i]);
-        degM=pMULIP64(m,linF,degM,1,p);
+        degM=pMULIP64(m.data(),linF.data(),degM,1,p);
     };
     return degM;
 }

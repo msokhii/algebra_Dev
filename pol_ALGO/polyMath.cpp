@@ -208,19 +208,20 @@ pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,
 
 // In place subtraction. Overwrites a and returns the new degree.
 
-int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const LONG p){
+int pSUBIP64(LONG *a,
+             const LONG *b,
+             int degA,
+             const int degB,
+             const LONG p){
 	if(degA==-1&&degB==-1) return -1;
 	if(degB==-1) return degA;
-	if(degA==-1){
-		a=b;
-		degA=degB;
-		for(int i=0;i<=degA;i++){
+    if(degA==-1){
+		for(int i=0;i<=degB;i++){
 			a[i]=neg64s(b[i],p);
 		}
-		return degA;
+		return degB;
 	}
 	int maxDeg=max(degA,degB);
-	if(a.size()<maxDeg+1) a.resize(maxDeg+1,0);
 	int i=0;
 	while(i<=degA&&i<=degB){
 		a[i]=sub64b(a[i],b[i],p);
@@ -228,13 +229,8 @@ int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const
 	}
 	for(;i<=degB;i++) a[i]=neg64s(b[i],p);
 	while(maxDeg>=0&&a[maxDeg]==0) maxDeg--;
-	if(maxDeg==-1){
-		a.clear();
-		return maxDeg;
-	}
-	a.resize(maxDeg+1);
-	degA=maxDeg;
-	return degA;
+	
+	return maxDeg;
 }
 
 // Returns a pair containing the new vector c=(a*b) mod p
@@ -261,13 +257,16 @@ pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int
 
 // In place multiplication. Overwrites a and returns the new degree.
 
-int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
+int pMULIP64(LONG *a,
+             const LONG* b,
+             int degA,
+             int degB,
+             const LONG p){
 	if(degA<0 || degB<0) return -1;
 	int i;
 	int k;
 	int m;
-	int degC=degA+degB;
-	if(degC>degA) a.resize(degC+1);
+	int degC=degA+degB; // Called must guarantee that a has enough storage.
 	/* 
 	If p<2^31 then our product fits inside 2^63 bits.
 	We essentially perform a convolution i.e. sum over i of
@@ -314,7 +313,6 @@ int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 		}
 	}
 	while(degC>=0 && a[degC]==0) degC--;
-	a.resize(degC+1);
 	return degC;
 }
 
@@ -1653,12 +1651,12 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             bVal = mul64b(aVal, W.r2[degB-1], p);
             bVal = mul64b(uInv, sub64b(W.r1[degA-1], bVal, p), p);
 
-            degR = polSUBMUL64(W.r1.data(), W.r2.data(), aVal, bVal, degA, degB, p);
-            degT = polSUBMUL64(W.t1.data(), W.t2.data(), aVal, bVal, degT1, degT2, p);
+            degR=polSUBMUL64(W.r1.data(),W.r2.data(),aVal,bVal,degA,degB,p);
+            degT=polSUBMUL64(W.t1.data(),W.t2.data(),aVal,bVal,degT1,degT2,p);
         }
         else{
-            degR = polDIVIP64(W.r1.data(), W.r2.data(), degA, degB, p);
-            degQ = degA - degB;
+            degR=polDIVIP64(W.r1.data(),W.r2.data(),degA,degB,p);
+            degQ=degA-degB;
 
             
             for(int i=0;i<=degQ;i++){
@@ -1676,9 +1674,9 @@ int ratReconFastKernelWS(const vector<LONG> &m,
 
                 // std::copy_n(W.t2.data(), degT2 + 1, W.tmpT.data());
 
-                int degTmpT = degT2;
-                degTmpT = pMULIP64(W.tmpT, W.q, degTmpT, degQ, p);
-                degT = pSUBIP64(W.t1, W.tmpT, degT1, degTmpT, p);
+                int degTmpT=degT2;
+                degTmpT=pMULIP64(W.tmpT.data(),W.q.data(),degTmpT,degQ,p);
+                degT=pSUBIP64(W.t1.data(),W.tmpT.data(),degT1,degTmpT,p);
                 
                 // degT = polfms64s(W.t2.data(), W.q.data(), W.t1.data(), degT2, degQ, degT1, p);
             }

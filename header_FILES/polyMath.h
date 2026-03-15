@@ -107,8 +107,16 @@ LONG powmodP64(LONG a,LONG n,LONG p,recint P);
 pair<vector<LONG>,int> pADDNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);
 int pADDIP64(vector<LONG> &a,const vector<LONG> &b,int &degA,const int degB,const LONG p);
 pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,const int degA,const int degB,const LONG p);
-int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const LONG p);
-int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
+int pSUBIP64(LONG *a,
+             const LONG *b,
+             int degA,
+             const int degB,
+             const LONG p);
+int pMULIP64(LONG *a,
+             const LONG* b,
+             int degA,
+             int degB,
+             const LONG p);
 int pMULIP64VANDER(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p);
 int polSUBMUL64(LONG *a,
                 const LONG *b,
@@ -124,7 +132,11 @@ int polfms64s(LONG *A, LONG *B, LONG *C, int da, int db, int dc, LONG p);
 LONG evalHORN64(vector<LONG> &a,LONG alpha,const LONG p);
 LONG pEVAL64(vector<LONG> &a,int d,LONG x,const LONG p);
 pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);
-int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
+int polDIVIP64(LONG *a,
+               const LONG *b,
+               int degA,
+               int degB,
+               const LONG p);
 void polMAKEMONIC64(vector<LONG> &a,const LONG p);
 pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
