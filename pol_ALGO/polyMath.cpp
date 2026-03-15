@@ -568,11 +568,12 @@ pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,co
 // half of a so a[0...deg(b)-1] and quotient in the top half 
 // so a[degb...dega] and return the degree of the remainder.
 
-int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
-    // Safety checks.
-	if(a.size()<degA+1){a.resize(degA+1,0);}
-	if(degB>=0 && b.size()<degB+1){b.resize(degB+1,0);}
-	int dq;
+int polDIVIP64(LONG *a,
+               const LONG *b,
+               int degA,
+               int degB,
+               const LONG p){
+    int dq;
 	int dr;
 	int k;
 	int j;
@@ -642,10 +643,14 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 			j++;
             t+=(t>>63)&p2;
         }
-        if(j==m)t-=b[j]*a[k-j+degB];
+        if(j==m){
+            t-=b[j]*a[k-j+degB];
+        }
         t=t%p;
         t+=(t>>63)&p;
-        if(k>=degB && inv!=1)t=mul64b(t,inv,p);
+        if(k>=degB && inv!=1){
+            t=mul64b(t,inv,p);
+        }
         a[k]=t;
     }
 } else{
@@ -661,16 +666,22 @@ int polDIVIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 			j++;
             if(z[1]>=p)z[1]-=p;
         }
-        if(j==m)ZFMA(z,b[j],a[k-j+degB]);
+        if(j==m){
+            ZFMA(z,b[j],a[k-j+degB]);
+        }
         ZMOD(z,p);
         t=a[k]-z[0];
         t+=(t>>63)&p;
-        if(k>=degB && inv!=1)t=mul64b(t,inv,p);
+        if(k>=degB && inv!=1){
+            t=mul64b(t,inv,p);
+        }
         a[k]=t;
     }
 }
-    while(dr>=0 && a[dr]==0)dr--;
-    return(dr);
+    while(dr>=0 && a[dr]==0){
+        dr--;
+    }
+    return dr;
 }
 
 // Makes a polynomial monic. We can do this as we are working 
@@ -1646,7 +1657,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             degT = polSUBMUL64(W.t1.data(), W.t2.data(), aVal, bVal, degT1, degT2, p);
         }
         else{
-            degR = polDIVIP64(W.r1, W.r2, degA, degB, p);
+            degR = polDIVIP64(W.r1.data(), W.r2.data(), degA, degB, p);
             degQ = degA - degB;
 
             
