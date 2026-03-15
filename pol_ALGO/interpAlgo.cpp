@@ -29,7 +29,6 @@ int newtonInterp(LONG *x,
     /*
     d is the degree of the interpolating polynomial. This 
     can be atmost n-1.
-    */
     d=n-1;
     while(d>=0&&b[d]==0){
         d--;
