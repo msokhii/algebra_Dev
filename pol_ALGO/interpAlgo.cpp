@@ -9,7 +9,6 @@ int newtonInterp(LONG *x,
                  const int n,
                  const LONG p,
                  LONG *b){
-    // if(n<1){return {y.empty(),-1};}
     int d,i,j;
     LONG prod;
     LONG s;

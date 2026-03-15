@@ -110,7 +110,13 @@ pair<vector<LONG>,int> pSUBNEW64(const vector<LONG> &a,const vector<LONG> &b,con
 int pSUBIP64(vector<LONG> &a,const vector<LONG> &b,int degA,const int degB,const LONG p);
 int pMULIP64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 int pMULIP64VANDER(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p);
-int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int degB,const LONG p);
+int polSUBMUL64(LONG *a,
+                const LONG *b,
+                LONG aVal,
+                LONG bVal,
+                int degA,
+                int degB,
+                const LONG p);
 pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);
 vector<LONG> polSCMULNEW64(vector<LONG> &a,LONG x,int degA,const LONG p);
 void polSCMULIP64(vector<LONG> &a,LONG x,int degA,const LONG p);

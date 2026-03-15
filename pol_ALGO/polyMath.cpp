@@ -20,8 +20,8 @@ struct RatReconFastWS{
 
     RatReconFastWS(int degM){
         int n=degM+1;
-        r1.resize(n,0);
-        r2.resize(n,0);
+        r1.resize(n);
+        r2.resize(n);
         t1.assign(n,0);
         t2.assign(n,0);
         q.assign(n,0);
@@ -443,10 +443,13 @@ void polSCMULIP64(vector<LONG> &a,LONG x,int degA,const LONG p){
 
 // Computes A=A-(ax+b)*B efficiently using accumalators.
 
-int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int degB,const LONG p){
-	// Safety checks.
-	if(a.size()<degA+1){a.resize(degA+1,0);}
-	if(degB>=0 && b.size()<degB+1){b.resize(degB+1,0);}
+int polSUBMUL64(LONG *a,
+                const LONG *b,
+                LONG aVal,
+                LONG bVal,
+                int degA,
+                int degB,
+                const LONG p){
 	ULNG z[2];
 	LONG t;
 	int i;
@@ -454,16 +457,18 @@ int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int
 	If b is the zero polynomial, then A-(ax+b)*B=A so we simply
 	return the degree of A.
 	*/
-	if(degB==-1){return degA;}
+	if(degB<0){
+        return degA;
+    }
 	z[0]=z[1]=0LL;
 	/*
-	If degA<=degB, then we pad A with zereos.
+	If degA<=degB, then we pad A with zereos. The caller needs to 
+    guarantee a[0..degB+1] exists.
 	*/
-	while(degA <= degB){
+	while(degA<=degB){
     	++degA;
-    	if((int)a.size() < degA+1) a.resize(degA+1, 0);
-    	else a[degA] = 0;
-	}
+    	a[degA]=0;
+    }
 	/*
 	Constant term is special in the sense b*B does not 
 	have any effect on the degrees so we can compute A=b*B directly.
@@ -475,10 +480,11 @@ int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int
 	A[i]-(aVal*x-bVal)*B[i].
 	*/
 	for(i=1;i<=degB;i++){
+        z[0]=z[1]=0ULL;
 		ZMUL(z,aVal,b[i-1]);
 		ZFMA(z,bVal,b[i]);
 		ZMOD(z,p);
-		t=a[i]-z[0];
+		t=a[i]-(LONG)z[0];
 		a[i]=t+((t>>63)&p);
 	}
 	/*
@@ -486,8 +492,9 @@ int polSUBMUL64(vector<LONG> &a,vector<LONG> &b,LONG aVal,LONG bVal,int degA,int
 	*/
 	t=mul64b(aVal,b[degB],p);
 	a[degB+1]=sub64b(a[degB+1],t,p);
-	// Why do we have an extra checking condition?
-	while(degA>=0 && (a[degA]==0 || a[degA]==p)){degA--;}
+	while(degA>=0 && (a[degA]==0 || a[degA]==p)){
+        degA--;
+    }
 	return degA;
 }
 
@@ -713,6 +720,7 @@ pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int 
 // in A and returns degree of g. Both original a and b are 
 // updated and-or destroyed. 
 
+/* 
 int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p) {
     int degR;
     vector<LONG> c;
@@ -814,6 +822,7 @@ GCDEX pGCDEXFULLSLOW(vector<LONG> &r0,vector<LONG> &r1,int degr0,int degr1,const
 // Fast version of extended euclidean algorithm. This is done in place.
 // Also monic.
 
+/* 
 GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p){
 	if(degA<0 || degB<0){
 		cout<<"INPUTS MUST BE NON-ZERO.\n";
@@ -835,6 +844,7 @@ GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LON
 	s1=1,s2=0
 	t1=0,t2=1
 	*/
+    /*
 	s1[0]=1;
 	t2[0]=1;
 	int degs1=0;
@@ -920,6 +930,8 @@ GCDEX pGCDEXFULLFAST(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LON
 		degt1=tempT;
 	}
 }
+
+*/
 
 // Returns the struct GCDEXHIST that contains all values of 
 // r,s and t for each and every iteration.
@@ -1089,6 +1101,7 @@ static inline bool exactDivIP64(vector<LONG> &num, int &degNum,
     return true;
 }
 
+/* 
 pairRFR ratReconFast(const vector<LONG> &m,
                      const vector<LONG> &u,
                      int degM,
@@ -1202,8 +1215,7 @@ pairRFR ratReconFast(const vector<LONG> &m,
     return {{},{},-1,-1,-20};
 }
 
-
-
+/* 
 pairRFR ratRecon(const vector<LONG> &m,
                  const vector<LONG> &u,
                  int degM,
@@ -1630,8 +1642,8 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             bVal = mul64b(aVal, W.r2[degB-1], p);
             bVal = mul64b(uInv, sub64b(W.r1[degA-1], bVal, p), p);
 
-            degR = polSUBMUL64(W.r1, W.r2, aVal, bVal, degA, degB, p);
-            degT = polSUBMUL64(W.t1, W.t2, aVal, bVal, degT1, degT2, p);
+            degR = polSUBMUL64(W.r1.data(), W.r2.data(), aVal, bVal, degA, degB, p);
+            degT = polSUBMUL64(W.t1.data(), W.t2.data(), aVal, bVal, degT1, degT2, p);
         }
         else{
             degR = polDIVIP64(W.r1, W.r2, degA, degB, p);
