@@ -26,10 +26,10 @@ int mkM(vector<LONG>&m,const vector<LONG> &xs,const LONG p){
 int main(){
 
     LONG p=9223372036854775783; // This is prevprime(2^63-1).
-    int degN=5;
-    int degD=5;
-    const int NUM=100000; // Total calls.
-    const int iter=3;
+    int degN=160;
+    int degD=160;
+    const int NUM=1000000; // Total calls.
+    const int iter=1;
     ofstream logFile("cppTimings.txt");
     logFile<<"Benchmark:\n";
     logFile<<"Prime p: "<<p<<"\n";
