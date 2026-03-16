@@ -26,10 +26,10 @@ int mkM(vector<LONG>&m,const vector<LONG> &xs,const LONG p){
 int main(){
 
     LONG p=9223372036854775783; // This is prevprime(2^63-1).
-    int degN=5;
-    int degD=5;
+    int degN=10;
+    int degD=10;
     const int NUM=1000000; // Total calls.
-    const int iter=3;
+    const int iter=1;
     ofstream logFile("cppTimings.txt");
     logFile<<"Benchmark:\n";
     logFile<<"Prime p: "<<p<<"\n";
@@ -40,13 +40,15 @@ int main(){
         int degX=degN+degD+1;
         // Fixed size vectors for numerator and denominator.
         // auto vecBuildTimeStart=chrono::steady_clock::now();
-        std::vector<LONG>n(degN+1,0);
-        std::vector<LONG>d(degD+1,0);
+        std::vector<LONG> n = {7, 3, 11, 5, 2, 13, 17, 19, 23, 29, 31};
+        std::vector<LONG> d = {3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+
         // Populating vectors where 0<=x<p.
-        for(int i=0;i<=degN;i++){
-            n[i]=rand64s(p);
-            d[i]=rand64s(p);
-        }
+        
+        // for(int i=0;i<=5;i++){
+          //   n[i]=rand64s(p);
+           //  d[i]=rand64s(p);
+        // }
         // We need degN+degD+1=degX distinct points for interpolation. 
         std::vector<LONG>x(degX,0);
         for(int i=0;i<degX;i++){
