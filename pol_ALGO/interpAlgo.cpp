@@ -49,6 +49,7 @@ int newtonInterp(LONG *x,
 */
 
 // No extra memory. Use y as OP.
+
 int newtonInterp(LONG* x,
     LONG* y,
     const int n,
@@ -84,3 +85,60 @@ int newtonInterp(LONG* x,
     }
     return d;
 }
+
+
+/* int newtonInterp2(LONG* y, const int n, const LONG p) {
+    if (n < 1) {
+        return -1;
+    }
+
+    int d, i, j;
+    LONG s, prod;
+
+    // Precompute factorials and inverse factorials mod p.
+    std::vector<LONG> fact(n, 0);
+    std::vector<LONG> invFact(n, 0);
+
+    fact[0] = 1;
+    for (j = 1; j < n; j++) {
+        fact[j] = mul64b(fact[j - 1], (LONG)j, p);
+    }
+
+    for (j = 0; j < n; j++) {
+        invFact[j] = modinv64b(fact[j], p);
+        if (invFact[j] == 0) {
+            std::exit(1);
+        }
+    }
+
+    // Step 1: compute Newton coefficients in-place in y.
+    for (j = 1; j < n; j++) {
+        s = y[0];
+        prod = j;   // (x_j - x_0) = j - 0 = j
+
+        for (i = 1; i < j; i++) {
+            s = add64b(s, mul64b(prod, y[i], p), p);
+            prod = mul64b(prod, (LONG)(j - i), p);   // multiply by (x_j - x_i) = j - i
+        }
+
+        y[j] = mul64b(sub64b(y[j], s, p), invFact[j], p);
+    }
+
+    // Trim trailing zero coefficients in Newton form.
+    d = n - 1;
+    while (d >= 0 && y[d] == 0) {
+        d--;
+    }
+
+    // Step 2: convert Newton form to monomial form in-place.
+    for (i = 1; i <= d; i++) {
+        LONG xi = (LONG)(d - i);   // because x[d-i] = d-i
+        for (j = d - i; j <= d - 1; j++) {
+            y[j] = sub64b(y[j], mul64b(xi, y[j + 1], p), p);
+        }
+    }
+
+    return d;
+}
+
+*/

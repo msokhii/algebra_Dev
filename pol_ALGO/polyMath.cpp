@@ -506,7 +506,7 @@ LONG evalHORN64(vector<LONG>& a,LONG alpha,LONG p){
     return r;
 }
 
-LONG pEVAL64(vector<LONG> &a,int d,LONG x,const LONG p){
+LONG pEVAL64(LONG *a,int d,LONG x,const LONG p){
 	int i;
 	LONG r;
 	if(d==-1){return 0;}
