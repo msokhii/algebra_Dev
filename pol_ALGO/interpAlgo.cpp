@@ -53,8 +53,8 @@ int newtonInterp(LONG *x,
 int newtonInterp(LONG* x,
     LONG* y,
     const int n,
-    const LONG p,
-    long &mulNewton){
+    const LONG p
+    ){
     if(n<1){
         return -1;
     }
@@ -68,15 +68,15 @@ int newtonInterp(LONG* x,
         prod=sub64b(x[j],x[0],p);
         for(i=1;i<j;i++){
             s=add64b(s,mul64b(prod,y[i],p),p);
-            mulNewton++;
+            
 	    prod=mul64b(prod,sub64b(x[j],x[i],p),p);
-            mulNewton++;
+            
 	}
         if(prod==0){
             exit(1);
         }
         y[j]=mul64b(sub64b(y[j],s,p),modinv64b(prod,p),p);
-	mulNewton++;
+	
 }
     d=n-1;
     while(d>=0&&y[d]==0){
@@ -85,7 +85,7 @@ int newtonInterp(LONG* x,
     for(i=1;i<=d;i++){
         for(j=d-i;j<=d-1;j++){
             y[j]=sub64b(y[j],mul64b(x[d-i],y[j+1],p),p);
-            mulNewton++;
+            
 	}
     }
     return d;

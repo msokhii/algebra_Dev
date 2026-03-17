@@ -1,7 +1,7 @@
 #pragma once 
 
 #include<cstdint>
-static long long GLOBALMUL=0;
+extern long long GLOBALMUL;
 using LONG=int64_t;
 using ULNG=uint_fast64_t;
 using ULNG128=__uint128_t;
