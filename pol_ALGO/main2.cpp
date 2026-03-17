@@ -159,12 +159,13 @@ int main(){
 
     dispVEC64(y);
     vector<LONG>yCopy(m,0);
-    int degU=newtonInterp(x.data(),y.data(),m,p);
+    long mulNCP=0;
+    int degU=newtonInterp(x.data(),y.data(),m,p,mulNCP);
     long mulN=0;
     auto start=chrono::steady_clock::now();
     for(int i=0;i<ITER;i++){
         copy(y.begin(),y.end(),yCopy.begin());
-    	int degU=newtonInterp(x.data(),y.data(),m,p,mulN);
+    	int degU=newtonInterp(x.data(),yCopy.data(),m,p,mulN);
     };
     auto stop=chrono::steady_clock::now();
     double total=chrono::duration<double,std::micro>(stop-start).count();
