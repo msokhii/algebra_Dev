@@ -110,10 +110,10 @@ long long cpuMUL=0;
 int main(){
 
     LONG p=9223372036854775783;
-    int degN=5;
-    int degD=5;
+    int degN=1;
+    int degD=1;
     const int ITER=100000;
-    const int STEP=3;
+    const int STEP=11;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
