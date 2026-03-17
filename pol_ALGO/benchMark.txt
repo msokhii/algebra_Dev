@@ -1,0 +1,5 @@
+PRIME -> 9223372036854775783
+CALLS -> 100000
+STEP      degN      degD      avgTimeNewton     avgTimeRR         mulsNewton    mulsRR        
+1         5         5         3.52033           5.32138           155           147           
+2         10        10        15.7309           12.8126           610           592           
