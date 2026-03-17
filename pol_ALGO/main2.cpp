@@ -178,6 +178,21 @@ int main(){
     dispVEC64(y);
     dispVEC64(M); 
 
+    RatReconFastWS W(degM);
+    vector<LONG>rOut(m,0);
+    vector<LONG>tOut(m,0);
+    int degR=-1;
+    int degT=-1;
+    int flag=-999;
+    auto start1=chrono::steady_clock::now();
+    for(int k=0;k<NUM;k++){
+        flag=ratReconFastKernelWS(m,yInterp,degX,degU,
+        degN,degD,p,W,rOut.data(),degR,tOut.data(),degT);
+    }
+    auto stop2=chrono::steady_clock::now();
+    double total2=chrono::duration<double,std::micro>(stop2-start2).count();
+    double avgTimeRR=total2/ITER;
+    cout<<avgTimeRR<<"\n";
     return 0;
 }
 
