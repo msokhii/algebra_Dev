@@ -41,21 +41,4 @@ static inline LONG powmod64s(LONG a,LONG n,LONG p){
     }
     return r;
 };
-static inline LONG modinv64b(LONG c,LONG p){   
-    LONG d,r,q,r1,c1,d1;
-    d=p;
-    c1=1;
-    d1=0;
-    while(d!=0){
-        q=c/d;
-        r=c-q*d; 
-        r1=c1-q*d1;
-        c=d;
-        c1=d1;
-        d=r; 
-        d1=r1;
-    }
-    if(c!=1) return(0);
-    if(c1<0) c1+=p;
-    return c1;
-};
+LONG modinv64b(LONG c,LONG p);

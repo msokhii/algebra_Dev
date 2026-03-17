@@ -113,7 +113,7 @@ int main(){
     int degN=1;
     int degD=1;
     const int ITER=100000;
-    const int STEP=11;
+    const int STEP=5;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
