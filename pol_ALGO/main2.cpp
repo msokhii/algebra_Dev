@@ -107,7 +107,7 @@ int main(){
     LONG p=9223372036854775783;
     int degN=40;
     int degD=40;
-    const int ITER=100000;
+    const int ITER=1;
 
     vector<LONG>n(degN+1,0);
     vector<LONG>d(degD+1,0);
@@ -161,8 +161,8 @@ int main(){
     vector<LONG>yCopy(m,0);
     auto start=chrono::steady_clock::now();
     for(int i=0;i<ITER;i++){
-        copy(y.begin(),y.end(),yCopy.begin());
-    	int degU=newtonInterp(x.data(),yCopy.data(),m,p);
+        // copy(y.begin(),y.end(),yCopy.begin());
+    	int degU=newtonInterp(x.data(),y.data(),m,p);
     };
     auto stop=chrono::steady_clock::now();
     double total=chrono::duration<double,std::micro>(stop-start).count();
