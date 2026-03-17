@@ -103,7 +103,77 @@ int main(){
 }
 */
 
+int main(){
+    LONG p=9223372036854775783;
+    int degN=10;
+    int degD=10;
+    const int ITER=100000;
 
+    vector<LONG>n(degN+1,0);
+    vector<LONG>d(degD+1,0);
+
+    for(int i=0;i<degN+1;i++){
+        n[i]=rand64s(p);
+    }
+    for(int j=0;j<degD+1;j++){
+        LONG temp=rand64s(p);
+        while(temp==0){
+            temp=rand64s(p);
+        }
+        d[i]=temp;
+    }
+
+    if(d[degD]!=1){
+        LONG invTerm;
+        invTerm=modinv64b(d[degD],p);
+        for(int i=0;i<degD;i++){
+            d[i]=mul64b(invTerm,d[i],p);
+        }
+        for(int j=0;j<degN;;j++){
+            n[i]=mul64b(invTerm,n[i],p);
+        }
+    }
+
+    vector<LONG>nCopy=n;
+    vector<LONG>dCopy=d;
+    int g=polGCD64(nCopy,dCopy,degN,degD,p);
+    if(g!=1){
+        return -1;
+    }
+
+    int m=degN+degD+1;
+    vector<LONG>x(m,0);
+    for(int i=0;i<m;i++){
+        x[i]=i+1;
+    }
+
+    vector<LONG>y(m,0);
+    for(int i=0i<m;i++){
+        LONG denEval=pEVAL64(d.data(),degD,x[i],p);
+        if(denEval==0){
+            return -1;
+        }
+        LONG numEval=pEVAL64(n,data(),degN,x[i],p);
+        y[i]=mul64b(numEval,modinv64b(denEval,p),p);
+    }
+
+    dispVEC64(y);
+
+    int degU=newtonInterp(x.data(),y.data(),m,p);
+    vector<LONG>M(m,0);
+    M[0]=1;
+    int degM=mkM(M,x,p);
+
+    dispVEC64(n);
+    dispVEC64(d);
+    dispVEC64(x);
+    dispVEC64(y);
+    dispVEC64(M); 
+
+    return 0;
+}
+
+/*
 int main(){
 
     LONG p=9223372036854775783; // This is prevprime(2^63-1).
@@ -210,3 +280,5 @@ std::vector<LONG> d = {
     cout<<"Complete.\n";
     return 0;
 }
+
+*/
