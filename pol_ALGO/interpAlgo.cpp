@@ -27,7 +27,7 @@ int newtonInterp(LONG* x,
         prod=sub64b(xj,X[0],p);
         for(i=1;i<j;i++){
             s=add64b(s,mulrec64(prod,Y[i],P),p);
-	        prod=mul64b(prod,sub64b(X[j],X[i],p),p);
+	        prod=mulrec64(prod,sub64b(X[j],X[i],p),P);
         }
         if(prod==0){
             return -1;
