@@ -1,5 +1,6 @@
 #include "int128g.hpp"
 
+extern long long GLOBALMUL;
 volatile int __int128zero = 0;
 volatile int __int128junk = 0;
 INT64 CNTR = 0;
@@ -409,7 +410,8 @@ void rec128(UINT64 *x, recint v)
 
 /* 64 x 64 bit mulmod */
 UINT64 mulrec64(UINT64 a, UINT64 b, recint v)
-{
+{   
+    ++GLOBALMUL;
     UINT64 u0, u1, r;
     b = b << v.s;
     MUL211(u0, u1, a, b);
