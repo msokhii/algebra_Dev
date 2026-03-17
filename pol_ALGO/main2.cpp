@@ -105,8 +105,8 @@ int main(){
 
 int main(){
     LONG p=9223372036854775783;
-    int degN=10;
-    int degD=10;
+    int degN=40;
+    int degD=40;
     const int ITER=100000;
 
     vector<LONG>n(degN+1,0);
@@ -158,11 +158,19 @@ int main(){
     }
 
     dispVEC64(y);
-
-    int degU=newtonInterp(x.data(),y.data(),m,p);
+    vector<LONG>yCopy(m,0);
+    auto start=chrono::steady_clock::now();
+    for(int i=0;i<ITER;i++){
+        copy(y.begin(),y.end(),yCopy.begin());
+    	int degU=newtonInterp(x.data(),yCopy.data(),m,p);
+    };
+    auto stop=chrono::steady_clock::now();
+    double total=chrono::duration<double,std::micro>(stop-start).count();
+    double avgTimeNewton=total/ITER;
+    cout<<avgTimeNewton<<"\n";
     vector<LONG>M(m+1,0);
     M[0]=1;
-    int degM=mkM(M.data(),x.data(),p);
+    int degM=mkM(M,x,p);
 
     dispVEC64(n);
     dispVEC64(d);
