@@ -113,7 +113,11 @@ int main(){
     vector<LONG>d(degD+1,0);
 
     for(int i=0;i<degN+1;i++){
-        n[i]=rand64s(p);
+        LONG temp=rand64s(p);
+        while(temp==0){
+            temp=rand64s(p);
+        }
+        n[i]=temp;
     }
     for(int j=0;j<degD+1;j++){
         LONG temp=rand64s(p);
@@ -126,20 +130,16 @@ int main(){
     if(d[degD]!=1){
         LONG invTerm;
         invTerm=modinv64b(d[degD],p);
-        for(int i=0;i<degD;i++){
+        for(int i=0;i<=degD;i++){
             d[i]=mul64b(invTerm,d[i],p);
         }
-        for(int j=0;j<degN;j++){
+        for(int j=0;j<=degN;j++){
             n[j]=mul64b(invTerm,n[j],p);
         }
     }
 
     vector<LONG>nCopy=n;
     vector<LONG>dCopy=d;
-//    int g=polGCD64(nCopy,dCopy,degN,degD,p);
-  //  if(g!=1){
-    //    return -1;
-   // }
 
     int m=degN+degD+1;
     vector<LONG>x(m,0);
@@ -160,9 +160,9 @@ int main(){
     dispVEC64(y);
 
     int degU=newtonInterp(x.data(),y.data(),m,p);
-    vector<LONG>M(m,0);
+    vector<LONG>M(m+1,0);
     M[0]=1;
-    int degM=mkM(M,x,p);
+    int degM=mkM(M.data(),x.data(),p);
 
     dispVEC64(n);
     dispVEC64(d);
