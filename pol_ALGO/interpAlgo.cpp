@@ -2,7 +2,7 @@
 #include<cstdint>
 #include<cstdlib>
 #include"integerMath.h"
-#include"int128g.c"
+#include"int128g.hpp"
 
 using namespace std;
 
