@@ -5,8 +5,8 @@
 #include<vector> 
 #include<unordered_map>
 #include<cstdint>
-#include"depreIntMath.hpp"
 #include"algorithm"
+#include"int128g.c"
 
 using namespace std;
 
@@ -1580,12 +1580,16 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                          LONG *tOut,
                          int &degTOut){
 
+    
+    /*
     if(degM < 0 || degU < 0){
         degROut = -1;
         degTOut = -1;
         return -10; // Bad input.
     }
+    */
 
+    recint P=recip1(p);
     auto boundCheck = [&](int degR, int degT)->bool{
         if(degR > N) return false;
         if(D < 0) return true;
@@ -1649,10 +1653,10 @@ int ratReconFastKernelWS(const vector<LONG> &m,
 
         if(degB > 0 && degA - degB == 1){
             uInv = modinv64b(W.r2[degB], p);
-            aVal = mul64b(W.r1[degA], uInv, p);
+            aVal = mulrec64(W.r1[degA], uInv, P);
        
-            bVal = mul64b(aVal, W.r2[degB-1], p);
-            bVal = mul64b(uInv, sub64b(W.r1[degA-1], bVal, p), p);
+            bVal = mulrec64(aVal, W.r2[degB-1], P);
+            bVal = mulrec64(uInv, sub64b(W.r1[degA-1], bVal, p), P);
             degR=polSUBMUL64(W.r1.data(),W.r2.data(),aVal,bVal,degA,degB,p);
             degT=polSUBMUL64(W.t1.data(),W.t2.data(),aVal,bVal,degT1,degT2,p);
         }
