@@ -104,10 +104,10 @@ int main(){
 */
 
 int main(){
-    LONG p=2147483629;
-    int degN=40;
-    int degD=40;
-    const int ITER=1;
+    LONG p=9223372036854775783;
+    int degN=5;
+    int degD=5;
+    const int ITER=1000000;
 
     vector<LONG>n(degN+1,0);
     vector<LONG>d(degD+1,0);
@@ -159,9 +159,10 @@ int main(){
 
     dispVEC64(y);
     vector<LONG>yCopy(m,0);
+    int degU=newtonInterp(x.data(),y.data(),m,p);
     auto start=chrono::steady_clock::now();
     for(int i=0;i<ITER;i++){
-        // copy(y.begin(),y.end(),yCopy.begin());
+        copy(y.begin(),y.end(),yCopy.begin());
     	int degU=newtonInterp(x.data(),y.data(),m,p);
     };
     auto stop=chrono::steady_clock::now();
@@ -184,9 +185,9 @@ int main(){
     int degR=-1;
     int degT=-1;
     int flag=-999;
-    auto start1=chrono::steady_clock::now();
-    for(int k=0;k<NUM;k++){
-        flag=ratReconFastKernelWS(m,yInterp,degX,degU,
+    auto start2=chrono::steady_clock::now();
+    for(int k=0;k<ITER;k++){
+        flag=ratReconFastKernelWS(M,y,m,degU,
         degN,degD,p,W,rOut.data(),degR,tOut.data(),degT);
     }
     auto stop2=chrono::steady_clock::now();
