@@ -104,6 +104,7 @@ int main(){
 */
 
 int main(){
+    GLOBALMUL=0;
     LONG p=9223372036854775783;
     int degN=5;
     int degD=5;
@@ -159,19 +160,18 @@ int main(){
 
     dispVEC64(y);
     vector<LONG>yCopy(m,0);
-    long mulNCP=0;
-    int degU=newtonInterp(x.data(),y.data(),m,p,mulNCP);
-    long mulN=0;
+    int degU=newtonInterp(x.data(),y.data(),m,p);
+    long long newtonMuls=GLOBALMUL;
     auto start=chrono::steady_clock::now();
     for(int i=0;i<ITER;i++){
         copy(y.begin(),y.end(),yCopy.begin());
-    	int degU=newtonInterp(x.data(),yCopy.data(),m,p,mulN);
+    	int degU=newtonInterp(x.data(),yCopy.data(),m,p);
     };
     auto stop=chrono::steady_clock::now();
     double total=chrono::duration<double,std::micro>(stop-start).count();
     double avgTimeNewton=total/ITER;
     cout<<avgTimeNewton<<"\n";
-    cout<<mulN/ITER<<"\n";
+    cout<<newtonMuls<<"\n";
     vector<LONG>M(m+1,0);
     M[0]=1;
     int degM=mkM(M,x,p);
@@ -188,15 +188,18 @@ int main(){
     int degR=-1;
     int degT=-1;
     int flag=-999;
+    GLOBALMUL=0;
     auto start2=chrono::steady_clock::now();
     for(int k=0;k<ITER;k++){
         flag=ratReconFastKernelWS(M,y,m,degU,
         degN,degD,p,W,rOut.data(),degR,tOut.data(),degT);
     }
     auto stop2=chrono::steady_clock::now();
+    long long RRmuls=GLOBALMUL;
     double total2=chrono::duration<double,std::micro>(stop2-start2).count();
     double avgTimeRR=total2/ITER;
     cout<<avgTimeRR<<"\n";
+    cout<<RRmuls<<"\n";
     return 0;
 }
 

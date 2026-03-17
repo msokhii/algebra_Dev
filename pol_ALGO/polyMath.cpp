@@ -729,7 +729,6 @@ pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int 
 // in A and returns degree of g. Both original a and b are 
 // updated and-or destroyed. 
 
-/* 
 int polGCD64(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p) {
     int degR;
     vector<LONG> c;
@@ -1576,7 +1575,8 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                          LONG *rOut,
                          int &degROut,
                          LONG *tOut,
-                         int &degTOut){
+                         int &degTOut,
+                         long &mulCountRR){
 
     if(degM < 0 || degU < 0){
         degROut = -1;
@@ -1648,9 +1648,11 @@ int ratReconFastKernelWS(const vector<LONG> &m,
         if(degB > 0 && degA - degB == 1){
             uInv = modinv64b(W.r2[degB], p);
             aVal = mul64b(W.r1[degA], uInv, p);
+            mulCountRR++;
             bVal = mul64b(aVal, W.r2[degB-1], p);
+            mulCountRR++;
             bVal = mul64b(uInv, sub64b(W.r1[degA-1], bVal, p), p);
-
+            mulCountRR++;
             degR=polSUBMUL64(W.r1.data(),W.r2.data(),aVal,bVal,degA,degB,p);
             degT=polSUBMUL64(W.t1.data(),W.t2.data(),aVal,bVal,degT1,degT2,p);
         }
