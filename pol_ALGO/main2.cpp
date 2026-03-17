@@ -120,7 +120,7 @@ int main(){
         while(temp==0){
             temp=rand64s(p);
         }
-        d[i]=temp;
+        d[j]=temp;
     }
 
     if(d[degD]!=1){
@@ -129,17 +129,17 @@ int main(){
         for(int i=0;i<degD;i++){
             d[i]=mul64b(invTerm,d[i],p);
         }
-        for(int j=0;j<degN;;j++){
-            n[i]=mul64b(invTerm,n[i],p);
+        for(int j=0;j<degN;j++){
+            n[j]=mul64b(invTerm,n[j],p);
         }
     }
 
     vector<LONG>nCopy=n;
     vector<LONG>dCopy=d;
-    int g=polGCD64(nCopy,dCopy,degN,degD,p);
-    if(g!=1){
-        return -1;
-    }
+//    int g=polGCD64(nCopy,dCopy,degN,degD,p);
+  //  if(g!=1){
+    //    return -1;
+   // }
 
     int m=degN+degD+1;
     vector<LONG>x(m,0);
@@ -148,12 +148,12 @@ int main(){
     }
 
     vector<LONG>y(m,0);
-    for(int i=0i<m;i++){
+    for(int i=0;i<m;i++){
         LONG denEval=pEVAL64(d.data(),degD,x[i],p);
         if(denEval==0){
             return -1;
         }
-        LONG numEval=pEVAL64(n,data(),degN,x[i],p);
+        LONG numEval=pEVAL64(n.data(),degN,x[i],p);
         y[i]=mul64b(numEval,modinv64b(denEval,p),p);
     }
 
