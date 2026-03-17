@@ -9,7 +9,7 @@
 #include"algorithm"
 
 using namespace std;
-
+extern long long cpuMUL;
 struct RatReconFastWS{
     vector<LONG> r1;
     vector<LONG> r2;
@@ -69,11 +69,15 @@ struct GCDEXHIST{
 /* Fast CPU routines                                                                      */
 /******************************************************************************************/
 
-#define ZMUL(z,a,b) __asm__(\
+#define ZMUL(z,a,b) do { 	\
+        ++cpuMUL; \
+         __asm__(\
         "       mulq    %%rdx   \n\t" \
-                : "=a"(z[0]), "=d"(z[1]) : "a"(a), "d"(b))
+                : "=a"(z[0]), "=d"(z[1]) : "a"(a), "d"(b)); \
+	} while(0)
 
 #define ZFMA(z,a,b) do {        \
+	++cpuMUL; \
         unsigned long u,v;              \
         __asm__(                        \
         "       mulq    %%rdx           \n\t" \
@@ -1587,7 +1591,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     }
 
     auto boundCheck = [&](int degR, int degT)->bool{
-        if(degR > N) return false;
+        if(degR!=N) return false;
         if(D < 0) return true;
         return degT <= D;
     };
@@ -1608,6 +1612,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     // Test Version.
     std::copy_n(m.data(),degM+1,W.r1.data());
     std::copy_n(u.data(),degU+1,W.r2.data());   
+    W.t1[0]=0;
     W.t2[0]=1;
 
     int degA = degM;

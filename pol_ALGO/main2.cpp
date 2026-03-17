@@ -104,6 +104,7 @@ int main(){
 */
 
 long long GLOBALMUL=0;
+long long cpuMUL=0;
 int main(){
     LONG p=9223372036854775783;
     int degN=20;
@@ -162,7 +163,7 @@ int main(){
     vector<LONG>yCopy(m,0);
     copy(y.begin(),y.end(),yCopy.begin());
     int degU=newtonInterp(x.data(),yCopy.data(),m,p);
-    cout<<"Degree of the IP: %d.\n"<<degU;
+    cout<<"Degree of the IP: "<<degU<<"\n";
     GLOBALMUL=0;
     auto start=chrono::steady_clock::now();
     for(int i=0;i<ITER;i++){
@@ -199,10 +200,12 @@ int main(){
     }
     auto stop2=chrono::steady_clock::now();
     long long RRmuls=GLOBALMUL/ITER;
+    long long cpuMULRR=cpuMUL/ITER;
     double total2=chrono::duration<double,std::micro>(stop2-start2).count();
     double avgTimeRR=total2/ITER;
     cout<<avgTimeRR<<"\n";
     cout<<RRmuls<<"\n";
+    cout<<cpuMULRR<<"\n";
     return 0;
 }
 
