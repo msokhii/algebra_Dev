@@ -104,7 +104,7 @@ int main(){
 */
 
 int main(){
-    LONG p=9223372036854775783;
+    LONG p=2147483629;
     int degN=40;
     int degD=40;
     const int ITER=1;
