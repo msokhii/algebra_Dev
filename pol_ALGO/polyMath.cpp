@@ -544,15 +544,15 @@ int polSUBMUL64P(LONG *a,
         ++degA;
         a[degA]=0;
     }
-    t=mulrec64(bVal,B[0],P);
+    t=mulrec64(bVal,b[0],P);
     a[0]=sub64b(a[0],t,p);
     for(i=1;i<=degB;i++){
         t=mulrec64(aVal,b[i-1],P);
-        t=add64s(t,mulrec64(bVal,b[i],P),p);
-        a[i]=sub64s(a[i],t,p);
+        t=add64b(t,mulrec64(bVal,b[i],P),p);
+        a[i]=sub64b(a[i],t,p);
     }
     t=mulrec64(aVal,b[degB],P);
-    a[degB+1]=sub64s(a[degB+1],t,p);
+    a[degB+1]=sub64b(a[degB+1],t,p);
     while(degA>=0 && (a[degA]==0 || a[degA]==p)){
         degA--;
     }
