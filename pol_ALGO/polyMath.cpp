@@ -754,8 +754,8 @@ int polDIVP(LONG *a,
             int degB,
             LONG p,
             recint P){
-    int dq;
-    int dr;
+    int degQ;
+    int degR;
     int k;
     int j;
     int m;
@@ -1662,7 +1662,7 @@ SHORT SUMMARY OF THE ABOVE ROUTINE:
 
 static inline void makeDenMonicOut64(LONG *num, int degNum,
                                      LONG *den, int degDen,
-                                     const LONG p){
+                                     const LONG p,recint P){
     if(degDen < 0) return;
 
     LONG lc = den[degDen] % p;
@@ -1671,10 +1671,10 @@ static inline void makeDenMonicOut64(LONG *num, int degNum,
     if(lc != 1){
         LONG inv = modinv64b(lc, p);
         for(int i=0;i<=degDen;i++){
-            den[i] = mulrec64(den[i],inv,p);
+            den[i] = mulrec64(den[i],inv,P);
         }
         for(int i=0;i<=degNum;i++){
-            num[i] = mulrec64(num[i],inv,p);
+            num[i] = mulrec64(num[i],inv,P);
         }
     }
 }
@@ -1756,7 +1756,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             // std::copy_n(W.r2.data(), degROut + 1, rOut);
             // std::copy_n(W.t2.data(), degTOut + 1, tOut);
 
-            makeDenMonicOut64(rOut,degROut,tOut,degTOut,P);
+            makeDenMonicOut64(rOut,degROut,tOut,degTOut,p,P);
             return 0;
         }
 
@@ -1769,11 +1769,11 @@ int ratReconFastKernelWS(const vector<LONG> &m,
        
             bVal=mulrec64(aVal, W.r2[degB-1], P);
             bVal=mulrec64(uInv, sub64b(W.r1[degA-1], bVal, p), P);
-            degR=polSUBMUL64P(W.r1.data(),W.r2.data(),aVal,bVal,degA,degB,P);
-            degT=polSUBMUL64P(W.t1.data(),W.t2.data(),aVal,bVal,degT1,degT2,P);
+            degR=polSUBMUL64P(W.r1.data(),W.r2.data(),aVal,bVal,degA,degB,p,P);
+            degT=polSUBMUL64P(W.t1.data(),W.t2.data(),aVal,bVal,degT1,degT2,p,P);
         }
         else{
-            degR=polDIVIP(W.r1.data(),W.r2.data(),degA,degB,p,P);
+            degR=polDIVP(W.r1.data(),W.r2.data(),degA,degB,p,P);
             degQ=degA-degB;
             for(int i=0;i<=degQ;i++){
                 W.q[i]=W.r1[degB+i];
@@ -1791,7 +1791,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                 // std::copy_n(W.t2.data(), degT2 + 1, W.tmpT.data());
 
                 int degTmpT=degT2;
-                degTmpT=pMUL64P(W.tmpT.data(),W.q.data(),degTmpT,degQ,p,P);
+                degTmpT=polMUL64P(W.tmpT.data(),W.q.data(),degTmpT,degQ,p,P);
                 degT=pSUBIP64(W.t1.data(),W.tmpT.data(),degT1,degTmpT,p);
                 
                 // degT = polfms64s(W.t2.data(), W.q.data(), W.t1.data(), degT2, degQ, degT1, p);
