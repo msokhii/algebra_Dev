@@ -19,13 +19,6 @@ using INT64  = int64_t;
 using UINT32 = uint32_t;
 using UINT64 = uint64_t;
 
-struct recint {
-  UINT64 s;   /* shift */
-  UINT64 v;   /* reciprocal */
-  UINT64 d0;  /* divisor shifted up */
-  UINT64 d1;
-};
-
 struct RatReconFastWS{
     vector<LONG> r1;
     vector<LONG> r2;

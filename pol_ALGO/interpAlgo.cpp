@@ -46,6 +46,7 @@ int newtonInterp(LONG* x,
     return d;
 }
 
+/*
 int newtonInterp2(LONG* x,
     LONG* y,
     const int n,
@@ -113,3 +114,5 @@ Y[j] = sub64b(Y[j], (LONG)z[0], p);
 
 return d;
 }
+
+*/
