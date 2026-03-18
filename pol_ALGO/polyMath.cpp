@@ -1674,6 +1674,7 @@ static inline void makeDenMonicOut64(LONG *num, int degNum,
     }
 }
 
+/*
 int ratReconFastKernelWS(const vector<LONG> &m,
                          const vector<LONG> &u,
                          int degM,
@@ -1700,7 +1701,6 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     for(int i=0;i<=degU;i++){
         W.r2[i] = u[i];
     }
-    */
 
     // Test Version.
     std::copy_n(m.data(),degM+1,W.r1.data());
@@ -1799,9 +1799,120 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     degROut = -1;
     degTOut = -1;
     return -20;
+} 
+*/
+
+int ratReconFastKernelWS(const vector<LONG> &m,
+    const vector<LONG> &u,
+    int degM,
+    int degU,
+    int N,
+    int D,
+    const LONG p,
+    RatReconFastWS &W,
+    LONG *rOut,
+    int &degROut,
+    LONG *tOut,
+    int &degTOut,
+    recint P)
+{
+
+// Copy inputs into workspace
+std::copy_n(m.data(), degM + 1, W.r1.data());
+std::copy_n(u.data(), degU + 1, W.r2.data());
+
+// Initialize t-sequence:
+// r1 = m, r2 = u
+// t1 = 0, t2 = 1
+W.t2[0] = 1;
+
+int degA  = degM;
+int degB  = degU;
+int degT1 = -1;
+int degT2 = 0;
+
+// Ensure degA >= degB initially
+if(degA < degB){
+std::swap(W.r1, W.r2);
+std::swap(degA, degB);
+std::swap(W.t1, W.t2);
+std::swap(degT1, degT2);
 }
 
-/* 
-FIXED SIZE ARRAY ROUTINES:
-*/
+while(degB != -1){
+
+// Stop at the first index k such that deg(r_k) <= N
+if(degB <= N){
+degROut = degB;
+degTOut = degT2;
+
+std::copy_n(W.r2.data(), degROut + 1, rOut);
+std::copy_n(W.t2.data(), degTOut + 1, tOut);
+
+return 0;
+}
+
+LONG uInv, aVal, bVal;
+int degR, degQ, degT;
+
+// Special degree-1 quotient step
+if(degB > 0 && degA - degB == 1){
+uInv = modinv64b(W.r2[degB], p);
+
+aVal = mulrec64(W.r1[degA], uInv, P);
+
+bVal = mulrec64(aVal, W.r2[degB - 1], P);
+bVal = mulrec64(uInv, sub64b(W.r1[degA - 1], bVal, p), P);
+
+degR = polSUBMUL64P(W.r1.data(), W.r2.data(),
+           aVal, bVal, degA, degB, p, P);
+
+degT = polSUBMUL64P(W.t1.data(), W.t2.data(),
+           aVal, bVal, degT1, degT2, p, P);
+}
+else{
+// Divide r1 by r2:
+// quotient goes into high part of W.r1, remainder stays in low part
+degR = polDIVP(W.r1.data(), W.r2.data(), degA, degB, p, P);
+degQ = degA - degB;
+
+for(int i = 0; i <= degQ; i++){
+W.q[i] = W.r1[degB + i];
+}
+
+if(degT2 >= 0){
+for(int i = 0; i <= degT2; i++){
+W.tmpT[i] = W.t2[i];
+}
+
+int degTmpT = degT2;
+degTmpT = polMUL64P(W.tmpT.data(), W.q.data(), degTmpT, degQ, p, P);
+degT = pSUBIP64(W.t1.data(), W.tmpT.data(), degT1, degTmpT, p);
+}
+else{
+degT = degT1;
+}
+}
+
+if(degR < 0){
+break;
+}
+
+// Shift:
+// (r1,r2) <- (r2,r)
+// (t1,t2) <- (t2,t)
+std::swap(W.r1, W.r2);
+degA = degB;
+degB = degR;
+
+std::swap(W.t1, W.t2);
+int oldDegT2 = degT2;
+degT2 = degT;
+degT1 = oldDegT2;
+}
+
+degROut = -1;
+degTOut = -1;
+return -20;
+}
 
