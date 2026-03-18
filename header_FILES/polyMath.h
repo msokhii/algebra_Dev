@@ -125,6 +125,14 @@ int polSUBMUL64(LONG *a,
                 int degA,
                 int degB,
                 const LONG p);
+int polSUBMUL64P(LONG *a,
+                const LONG *b,
+                LONG aVal,
+                LONG bVal,
+                int degA,
+                int degB,
+                const LONG p,
+                recint P);
 pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int degA,int degB,const LONG p);
 vector<LONG> polSCMULNEW64(vector<LONG> &a,LONG x,int degA,const LONG p);
 void polSCMULIP64(vector<LONG> &a,LONG x,int degA,const LONG p);
@@ -137,6 +145,12 @@ int polDIVIP64(LONG *a,
                int degA,
                int degB,
                const LONG p);
+int polDIVP(LONG *a,
+            LONG *b,
+            int degA,
+            int degB,
+            LONG p,
+            recint P);
 void polMAKEMONIC64(vector<LONG> &a,const LONG p);
 pair<vector<LONG>,int> polGCDNEW64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);
 int polGCD64(vector<LONG> &a,vector<LONG> &b,int degA,int degB,const LONG p);

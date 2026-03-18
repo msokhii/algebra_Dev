@@ -316,6 +316,34 @@ int pMULIP64(LONG *a,
 	return degC;
 }
 
+int polMUL64P(LONG *a,
+              LONG *b,
+              int degA,
+              int degB,
+              LONG p,
+              recint P){
+    int i;
+    int k;
+    int m;
+    LONG t;
+    if(degA<0 || degB<0){
+        return -1;
+    }
+    int degC=degA+degB;
+    for(k=degC;k>=0;k--){
+        i=max(0,k-degB);
+        m=min(k,degA);
+        for(t=0;i<=m;i++){
+            t=add64b(t,mulrec64(a[i],b[k-i],P),p);
+        }
+        a[k]=t;
+    }
+    while(degC>=0 && a[degC]==0){
+        degC--;
+    }
+    return degC;
+}
+
 int polfms64s(LONG *A, LONG *B, LONG *C, int da, int db, int dc, LONG p)
 {   // polynomial fused multiply subtract: C -= A*B
     int i,k,m; ULNG z[2];
@@ -494,6 +522,44 @@ int polSUBMUL64(LONG *a,
         degA--;
     }
 	return degA;
+}
+
+int polSUBMUL64P(LONG *a,
+                 const LONG *b,
+                 LONG aVal,
+                 LONG bVal,
+                 int degA,
+                 int degB,
+                 const LONG p,
+                 recint P){
+    LONG s;
+    LONG t;
+    int i;
+    int d;
+    if(degB==-1){
+        return degA;
+    }
+    d=degA;
+    while(degA<=degB){
+        ++degA;
+        a[degA]=0;
+    }
+    t=mulrec64(bVal,B[0],P);
+    a[0]=sub64b(a[0],t,p);
+    for(i=1;i<=degB;i++){
+        t=mulrec64(aVal,b[i-1],P);
+        t=add64s(t,mulrec64(bVal,b[i],P),p);
+        a[i]=sub64s(a[i],t,p);
+    }
+    t=mulrec64(aVal,b[degB],P);
+    a[degB+1]=sub64s(a[degB+1],t,p);
+    while(degA>=0 && (a[degA]==0 || a[degA]==p)){
+        degA--;
+    }
+    if(degA==d){
+        printf("FAIL");
+    }
+    return degA;
 }
 
 // Evaluates a polynomial using Horners rule.
@@ -680,6 +746,52 @@ int polDIVIP64(LONG *a,
         dr--;
     }
     return dr;
+}
+
+int polDIVP(LONG *a,
+            LONG *b,
+            int degA,
+            int degB,
+            LONG p,
+            recint P){
+    int dq;
+    int dr;
+    int k;
+    int j;
+    int m;
+    LONG t;
+    LONG inv; 
+    if(degB<0){
+        printf("Div by 0\n");
+        return -1;
+    }
+    if(degA<degB){
+        return degA;
+    }
+    degQ=degA-degB;
+    degR=degB-1;
+    if(b[degB]==1){
+        inv=1;
+    }
+    else{
+        inv=modinv64b(b[degB],p);
+    }
+    for(k=degA;k>=0;k--){
+        t=a[k];
+        m=min(degR,k);
+        j=max(0,k-degQ);
+        for(t=a[k];j<=m;j++){
+            t=sub64b(t,mulrec64(b[j],a[k-j+degB],P),p);
+        }
+        if(k>=degB && inv!=1){
+            t=mulrec64(t,inv,P);
+        }
+        a[k]=t;
+    }
+    while(degR>0 &&  a[degR]==0){
+        degR--;
+    }
+    return degR;
 }
 
 // Makes a polynomial monic. We can do this as we are working 
@@ -1559,10 +1671,10 @@ static inline void makeDenMonicOut64(LONG *num, int degNum,
     if(lc != 1){
         LONG inv = modinv64b(lc, p);
         for(int i=0;i<=degDen;i++){
-            den[i] = mul64b(den[i], inv, p);
+            den[i] = mulrec64(den[i],inv,p);
         }
         for(int i=0;i<=degNum;i++){
-            num[i] = mul64b(num[i], inv, p);
+            num[i] = mulrec64(num[i],inv,p);
         }
     }
 }
@@ -1644,7 +1756,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             // std::copy_n(W.r2.data(), degROut + 1, rOut);
             // std::copy_n(W.t2.data(), degTOut + 1, tOut);
 
-            makeDenMonicOut64(rOut, degROut, tOut, degTOut, p);
+            makeDenMonicOut64(rOut,degROut,tOut,degTOut,P);
             return 0;
         }
 
@@ -1652,21 +1764,19 @@ int ratReconFastKernelWS(const vector<LONG> &m,
         int degR, degQ, degT;
 
         if(degB > 0 && degA - degB == 1){
-            uInv = modinv64b(W.r2[degB], p);
-            aVal = mulrec64(W.r1[degA], uInv, P);
+            uInv=modinv64b(W.r2[degB], p);
+            aVal=mulrec64(W.r1[degA], uInv, P);
        
-            bVal = mulrec64(aVal, W.r2[degB-1], P);
-            bVal = mulrec64(uInv, sub64b(W.r1[degA-1], bVal, p), P);
-            degR=polSUBMUL64(W.r1.data(),W.r2.data(),aVal,bVal,degA,degB,p);
-            degT=polSUBMUL64(W.t1.data(),W.t2.data(),aVal,bVal,degT1,degT2,p);
+            bVal=mulrec64(aVal, W.r2[degB-1], P);
+            bVal=mulrec64(uInv, sub64b(W.r1[degA-1], bVal, p), P);
+            degR=polSUBMUL64P(W.r1.data(),W.r2.data(),aVal,bVal,degA,degB,P);
+            degT=polSUBMUL64P(W.t1.data(),W.t2.data(),aVal,bVal,degT1,degT2,P);
         }
         else{
-            degR=polDIVIP64(W.r1.data(),W.r2.data(),degA,degB,p);
+            degR=polDIVIP(W.r1.data(),W.r2.data(),degA,degB,p,P);
             degQ=degA-degB;
-
-            
             for(int i=0;i<=degQ;i++){
-                W.q[i] = W.r1[degB + i];
+                W.q[i]=W.r1[degB+i];
             }
             
             // std::copy_n(W.r1.data() + degB, degQ + 1, W.q.data());
@@ -1681,7 +1791,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                 // std::copy_n(W.t2.data(), degT2 + 1, W.tmpT.data());
 
                 int degTmpT=degT2;
-                degTmpT=pMULIP64(W.tmpT.data(),W.q.data(),degTmpT,degQ,p);
+                degTmpT=pMUL64P(W.tmpT.data(),W.q.data(),degTmpT,degQ,p,P);
                 degT=pSUBIP64(W.t1.data(),W.tmpT.data(),degT1,degTmpT,p);
                 
                 // degT = polfms64s(W.t2.data(), W.q.data(), W.t1.data(), degT2, degQ, degT1, p);

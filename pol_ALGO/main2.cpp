@@ -33,7 +33,7 @@ int main(){
     int degN=1;
     int degD=1;
     const int ITER=100000;
-    const int STEP=9;
+    const int STEP=5;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
@@ -44,9 +44,9 @@ int main(){
         <<setw(10)<<"degD"
         <<setw(18)<<"avgTimeNewton"
         <<setw(18)<<"avgTimeRR"<<"\n";
-        //<<setw(14)<<"mulsNewton"
-        //<<setw(14)<<"mulsRR"
-        //<< "\n";
+        <<setw(14)<<"mulsNewton"
+        <<setw(14)<<"mulsRR"
+        << "\n";
 
     for(int step=1;step<STEP;step++){
         vector<LONG>n(degN+1,0);
@@ -135,7 +135,7 @@ int main(){
         }
         auto stop2=chrono::steady_clock::now();
         long long RRmuls=GLOBALMUL/ITER;
-        long long cpuMULRR=cpuMUL/ITER;
+        //long long cpuMULRR=cpuMUL/ITER;
         double total2=chrono::duration<double,std::micro>(stop2-start2).count();
         double avgTimeRR=total2/ITER;
         
@@ -145,8 +145,8 @@ int main(){
                  setw(10)<<degD<<
                  setw(18)<<avgTimeNewton<<
                  setw(18)<<avgTimeRR<<"\n";
-                 //setw(14)<<newtonMuls<<
-                 //setw(14)<<RRmuls+cpuMULRR<<"\n";
+                 setw(14)<<newtonMuls<<
+                 setw(14)<<RRmuls<<"\n";
 
         degN*=2;
         degD*=2;
