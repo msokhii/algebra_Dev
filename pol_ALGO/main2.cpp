@@ -26,13 +26,14 @@ int mkM(vector<LONG>&m,const vector<LONG> &xs,const LONG p){
 }
 
 long long GLOBALMUL=0;
-// long long cpuMUL=0;
+long long GLOBALMUL64=0;
+long long GLOBALCPUMUL=0;
 int main(){
 
     LONG p=9223372036854775783;
     recint P=recip1(p);
-    int degN=64;
-    int degD=64;
+    int degN=4;
+    int degD=4;
     const int ITER=100000;
     const int STEP=2;
 
@@ -43,9 +44,12 @@ int main(){
         <<setw(10)<<"STEP"
         <<setw(10)<<"degN"
         <<setw(10)<<"degD"
-        <<setw(18)<<"avgTimeNewton"
-        <<setw(18)<<"avgTimeRR"
-        <<setw(14)<<"mulsNewton"
+        <<setw(18)<<"avgTimeNewton(mulRec)"
+        <<setw(18)<<"avgTimeNewton(mulSub)"
+        <<setw(18)<<"avgTimeRR(No CPU routines)"
+        <<setw(18)<<"avgTimeRR(CPU routines)"
+        <<setw(14)<<"mulsNewton(mulRec)"
+        <<setw(14)<<"mulsNewton(mulSub)"
         <<setw(14)<<"mulsRR"
         << "\n";
 
@@ -100,14 +104,27 @@ int main(){
 
         vector<LONG>yCopy(m,0);
         copy(y.begin(),y.end(),yCopy.begin());
-        int degU=newtonInterp(x.data(),yCopy.data(),m,p,P);
+        int degU=newtonInterpMulRec(x.data(),yCopy.data(),m,p,P);
+        
+        // Timer for newton interpolation using mulrec64 routine.
         GLOBALMUL=0;
         auto start=chrono::steady_clock::now();
         for(int i=0;i<ITER;i++){
             copy(y.begin(),y.end(),yCopy.begin());
-            int degU=newtonInterp(x.data(),yCopy.data(),m,p,P);
+            int degU=newtonInterpMulRec(x.data(),yCopy.data(),m,p,P);
         };
         auto stop=chrono::steady_clock::now();
+        
+        // Timer for newton interpolation using mul64b routine.
+        GLOBALMUL64=0;
+        auto newton2Start=chrono::steady_clock::now();
+        for(int i=0;i<ITER;i++){
+            copy(y.begin(),y.end(),yCopy.begin());
+            int degU=newtonInterpMulNormal(x.data(),yCopy.data(),m,p);
+        }
+        auto newton2Stop=chrono::steady_clock::now();
+        
+        // Timer for copying y into y0 for newton interpolation.
         auto cpStart=chrono::steady_clock::now();
         for(int i=0;i<ITER;i++){
             copy(y.begin(),y.end(),yCopy.begin());
@@ -115,40 +132,74 @@ int main(){
         auto cpStop=chrono::steady_clock::now();
         double cpTotal=chrono::duration<double,std::micro>(cpStop-cpStart).count();
         double total=chrono::duration<double,std::micro>(stop-start).count();
+        double newton2Total=chrono::duration<double,std::micro>(newton2Stop-newton2Start).count();
         double avgTimeCp=cpTotal/ITER;
         double avgTimeNewton=(total/ITER)-avgTimeCp;
+        double avgTimeNewton2=(newton2Total/ITER)-avgTimeCp;
         long long newtonMuls=GLOBALMUL/ITER;
+        long long newtonMuls2=GLOBALMUL64/ITER;
         vector<LONG>M(m+1,0);
         M[0]=1;
         int degM=mkM(M,x,p);
 
         RatReconFastWS W(degM);
+        RatReconFastWS W2(degM);
         vector<LONG>rOut(m,0);
         vector<LONG>tOut(m,0);
+        vector<LONG>rOut2(m,0);
+        vector<LONG>tOut2(m,0);
         int degR=-1;
         int degT=-1;
         int flag=-999;
+        int degR2=-1;
+        int degT2=-1;
+        int flag2=-999;
+        int degUCP=degU;
+        int degNCP=degN;
+        int degDCP=degD;
+        int mCP=m;
+        vector<LONG> MCP=M;
+        vector<LONG> yCP2=y;
         GLOBALMUL=0;
+        GLOBALCPUMUL=0;
+        GLOBALMUL64=0;
         auto start2=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
             flag=ratReconFastKernelWS(M,y,m,degU,
             degN,degD,p,W,rOut.data(),degR,tOut.data(),degT,P);
         }
         auto stop2=chrono::steady_clock::now();
+
+        auto rrNormStart=chrono::steady_clock::now();
+        for(int k=0;k<ITER;k++){
+            flag=ratReconNormal(MCP,yCP2,mCP,degUCP,
+            degNCP,degDCP,p,W2,rOut2.data(),degR2,tOut2.data(),degT2);
+        }
+        auto rrNormStop=chrono::steady_clock::now();
+
         long long RRmuls=GLOBALMUL/ITER;
-        //long long cpuMULRR=cpuMUL/ITER;
+        long long cpuMULRR=GLOBALCPUMUL/ITER;
+        long long totalRRMuls=RRmuls+cpuMULRR;
+        long long rrMulsNorm=GLOBALMUL64/ITER;
         double total2=chrono::duration<double,std::micro>(stop2-start2).count();
+        double rrNormTotal=chrono::duration<double,std::micro>(rrNormStop-rrNormStart).count();
         double avgTimeRR=total2/ITER;
-        
+        double avgTimeRRNorm=rrNormTotal/ITER;
+
         logFile<<left<<
                  setw(10)<<step<<
                  setw(10)<<degN<<
                  setw(10)<<degD<<
                  setw(18)<<avgTimeNewton<<
+                 setw(18)<<avgTimeNewton2<<
                  setw(18)<<avgTimeRR<<
+                 setw(18)<<avgTimeRRNorm<<
                  setw(14)<<newtonMuls<<
-                 setw(14)<<RRmuls<<"\n";
-
+                 setw(14)<<newtonMuls2<<
+                 setw(14)<<totalRRMuls<<
+                 setw(14)<<rrMulsNorm<<
+                 "\n";
+                  
         degN*=2;
         degD*=2;
     }

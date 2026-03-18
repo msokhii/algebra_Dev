@@ -9,6 +9,7 @@
 #include"int128g.hpp"
 
 using namespace std;
+extern long long GLOBALCPUMUL;
 
 struct RatReconFastWS{
     vector<LONG> r1;
@@ -69,18 +70,24 @@ struct GCDEXHIST{
 /* Fast CPU routines                                                                      */
 /******************************************************************************************/
 
-#define ZMUL(z,a,b) __asm__(\
+#define ZMUL(z,a,b) do { \
+        ++GLOBALCPUMUL; \
+        __asm__( \
         "       mulq    %%rdx   \n\t" \
-                : "=a"(z[0]), "=d"(z[1]) : "a"(a), "d"(b))
+                : "=a"(z[0]), "=d"(z[1]) \
+                : "a"(a), "d"(b)); \
+} while (0)
 
-#define ZFMA(z,a,b) do {        \
-        unsigned long u,v;              \
-        __asm__(                        \
+#define ZFMA(z,a,b) do { \
+        ++GLOBALCPUMUL; \
+        unsigned long u,v; \
+        __asm__( \
         "       mulq    %%rdx           \n\t" \
         "       addq    %%rax, %0       \n\t" \
         "       adcq    %%rdx, %1       \n\t" \
-                : "=&r"(z[0]), "=&r"(z[1]), "=a"(u), "=d"(v) : "0"(z[0]), "1"(z[1]), "a"(a), "d"(b));\
-        } while (0)
+                : "=&r"(z[0]), "=&r"(z[1]), "=a"(u), "=d"(v) \
+                : "0"(z[0]), "1"(z[1]), "a"(a), "d"(b)); \
+} while (0)
 
 #define ZMOD(z,p) __asm__(\
         "       divq    %4      \n\t" \
@@ -1913,4 +1920,84 @@ degT1 = oldDegT2;
 degROut = -1;
 degTOut = -1;
 return -20;
+};
+
+int ratReconNormal(const vector<LONG> &m,
+                   const vector<LONG> &u,
+                   int degM,
+                   int degU,
+                   int N,
+                   int D,
+                   const LONG p,
+                   RatReconFastWS &W,
+                   LONG *rOut,
+                   int &degROut,
+                   LONG *tOut,
+                   int &degTOut){
+    std::copy_n(m.data(),degM+1,W.r1.data());
+    std::copy_n(u.data(),degU+1,W.r2.data());
+    W.t2[0]=1;
+    int degA=degM;
+    int degB=degU;
+    int degT1=-1;
+    int degT2=0;
+    if(degA<degB){
+        std::swap(W.r1,W.r2);
+        std::swap(degA,degB);
+        std::swap(W.t1,W.t2);
+        std::swap(degT1,degT2);
+    }
+    while(degB!=-1){
+        if(degB==N){
+            degROut=degB;
+            degTOut=degT2;
+            std::copy_n(W.r2.data(),degROut+1,rOut);
+            std::copy_n(W.t2.data(),degTOut+1,tOut);
+            return 0;
+        }
+        LONG uInv,aVal,bVal;
+        int degR,degQ,degT;
+        if(degB>0 && degA-degB==1){
+            uInv=modinv64b(W.r2[degB],p);
+            aVal=mul64b(W.r1[degA],uInv,p);
+            bVal=mul64b(aVal,W.r2[degB-1],p);
+            bVal=mul64b(uInv,sub64b(W.r1[degA-1],bVal,p),p);
+            degR=polSUBMUL64(W.r1.data(),W.r2.data(),
+                            aVal,bVal,degA,degB,p);
+            degT=polSUBMUL64(W.t1.data(),W.t2.data(),
+                            aVal,bVal,degT1,degT2,p);
+        }
+        else{
+            degR=polDIVIP64(W.r1.data(),W.r2.data(),degA,degB,p);
+            degQ=degA-degB;
+            for(int i=0;i<=degQ;i++){
+                W.q[i]=W.r1[degB+i];
+            }
+            if(degT2>=0){
+                for(int i=0;i<=degT2;i++){
+                    W.tmpT[i]=W.t2[i];
+                }
+
+            int degTmpT=degT2;
+            degTmpT=pMULIP64(W.tmpT.data(),W.q.data(),degTmpT,degQ,p);
+            degT=pSUBIP64(W.t1.data(),W.tmpT.data(),degT1,degTmpT,p);
+            }
+        else{
+            degT=degT1;
+        }
+        }
+        if(degR<0){
+            break;
+        }
+        std::swap(W.r1,W.r2);
+        degA=degB;
+        degB=degR;
+        std::swap(W.t1,W.t2);
+        int oldDegT2=degT2;
+        degT2=degT;
+        degT1=oldDegT2;
+    }
+    degROut=-1;
+    degTOut=-1;
+    return -20;
 };
