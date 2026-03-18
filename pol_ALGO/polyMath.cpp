@@ -1842,7 +1842,7 @@ std::swap(degT1, degT2);
 while(degB != -1){
 
 // Stop at the first index k such that deg(r_k) <= N
-if(degB <= N){
+if(degB = N){
 degROut = degB;
 degTOut = degT2;
 
