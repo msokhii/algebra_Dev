@@ -43,7 +43,7 @@ int main(){
         <<setw(10)<<"degN"
         <<setw(10)<<"degD"
         <<setw(18)<<"avgTimeNewton"
-        <<setw(18)<<"avgTimeRR"<<"\n";
+        <<setw(18)<<"avgTimeRR"
         <<setw(14)<<"mulsNewton"
         <<setw(14)<<"mulsRR"
         << "\n";
@@ -144,7 +144,7 @@ int main(){
                  setw(10)<<degN<<
                  setw(10)<<degD<<
                  setw(18)<<avgTimeNewton<<
-                 setw(18)<<avgTimeRR<<"\n";
+                 setw(18)<<avgTimeRR<<
                  setw(14)<<newtonMuls<<
                  setw(14)<<RRmuls<<"\n";
 
