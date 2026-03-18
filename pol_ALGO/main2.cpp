@@ -44,13 +44,14 @@ int main(){
         <<setw(10)<<"STEP"
         <<setw(10)<<"degN"
         <<setw(10)<<"degD"
-        <<setw(18)<<"avgTimeNewton(mulRec)"
-        <<setw(18)<<"avgTimeNewton(mulSub)"
-        <<setw(18)<<"avgTimeRR(No CPU routines)"
-        <<setw(18)<<"avgTimeRR(CPU routines)"
-        <<setw(14)<<"mulsNewton(mulRec)"
-        <<setw(14)<<"mulsNewton(mulSub)"
-        <<setw(14)<<"mulsRR"
+        <<setw(28)<<"avgTimeNewton(mulRec)"
+        <<setw(28)<<"avgTimeNewton(mulSub)"
+        <<setw(28)<<"avgTimeRR(CPU routines)"
+        <<setw(28)<<"avgTimeRR(No CPU routines)"
+        <<setw(22)<<"mulsNewton(mulRec)"
+        <<setw(22)<<"mulsNewton(mulSub)"
+        <<setw(18)<<"mulsRR"
+        <<setw(18)<<"mulsRRNorm"
         << "\n";
 
     for(int step=1;step<STEP;step++){
@@ -190,14 +191,14 @@ int main(){
                  setw(10)<<step<<
                  setw(10)<<degN<<
                  setw(10)<<degD<<
-                 setw(18)<<avgTimeNewton<<
-                 setw(18)<<avgTimeNewton2<<
-                 setw(18)<<avgTimeRR<<
-                 setw(18)<<avgTimeRRNorm<<
-                 setw(14)<<newtonMuls<<
-                 setw(14)<<newtonMuls2<<
-                 setw(14)<<totalRRMuls<<
-                 setw(14)<<rrMulsNorm<<
+                 setw(28)<<avgTimeNewton<<
+                 setw(28)<<avgTimeNewton2<<
+                 setw(28)<<avgTimeRR<<
+                 setw(28)<<avgTimeRRNorm<<
+                 setw(22)<<newtonMuls<<
+                 setw(22)<<newtonMuls2<<
+                 setw(18)<<totalRRMuls<<
+                 setw(18)<<rrMulsNorm<<
                  "\n";
                   
         degN*=2;
