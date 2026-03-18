@@ -1814,8 +1814,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
     int &degROut,
     LONG *tOut,
     int &degTOut,
-    recint P)
-{
+    recint P){
 
 // Copy inputs into workspace
 std::copy_n(m.data(), degM + 1, W.r1.data());
@@ -1841,8 +1840,8 @@ std::swap(degT1, degT2);
 
 while(degB != -1){
 
-// Stop at the first index k such that deg(r_k) <= N
-if(degB = N){
+// Stop at the first index k such that deg(r_k) == N
+if(degB==N){
 degROut = degB;
 degTOut = degT2;
 
@@ -1914,5 +1913,4 @@ degT1 = oldDegT2;
 degROut = -1;
 degTOut = -1;
 return -20;
-}
-
+};

@@ -31,10 +31,10 @@ int main(){
 
     LONG p=9223372036854775783;
     recint P=recip1(p);
-    int degN=4;
-    int degD=4;
+    int degN=64;
+    int degD=64;
     const int ITER=100000;
-    const int STEP=11;
+    const int STEP=2;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
