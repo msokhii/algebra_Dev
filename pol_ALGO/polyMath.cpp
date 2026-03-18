@@ -1663,18 +1663,13 @@ SHORT SUMMARY OF THE ABOVE ROUTINE:
 static inline void makeDenMonicOut64(LONG *num, int degNum,
                                      LONG *den, int degDen,
                                      const LONG p,recint P){
-    if(degDen < 0) return;
-
-    LONG lc = den[degDen] % p;
-    if(lc < 0) lc += p;
-
-    if(lc != 1){
-        LONG inv = modinv64b(lc, p);
+    if(den[degDen]!=1){
+        LONG inv=modinv64b(den[degDen],p);
         for(int i=0;i<=degDen;i++){
-            den[i] = mulrec64(den[i],inv,P);
+            den[i]=mulrec64(den[i],inv,P);
         }
         for(int i=0;i<=degNum;i++){
-            num[i] = mulrec64(num[i],inv,P);
+            num[i]=mulrec64(num[i],inv,P);
         }
     }
 }
@@ -1690,27 +1685,13 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                          LONG *rOut,
                          int &degROut,
                          LONG *tOut,
-                         int &degTOut){
-
-    
-    /*
-    if(degM < 0 || degU < 0){
-        degROut = -1;
-        degTOut = -1;
-        return -10; // Bad input.
-    }
-    */
-
-    recint P=recip1(p);
+                         int &degTOut,
+                         recint P){
     auto boundCheck = [&](int degR, int degT)->bool{
         if(degR > N) return false;
         if(D < 0) return true;
         return degT <= D;
     };
-
-    // reset only what must be reset
-    // fill(W.t1.begin(), W.t1.end(), 0);
-    // fill(W.t2.begin(), W.t2.end(), 0);
 
     /* copy inputs into workspace
     for(int i=0;i<=degM;i++){
@@ -1756,7 +1737,7 @@ int ratReconFastKernelWS(const vector<LONG> &m,
             // std::copy_n(W.r2.data(), degROut + 1, rOut);
             // std::copy_n(W.t2.data(), degTOut + 1, tOut);
 
-            makeDenMonicOut64(rOut,degROut,tOut,degTOut,p,P);
+            // makeDenMonicOut64(rOut,degROut,tOut,degTOut,p,P);
             return 0;
         }
 
