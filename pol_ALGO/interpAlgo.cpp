@@ -9,11 +9,11 @@ using namespace std;
 int newtonInterp(LONG* x,
     LONG* y,
     const int n,
-    const LONG p){
+    const LONG p,
+    recint P){
     if(n<1){
         return -1;
     }
-    recint P=recip1(p);
     LONG *X=x;
     LONG *Y=y;
     int d;

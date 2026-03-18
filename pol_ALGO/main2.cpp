@@ -26,10 +26,11 @@ int mkM(vector<LONG>&m,const vector<LONG> &xs,const LONG p){
 }
 
 long long GLOBALMUL=0;
-long long cpuMUL=0;
+// long long cpuMUL=0;
 int main(){
 
     LONG p=9223372036854775783;
+    recint P=recip1(p);
     int degN=1;
     int degD=1;
     const int ITER=100000;
@@ -99,12 +100,12 @@ int main(){
 
         vector<LONG>yCopy(m,0);
         copy(y.begin(),y.end(),yCopy.begin());
-        int degU=newtonInterp2(x.data(),yCopy.data(),m,p);
+        int degU=newtonInterp(x.data(),yCopy.data(),m,p,P);
         GLOBALMUL=0;
         auto start=chrono::steady_clock::now();
         for(int i=0;i<ITER;i++){
             copy(y.begin(),y.end(),yCopy.begin());
-            int degU=newtonInterp2(x.data(),yCopy.data(),m,p);
+            int degU=newtonInterp(x.data(),yCopy.data(),m,p,P);
         };
         auto stop=chrono::steady_clock::now();
         auto cpStart=chrono::steady_clock::now();
@@ -131,7 +132,7 @@ int main(){
         auto start2=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
             flag=ratReconFastKernelWS(M,y,m,degU,
-            degN,degD,p,W,rOut.data(),degR,tOut.data(),degT);
+            degN,degD,p,W,rOut.data(),degR,tOut.data(),degT,P);
         }
         auto stop2=chrono::steady_clock::now();
         long long RRmuls=GLOBALMUL/ITER;

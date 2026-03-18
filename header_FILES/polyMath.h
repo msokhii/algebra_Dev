@@ -2,6 +2,7 @@
 
 #include"integerMath.h"
 #include"helperF.h"
+#include"int128g.hpp"
 #include<vector>
 #include<cstdint> 
 #include<unordered_map>
@@ -117,6 +118,12 @@ int pMULIP64(LONG *a,
              int degA,
              int degB,
              const LONG p);
+int polMUL64P(LONG *a,
+              LONG *b,
+              int degA,
+              int degB,
+              LONG p,
+              recint P);
 int pMULIP64VANDER(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p);
 int polSUBMUL64(LONG *a,
                 const LONG *b,
@@ -175,5 +182,6 @@ int ratReconFastKernelWS(const vector<LONG> &m,
                          LONG *rOut,
                          int &degROut,
                          LONG *tOut,
-                         int &degTOut);
+                         int &degTOut,
+                         recint P);
 pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,int N,int D,const LONG p);
