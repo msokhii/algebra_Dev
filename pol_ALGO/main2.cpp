@@ -99,12 +99,12 @@ int main(){
 
         vector<LONG>yCopy(m,0);
         copy(y.begin(),y.end(),yCopy.begin());
-        int degU=newtonInterp(x.data(),yCopy.data(),m,p);
+        int degU=newtonInterp2(x.data(),yCopy.data(),m,p);
         GLOBALMUL=0;
         auto start=chrono::steady_clock::now();
         for(int i=0;i<ITER;i++){
             copy(y.begin(),y.end(),yCopy.begin());
-            int degU=newtonInterp(x.data(),yCopy.data(),m,p);
+            int degU=newtonInterp2(x.data(),yCopy.data(),m,p);
         };
         auto stop=chrono::steady_clock::now();
         auto cpStart=chrono::steady_clock::now();
