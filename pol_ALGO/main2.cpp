@@ -34,8 +34,8 @@ int main(){
     recint P=recip1(p);
     int degN=4;
     int degD=4;
-    const int ITER=100000;
-    const int STEP=7;
+    const int ITER=1000;
+    const int STEP=11;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
