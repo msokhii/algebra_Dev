@@ -35,7 +35,7 @@ int main(){
     int degN=5;
     int degD=5;
     const int ITER=100000;
-    const int STEP=5;
+    const int STEP=7;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
@@ -189,9 +189,6 @@ int main(){
             degNCP,degDCP,p,W2,rOut2.data(),degR2,tOut2.data(),degT2);
         }
         auto rrNormStop=chrono::steady_clock::now();
-
-        GLOBALCPUMUL=0;
-        GLOBALMUL=0;
         auto rrNorm2Start=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
             flag3=ratRecon2(MCP3,yCP3,mCP3,degUCP3,
