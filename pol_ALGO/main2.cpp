@@ -32,8 +32,8 @@ int main(){
 
     LONG p=9223372036854775783;
     recint P=recip1(p);
-    int degN=5;
-    int degD=5;
+    int degN=4;
+    int degD=4;
     const int ITER=100000;
     const int STEP=7;
 
@@ -52,7 +52,6 @@ int main(){
         <<setw(22)<<"mulsNewton(mulRec)"
         <<setw(22)<<"mulsNewton(mulSub)"
         <<setw(18)<<"mulsRR"
-        <<setw(18)<<"mulsRRNorm"
         << "\n";
 
     for(int step=1;step<STEP;step++){
@@ -199,7 +198,6 @@ int main(){
         long long RRmuls=GLOBALMUL/ITER;
         long long cpuMULRR=GLOBALCPUMUL/ITER;
         long long totalRRMuls=RRmuls;
-        long long rrMulsNorm=(GLOBALMUL64/ITER)+cpuMULRR;
         double total2=chrono::duration<double,std::micro>(stop2-start2).count();
         double rrNormTotal=chrono::duration<double,std::micro>(rrNormStop-rrNormStart).count();
         double rrNorm2Total=chrono::duration<double,std::micro>(rrNorm2Stop-rrNorm2Start).count();
@@ -219,7 +217,6 @@ int main(){
                  setw(22)<<newtonMuls<<
                  setw(22)<<newtonMuls2<<
                  setw(18)<<totalRRMuls<<
-                 setw(18)<<rrMulsNorm<<
                  "\n";
                   
         degN*=2;
