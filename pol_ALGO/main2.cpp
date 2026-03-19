@@ -46,8 +46,8 @@ int main(){
         <<setw(10)<<"degD"
         <<setw(28)<<"avgTimeNewton(mulRec)"
         <<setw(28)<<"avgTimeNewton(mulSub)"
-        <<setw(28)<<"avgTimeRR(CPU routines)"
-        <<setw(28)<<"avgTimeRR(No CPU routines)"
+        <<setw(28)<<"avgTimeRR(No CPU ~ mulRec)"
+        <<setw(28)<<"avgTimeRR(CPU ~ mulSub)"
         <<setw(22)<<"mulsNewton(mulRec)"
         <<setw(22)<<"mulsNewton(mulSub)"
         <<setw(18)<<"mulsRR"
@@ -162,15 +162,14 @@ int main(){
         vector<LONG> MCP=M;
         vector<LONG> yCP2=y;
         GLOBALMUL=0;
-        GLOBALCPUMUL=0;
-        GLOBALMUL64=0;
         auto start2=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
             flag=ratReconFastKernelWS(M,y,m,degU,
             degN,degD,p,W,rOut.data(),degR,tOut.data(),degT,P);
         }
         auto stop2=chrono::steady_clock::now();
-
+        GLOBALMUL64=0;
+        GLOBALCPUMUL=0;
         auto rrNormStart=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
             flag=ratReconNormal(MCP,yCP2,mCP,degUCP,
@@ -180,8 +179,8 @@ int main(){
 
         long long RRmuls=GLOBALMUL/ITER;
         long long cpuMULRR=GLOBALCPUMUL/ITER;
-        long long totalRRMuls=RRmuls+cpuMULRR;
-        long long rrMulsNorm=GLOBALMUL64/ITER;
+        long long totalRRMuls=RRmuls;
+        long long rrMulsNorm=(GLOBALMUL64/ITER)+cpuMULRR;
         double total2=chrono::duration<double,std::micro>(stop2-start2).count();
         double rrNormTotal=chrono::duration<double,std::micro>(rrNormStop-rrNormStart).count();
         double avgTimeRR=total2/ITER;
