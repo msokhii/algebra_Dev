@@ -1,4 +1,7 @@
 PRIME -> 9223372036854775783
 CALLS -> 100000
-STEP      degN      degD      avgTimeNewton(mulRec)       avgTimeNewton(mulSub)       avgTimeRR(CPU routines)     avgTimeRR(No CPU routines)  mulsNewton(mulRec)    mulsNewton(mulSub)    mulsRR            mulsRRNorm        
-1         4         4         0.994105                    1.98158                     2.16954                     3.38436                     100                   100                   156               28                
+STEP      degN      degD      avgTimeNewton(mulRec)       avgTimeNewton(mul64)        avgTimeRR(No CPU+mulRec)    avgTimeRR(CPU+mul64)        mulsNewton(mulRec)    mulsNewton(mulSub)    mulsRR            mulsRRNorm        
+1         5         5         0.751483                    0.813746                    1.45546                     1.31847                     155                   155                   135               135               
+2         10        10        3.57069                     3.94882                     3.42243                     2.93564                     610                   610                   470               470               
+3         20        20        13.3796                     15.4919                     8.78094                     6.9341                      2420                  2420                  1740              1740              
+4         40        40        44.4359                     53.1897                     25.5811                     18.3367                     9640                  9640                  6680              6680              
