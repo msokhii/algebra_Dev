@@ -32,10 +32,10 @@ int main(){
 
     LONG p=9223372036854775783;
     recint P=recip1(p);
-    int degN=4;
-    int degD=4;
+    int degN=5;
+    int degD=5;
     const int ITER=100000;
-    const int STEP=2;
+    const int STEP=5;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
@@ -45,9 +45,15 @@ int main(){
         <<setw(10)<<"degN"
         <<setw(10)<<"degD"
         <<setw(28)<<"avgTimeNewton(mulRec)"
+<<<<<<< HEAD
         <<setw(28)<<"avgTimeNewton(mulSub)"
         <<setw(28)<<"avgTimeRR(No CPU ~ mulRec)"
         <<setw(28)<<"avgTimeRR(CPU ~ mulSub)"
+=======
+        <<setw(28)<<"avgTimeNewton(mul64)"
+        <<setw(28)<<"avgTimeRR(No CPU+mulRec)"
+        <<setw(28)<<"avgTimeRR(CPU+mul64)"
+>>>>>>> 391ff8f547858484a25f15ecfd751e1cd5abd64f
         <<setw(22)<<"mulsNewton(mulRec)"
         <<setw(22)<<"mulsNewton(mulSub)"
         <<setw(18)<<"mulsRR"
@@ -168,8 +174,13 @@ int main(){
             degN,degD,p,W,rOut.data(),degR,tOut.data(),degT,P);
         }
         auto stop2=chrono::steady_clock::now();
+<<<<<<< HEAD
         GLOBALMUL64=0;
         GLOBALCPUMUL=0;
+=======
+        GLOBALCPUMUL=0;
+        GLOBALMUL64=0;
+>>>>>>> 391ff8f547858484a25f15ecfd751e1cd5abd64f
         auto rrNormStart=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
             flag=ratReconNormal(MCP,yCP2,mCP,degUCP,
