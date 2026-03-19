@@ -189,4 +189,17 @@ int ratReconNormal(const vector<LONG> &m,
                    int &degROut,
                    LONG *tOut,
                    int &degTOut);
+int ratRecon2(const vector<LONG> &m,
+                   const vector<LONG> &u,
+                   int degM,
+                   int degU,
+                   int N,
+                   int D,
+                   const LONG p,
+                   RatReconFastWS &W,
+                   LONG *rOut,
+                   int &degROut,
+                   LONG *tOut,
+                   int &degTOut,
+                   recint P);
 pairRFR ratRecon(const vector<LONG> &m,const vector<LONG> &u,int degM,int degU,int N,int D,const LONG p);

@@ -45,15 +45,10 @@ int main(){
         <<setw(10)<<"degN"
         <<setw(10)<<"degD"
         <<setw(28)<<"avgTimeNewton(mulRec)"
-<<<<<<< HEAD
-        <<setw(28)<<"avgTimeNewton(mulSub)"
-        <<setw(28)<<"avgTimeRR(No CPU ~ mulRec)"
-        <<setw(28)<<"avgTimeRR(CPU ~ mulSub)"
-=======
         <<setw(28)<<"avgTimeNewton(mul64)"
         <<setw(28)<<"avgTimeRR(No CPU+mulRec)"
         <<setw(28)<<"avgTimeRR(CPU+mul64)"
->>>>>>> 391ff8f547858484a25f15ecfd751e1cd5abd64f
+        <<setw(28)<<"avgTimeRR(CPU+mulRec)"
         <<setw(22)<<"mulsNewton(mulRec)"
         <<setw(22)<<"mulsNewton(mulSub)"
         <<setw(18)<<"mulsRR"
@@ -151,22 +146,34 @@ int main(){
 
         RatReconFastWS W(degM);
         RatReconFastWS W2(degM);
+        RatReconFastWS W3(degM);
         vector<LONG>rOut(m,0);
         vector<LONG>tOut(m,0);
         vector<LONG>rOut2(m,0);
         vector<LONG>tOut2(m,0);
+        vector<LONG>rOut3(m,0);
+        vector<LONG>tOut3(m,0);
         int degR=-1;
         int degT=-1;
         int flag=-999;
         int degR2=-1;
         int degT2=-1;
         int flag2=-999;
+        int degR3=-1;
+        int degT3=-1;
+        int flag3=-999;
         int degUCP=degU;
         int degNCP=degN;
         int degDCP=degD;
         int mCP=m;
+        int degUCP3=degU;
+        int degNCP3=degN;
+        int degDCP3=degD;
+        int mCP3=m;
         vector<LONG> MCP=M;
         vector<LONG> yCP2=y;
+        vector<LONG> MCP3=M;
+        vector<LONG> yCP3=y;
         GLOBALMUL=0;
         auto start2=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
@@ -174,29 +181,35 @@ int main(){
             degN,degD,p,W,rOut.data(),degR,tOut.data(),degT,P);
         }
         auto stop2=chrono::steady_clock::now();
-<<<<<<< HEAD
-        GLOBALMUL64=0;
-        GLOBALCPUMUL=0;
-=======
         GLOBALCPUMUL=0;
         GLOBALMUL64=0;
->>>>>>> 391ff8f547858484a25f15ecfd751e1cd5abd64f
         auto rrNormStart=chrono::steady_clock::now();
         for(int k=0;k<ITER;k++){
-            flag=ratReconNormal(MCP,yCP2,mCP,degUCP,
+            flag2=ratReconNormal(MCP,yCP2,mCP,degUCP,
             degNCP,degDCP,p,W2,rOut2.data(),degR2,tOut2.data(),degT2);
         }
         auto rrNormStop=chrono::steady_clock::now();
 
+        GLOBALCPUMUL=0;
+        GLOBALMUL=0;
+        auto rrNorm2Start=chrono::steady_clock::now();
+        for(int k=0;k<ITER;k++){
+            flag3=ratRecon2(MCP3,yCP3,mCP3,degUCP3,
+            degNCP3,degDCP3,p,W3,rOut3.data(),degR3,tOut3.data(),degT3,P);
+        }
+        auto rrNorm2Stop=chrono::steady_clock::now();
+        
         long long RRmuls=GLOBALMUL/ITER;
         long long cpuMULRR=GLOBALCPUMUL/ITER;
         long long totalRRMuls=RRmuls;
         long long rrMulsNorm=(GLOBALMUL64/ITER)+cpuMULRR;
         double total2=chrono::duration<double,std::micro>(stop2-start2).count();
         double rrNormTotal=chrono::duration<double,std::micro>(rrNormStop-rrNormStart).count();
+        double rrNorm2Total=chrono::duration<double,std::micro>(rrNorm2Stop-rrNorm2Start).count();
         double avgTimeRR=total2/ITER;
         double avgTimeRRNorm=rrNormTotal/ITER;
-
+        double avgTimeRRNorm2=rrNorm2Total/ITER;
+        
         logFile<<left<<
                  setw(10)<<step<<
                  setw(10)<<degN<<
@@ -205,6 +218,7 @@ int main(){
                  setw(28)<<avgTimeNewton2<<
                  setw(28)<<avgTimeRR<<
                  setw(28)<<avgTimeRRNorm<<
+                 setw(28)<<avgTimeRRNorm2<<
                  setw(22)<<newtonMuls<<
                  setw(22)<<newtonMuls2<<
                  setw(18)<<totalRRMuls<<
