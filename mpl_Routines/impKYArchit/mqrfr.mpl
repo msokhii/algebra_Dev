@@ -10,7 +10,7 @@ MQ := proc(r0::polynom,r1::polynom,t0::integer,t1::integer,p::prime)
     i    := 1:
     while r[i] <> 0 do
         q[i] := Quo(r[i-1],r[i],x,'r[i+1]') mod p:
-        if degree(q[i],x)>qMax then
+        if degree(q[i],x) > qMax then
             qMax := degree(q[i],x):
             f    := r[i]:
             g    := t[i]:
