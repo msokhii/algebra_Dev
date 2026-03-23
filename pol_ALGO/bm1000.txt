@@ -1,6 +1,6 @@
 PRIME -> 9223372036854775783
 CALLS -> 1000
-STEP      degN      degD      avgTimeNewton(mulRec)       avgTimeNewton(mul64)        avgTimeRR(No CPU+mulRec)    avgTimeRR(CPU+mul64)        avgTimeRR(CPU+mulRec)       mulsNewton(mulRec)    mulsNewton(mulSub)    mulsRR            
+STEP      degN      degD      avgTimeNewton(mulRec)       avgTimeNewton(mul64)        avgTimeRR(No CPU+mulRec)    avgTimeRR(ZFMA+mul64)       avgTimeRR(CPU+mulRec)       mulsNewton(mulRec)    mulsNewton(mul64)    mulsRR            
 1         4         4         0.499679                    0.5305                      1.07531                     1.0108                      1.01258                     100                   100                   104               
 2         8         8         2.13413                     2.35247                     2.57069                     2.30819                     2.30438                     392                   392                   336               
 3         16        16        8.94434                     10.1762                     6.19199                     5.11269                     5.08926                     1552                  1552                  1184              

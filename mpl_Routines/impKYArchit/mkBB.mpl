@@ -15,7 +15,7 @@ getBB := proc(arg1,arg2,arg3)
     print(L);
     BB := proc(arg11::list(integer),p::prime)
         local pt,subVal,evalL,numEq,matA,errT,solX:
-
+        uses LinearAlgebra:-Modular:
         pt := arg11:
         global counter:
         counter=counter+1:
