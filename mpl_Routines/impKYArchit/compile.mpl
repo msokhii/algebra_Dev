@@ -7,6 +7,7 @@ read "helperFunc.mpl":
 read "mqrfr.mpl":
 read "ndsa.mpl":
 read "getPtAffLn.mpl":
+read "mrfi.mpl":
 
 (* Generate the system of equations. *)
 sys,xVar,yVar,nopsX,nopsY := genSystem("mike"):
@@ -20,12 +21,17 @@ nopsY;
 bkBox:= getBB(sys,xVar,yVar):
 
 (* Choose a prime. *)
-p := prevprime(2^63-1):
+p := 107:
 p;
 
 solX := bkBox([1,2,3,4,5],p):
 solX;
 
-MQRFRres,linSys := NDSA(BB,[seq(1,i=1..2)],2,p,4,2):
-MQRFRres;
-linSys;
+try
+    num,den := MRFI(bkBox,nopsX,nopsY,yVar,p):
+    catch:
+    lprint("ERROR: ",lasterror()):
+end try:
+
+num;
+den;

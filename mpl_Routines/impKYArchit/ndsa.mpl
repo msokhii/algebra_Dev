@@ -1,6 +1,6 @@
 with(LinearAlgebra):
 
-NDSA := proc(BB,sigmaVal,betaVal,numVar,numPt,numEq)
+NDSA := proc(BB,sigmaVal,betaVal,numVar,p,numPt,numEq)
     local MQRFRDone,correctDeg,linSys,T,res,count,r,
           alphaVal,m,psiAlpha,yVal,M,row,col,u,
           degQ,temp: 
@@ -19,8 +19,11 @@ NDSA := proc(BB,sigmaVal,betaVal,numVar,numPt,numEq)
         printf("T: ",T):
         r := rand(p):
         alphaVal := [seq(i mod p,i=1..T)]:
+        print(alphaVal):
         m := Expand(product(x-alphaVal[j],j=1..T)) mod p:
+        print(betaVal):
         psiAlpha := GPAFL(numVar,alphaVal,betaVal,sigmaVal,p,T):
+        print(psiAlpha):
         yVal := [seq(BB(psiAlpha[i],p),i=1..T)]:
         M := Matrix(yVal):
         row,col := Dimension(M):
@@ -53,7 +56,7 @@ NDSA := proc(BB,sigmaVal,betaVal,numVar,numPt,numEq)
                     MQRFRDone[i] := true:
                 fi:
             od:
-            deqQ := min(DQ):
+            degQ := min(DQ):
         fi: 
 
         if degQ>1 then
