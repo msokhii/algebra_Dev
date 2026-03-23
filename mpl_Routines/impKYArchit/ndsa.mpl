@@ -1,11 +1,11 @@
 with(LinearAlgebra):
 
 NDSA := proc(BB,sigmaVal,betaVal,numVar,numPt,numEq)
-    local MQRFRDone,correctDeg,linSys,T,res,count,r
+    local MQRFRDone,correctDeg,linSys,T,res,count,r,
           alphaVal,m,psiAlpha,yVal,M,row,col,u,
           degQ,temp: 
 
-    printf("IN NDSA NOW!")
+    printf("IN NDSA NOW!"):
     MQRFRDone  := [seq(false,i=1..numEq)]:
     correctDeg := false:
     linSys     := false:
@@ -29,6 +29,7 @@ NDSA := proc(BB,sigmaVal,betaVal,numVar,numPt,numEq)
             linSys := false:
             u      := Interp(alphaVal,yVal,x) mod p:
             res    := [[MQ(m,u,0,1,p)]]:
+            print(res);
             degQ   := res[1][3]:
         else:
             linSys := true:
@@ -43,6 +44,7 @@ NDSA := proc(BB,sigmaVal,betaVal,numVar,numPt,numEq)
                 fi:
                 temp := [op(temp),MQ(m,u[i],0,1,p)]:
                 res[i] := temp:
+                print(res);
                 temp := []:
             od:
             DQ := [seq(res[i][3],i=1..nops(res))]:
@@ -61,6 +63,7 @@ NDSA := proc(BB,sigmaVal,betaVal,numVar,numPt,numEq)
             for i from 1 to numEq do
                 if MQRFRDone[i] = false then
                     res[i] := []:
+                    print(res);
                 fi:
             od:
             DQ := []:

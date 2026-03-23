@@ -2,9 +2,9 @@ MRFI := proc(BB,arg2,arg3,arg4,p)
     local numVars,numEq,vars,randNum,pList,sigmaVal,
           numEval,denomEval,T,T_old,ptMQRFR:
 
-    numVars := arg2:
-    numEq   := arg3:
-    vars    := arg4:
+    numVars := arg2: (* Nops xVars. *)
+    numEq   := arg3: (* Nops yVars. *)
+    vars    := arg4: (* Actual yVars. *)
 
     lprint("STARTING MRFI: "):
     lprint("No. of parameters -> ",numVars):
