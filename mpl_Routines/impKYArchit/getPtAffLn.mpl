@@ -2,8 +2,8 @@ GPAFL := proc(numVar,alphaVal,betaVal,sigmaVal,p,T)
     option remember:
     local psi,nV,nP,i:
     
-    global numLines:
-    numLines := numLines+1:
+    # global numLines:
+    # numLines := numLines+1:
 
     if numVar<2 then
         error "-1":
