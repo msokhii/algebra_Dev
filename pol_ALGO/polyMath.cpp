@@ -9,7 +9,7 @@
 #include"int128g.hpp"
 
 using namespace std;
-extern long long GLOBALCPUMUL;
+// extern long long GLOBALCPUMUL;
 
 struct RatReconFastWS{
     vector<LONG> r1;
@@ -71,7 +71,6 @@ struct GCDEXHIST{
 /******************************************************************************************/
 
 #define ZMUL(z,a,b) do { \
-        ++GLOBALCPUMUL; \
         __asm__( \
         "       mulq    %%rdx   \n\t" \
                 : "=a"(z[0]), "=d"(z[1]) \
@@ -79,7 +78,6 @@ struct GCDEXHIST{
 } while (0)
 
 #define ZFMA(z,a,b) do { \
-        ++GLOBALCPUMUL; \
         unsigned long u,v; \
         __asm__( \
         "       mulq    %%rdx           \n\t" \
@@ -1848,14 +1846,40 @@ std::swap(degT1, degT2);
 while(degB != -1){
 
 // Stop at the first index k such that deg(r_k) == N
-if(degB==N){
-degROut = degB;
-degTOut = degT2;
+if(degB == N){
+    degROut = degB;
+    degTOut = degT2;
 
-std::copy_n(W.r2.data(), degROut + 1, rOut);
-std::copy_n(W.t2.data(), degTOut + 1, tOut);
+    std::copy_n(W.r2.data(), degROut + 1, rOut);
+    std::copy_n(W.t2.data(), degTOut + 1, tOut);
 
-return 0;
+    // Normalize so denominator is monic
+    if(degTOut >= 0){
+        LONG lc = tOut[degTOut];
+        if(lc == 0){
+            degROut = -1;
+            degTOut = -1;
+            return -30; // unexpected bad denominator
+        }
+
+        if(lc != 1){
+            LONG lcInv = modinv64b(lc, p);
+            if(lcInv == 0){
+                degROut = -1;
+                degTOut = -1;
+                return -31; // inverse does not exist
+            }
+
+            for(int i = 0; i <= degROut; i++){
+                rOut[i] = mulrec64(rOut[i], lcInv, P);
+            }
+            for(int i = 0; i <= degTOut; i++){
+                tOut[i] = mulrec64(tOut[i], lcInv, P);
+            }
+        }
+    }
+
+    return 0;
 }
 
 LONG uInv, aVal, bVal;

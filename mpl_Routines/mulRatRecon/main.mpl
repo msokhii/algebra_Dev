@@ -13,8 +13,9 @@ read "./data_gen.mpl":
 read "./helpers.mpl":
 read "./af2.mpl":
 read "./MRFI2.mpl":
-
-
+read "./cppRatRecon.mpl":
+read "./cppNewtonInterp.mpl":
+read "./cppVSolve.mpl":
 
 (* Vars,F,G,num_vars,num_eqn,params := get_data(1):
 counter := 0:
@@ -26,59 +27,53 @@ lprint("Denominator G:", G):
 print("num_eqn =",num_eqn):
 *)
 
+(*
+test_case:="rand":
+num_var:=3:
+num_terms:=11:
+den_terms:=9:
+Vars,F,G,num_vars,num_eqn,params:=get_data(test_case,num_var,num_terms,den_terms):
+counter := 0:
+num_lines:=0:
+B:= Construct_Rational_Blackbox(F,G,Vars):
+*)
 
+(*
+test_case:="rat_rand":
+num_var:=3:
+num_terms:=11:
+den_terms:=9:
+num_coeff_bound:=20:
+den_coeff_bound:=20:
+Vars,F,G,num_vars,num_eqn,params:=get_data(test_case,num_var,num_terms,den_terms,num_coeff_bound,den_coeff_bound):
+counter := 0:
+B:= Construct_Rational_Blackbox(F,G,Vars):
+*)
 
-
-# test_case:="rand":
-# num_var:=3:
-# num_terms:=11:
-# den_terms:=9:
-# Vars,F,G,num_vars,num_eqn,params:=get_data(test_case,num_var,num_terms,den_terms):
-# counter := 0:
-# num_lines:=0:
-# B:= Construct_Rational_Blackbox(F,G,Vars):
-
-
-# test_case:="rat_rand":
-# num_var:=3:
-# num_terms:=11:
-# den_terms:=9:
-# num_coeff_bound:=20:
-# den_coeff_bound:=20:
-# Vars,F,G,num_vars,num_eqn,params:=get_data(test_case,num_var,num_terms,den_terms,num_coeff_bound,den_coeff_bound):
-# counter := 0:
-# B:= Construct_Rational_Blackbox(F,G,Vars):
-
-# lprint("Variables:", Vars):
-# lprint("Numerator F:", F):
-# lprint("Denominator G:", G):
-# print("num_eqn =",num_eqn):
-
-
+(*
+lprint("Variables:", Vars):
+lprint("Numerator F:", F):
+lprint("Denominator G:", G):
+print("num_eqn =",num_eqn):
+*)
 
 # test_case:="example":
 # test_case:="small_sys_low_deg":
-test_case:="bspline":
 # test_case:="small_Sys":
-# test_case:="mike":
 # test_case:="bsbug":
+test_case:="bspline":
+# test_case:="mike":
 num_lines:=0:
 Sys, Vars, params, num_vars, num_eqn:= get_data(test_case):
 counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
 
-# UNLUCKY
+(* OVERFLOW PRIME. *)
 p1:= prevprime(2^32-1):
-# p:=107:
 p := prevprime(p1): 
 
-
-# print("Number of equations:", num_eqn):
-# print("Number of parameters:", num_vars):
-# Create black box
-
 try
-Num,Den := MRFI2(B, num_vars, num_eqn, params, p):
+    Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
     catch:
     lprint("ERROR:", lasterror()):
 end try:
