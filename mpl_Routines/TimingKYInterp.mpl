@@ -5,8 +5,9 @@ restart:
 with(NumberTheory):
 with(LinearAlgebra):
 
-libV := "/cecm/home/mss59/Desktop/update/pol_ALGO/fastVSolve.so":
-libR := "/cecm/home/mss59/Desktop/update/pol_ALGO/rfr.so":
+libV := "/localhome/mss59/Desktop/research_Works/development/pol_ALGO/fastVSolve.so":
+libR := "/localhome/mss59/Desktop/research_Works/development/pol_ALGO/rfr.so":
+
 
 (* Using 0-based indexing *)
 mVSOLVE := define_external(
@@ -44,7 +45,7 @@ mRATRECON := define_external(
 );
 
 # Remove type checking
-mRATRECON := subsop(1=(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,degNOUT,dOLEN,dOUT,degDOUT),op(mRATRECON));
+# mRATRECON := subsop(1=(mLen,degM,M,uLen,degU,U,N,DBound,p,nOLEN,nOUT,degNOUT,dOLEN,dOUT,degDOUT),op(mRATRECON));
 
 TIC := proc() option inline;
     return kernelopts(cputime);
@@ -241,8 +242,8 @@ end proc:
 
 p := prevprime(2^63-1):
 # RF := rand():
-n := x[1]^160+randpoly([seq(x[i],i=1..2)],terms=100,degree=160) mod p:
-d := x[1]^160+randpoly([seq(x[i],i=1..2)],terms=100,degree=160) mod p:
+n := x[1]^5+randpoly([seq(x[i],i=1..2)],terms=10,degree=5) mod p:
+d := x[1]^5+randpoly([seq(x[i],i=1..2)],terms=10,degree=5) mod p:
 
 f := n/d:
 
@@ -342,9 +343,9 @@ local alphaVal,TVal,interpVal,ratReconVal,mapRatRecon,M,rr,i,j,
             M := [seq(z-alphaVal[i],i=1..nops(alphaVal))]:
             M := Expand(convert(M,`*`)) mod p:
 
-            t0 := TIC():
+            # t0 := TIC():
             rr := Ratrecon1(interpVal,M,z,N,DD,p):
-            dt := TIC()-t0:
+            # dt := TIC()-t0:
             # TADD("rr_cpp_total","rr_cpp_calls", dt):
             # LogCSV("rr_cpp", j, tries, "loop", "Ratrecon1_total", dt):
 

@@ -20,8 +20,8 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
           tmpNum, tmpDen,
           maxDoublings, doublingCount;
 
-    lprint("INSIDE MRFI: "):
-    lprint("STARTING MRFI: "):
+    lprint("RR MRFI ========================================"):
+    lprint("RR MRFI Starting"):
     lprint("num_vars =", num_vars):
     lprint("num_eqn  =", num_eqn):
     lprint("=============================================================="):
@@ -147,12 +147,9 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
                 Y := [seq(BBvals[s][i], s=1..m_i)]:
 
-                # interpVal := Interp([op(1..m_i, alphaVal)], Y, x) mod p:
-                interpVal := cppNewtonInterp([op(1..m_i, alphaVal)], Y, x,p):
-                print(interpVal);
-                print(modulusTable[m_i]):
-                # rr := Ratrecon(interpVal, modulusTable[m_i], x, deg_num[i], deg_den[i]) mod p:
-                rr := cppRR(interpVal,modulusTable[m_i],x,deg_num[i],deg_den[i],p):
+                interpVal := cppNewtonInterp([op(1..m_i, alphaVal)], Y, x, p):
+                rr := cppRR(interpVal, modulusTable[m_i], x, deg_num[i], deg_den[i],p):
+
                 ratReconVal[i][j] := rr:
 
                 tmpNum := Eval(numer(rr), x=sigma_j[1]) mod p:
@@ -381,31 +378,18 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             return FAIL:
         end if:
 
-        #num_mono[k] := temp:
-        #print("MRFI num_mono[", k, "]:", num_mono[k]):
-        #print("MRFI lambda_num[", k, "]:", lambda_num[k]):
+        num_mono[k] := temp:
+        print("MRFI num_mono[", k, "]:", num_mono[k]):
+        print("MRFI lambda_num[", k, "]:", lambda_num[k]):
 
-        (* coeff_num[k] := Zippel_Transpose_Vandermonde_solver(
+        coeff_num[k] := Zippel_Transpose_Vandermonde_solver(
                             num_eval[k],
                             terms_num[k],
                             Roots_num_eval[k],
                             lambda_num[k],
                             p
                         ):
-        *)
-
-        vals := convert(num_eval[k], list):
-        rroots := convert(Roots_num_eval[k], list):
-        t1 := nops(rroots):
-
-        coeff_den[k] := cppVS(
-                            rroots,
-                            vals[1..t1],
-                            p,
-                            1
-                            ):
-    od:
-
+    end do:
 
     # ============================================================
     # Generate denominator monomials and coefficients
@@ -418,25 +402,13 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
         den_mono[1] := temp:
 
-        (* coeff_den[1] := Zippel_Transpose_Vandermonde_solver(
+        coeff_den[1] := Zippel_Transpose_Vandermonde_solver(
                             den_eval[1],
                             terms_den[1],
                             Roots_den_eval[1],
                             lambda_den[1],
                             p
                         ):
-        *)
-
-        vals := convert(den_eval[1], list):
-        rroots := convert(Roots_den_eval[1], list):
-        t2 := nops(rroots):
-
-        coeff_den[k] := cppVS(
-                             rroots,
-                             vals[1..t2],
-                             p,
-                             1
-                             ):
 
         temp := construct_final_polynomial(coeff_den[1], den_mono[1]):
 
@@ -457,36 +429,19 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
             den_mono[k] := temp:
 
-            (* coeff_den[k] := Zippel_Transpose_Vandermonde_solver(
+            coeff_den[k] := Zippel_Transpose_Vandermonde_solver(
                                 den_eval[k],
                                 terms_den[k],
                                 Roots_den_eval[k],
                                 lambda_den[k],
                                 p
                             ):
-            *)
-            vals := convert(den_eval[k], list):
-            rroots := convert(Roots_den_eval[k], list):
-            t3 := nops(rroots):
-
-            coeff_den[k] := cppVS(
-                                 rroots,
-                                 vals[1..t3],
-                                 p,
-                                 1
-                                 ):
-        od:
-    fi:
+        end do:
+    end if:
 
     # ============================================================
     # Normalize and construct final numerator / denominator
     # ============================================================
-    print("COEFFNUM : ",coeff_num):
-    print("NUM MONO :",num_mono):
-    print("COEFF DEN : ",coeff_den):
-    print(coeff_den[1][1]):
-    print("DEN MONO :",den_mono):
-    
     for k from 1 to num_eqn do
         lcoeff(add(mon, mon in den_mono[k]), vars, 'mon'):
         if not member(mon, den_mono[k], 'i') then
@@ -494,7 +449,7 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         end if:
 
         u := 1/coeff_den[k][-1] mod p:
-        
+
         coeff_num[k] := u*coeff_num[k] mod p:
         coeff_den[k] := u*coeff_den[k] mod p:
 
@@ -503,7 +458,7 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
         final_num[k] := construct_final_polynomial(coeff_num[k], num_mono[k]):
         final_den[k] := construct_final_polynomial(coeff_den[k], den_mono[k]):
-    od:
+    end do:
 
     lprint("MRFI ========================================"):
     lprint("MRFI RECOVERY COMPLETE"):

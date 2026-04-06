@@ -1,5 +1,8 @@
 read "./0_construct_BB.mpl":
 read "./1_MRFI.mpl":
+
+(* This is ver. 2 of MRFI2 - In use currently. *)
+read "./MRFI2.mpl":
 read "./2a_NDSA.mpl":
 read "./2b_Deterministic_NDSA.mpl":
 read "./3_get_point_on_affine_line.mpl":
@@ -11,11 +14,10 @@ read "./8_construct_final_polynomial.mpl":
 read "./9_rvr.mpl":
 read "./data_gen.mpl":
 read "./helpers.mpl":
-read "./af2.mpl":
-read "./MRFI2.mpl":
+
+(* CPP RATRECON WRAPPER *)
 read "./cppRatRecon.mpl":
 read "./cppNewtonInterp.mpl":
-read "./cppVSolve.mpl":
 
 (* Vars,F,G,num_vars,num_eqn,params := get_data(1):
 counter := 0:
@@ -68,9 +70,12 @@ Sys, Vars, params, num_vars, num_eqn:= get_data(test_case):
 counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
 
-(* OVERFLOW PRIME. *)
-p1:= prevprime(2^32-1):
-p := prevprime(p1): 
+(* 
+OVERFLOW PRIME.
+primeOF := prevprime(2^33-1):
+*)
+
+p := prevprime(2^31-1): 
 
 try
     Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):

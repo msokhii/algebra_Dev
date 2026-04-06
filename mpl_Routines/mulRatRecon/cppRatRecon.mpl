@@ -125,6 +125,8 @@ cppRR := proc(Uin,
                             nOLEN,nOUT,degNOUT,
                             dOLEN,dOUT,degDOUT
         ):
+        od:
+
         lastOP := cppRet:
         
         (* 0 flag means success in reconstruction. *)
