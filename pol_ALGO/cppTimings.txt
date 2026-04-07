@@ -1,5 +1,0 @@
-Benchmark:
-Prime p: 9223372036854775783
-Calls: 10000
-Iteration degN degD InterpAvgTime avgTimeCall
-0       20      20       65.0806      34.9443
