@@ -117,7 +117,9 @@ cppRR := proc(Uin,
         (* Initial State. Assuming N and D output will not be the 0 polynomial. *)
         degNOUT := -1:
         degDOUT := -1:
-
+        
+        printf("START\n"):
+        printlevel := 1000: 
         cppRet := mRATRECON(
                             mLen,degM,MArr,
                             uLen,degU,UArr,
@@ -125,8 +127,8 @@ cppRR := proc(Uin,
                             nOLEN,nOUT,degNOUT,
                             dOLEN,dOUT,degDOUT
         ):
-        od:
-
+        printlevel := 1:
+        printf("FINISH\n"):
         lastOP := cppRet:
         
         (* 0 flag means success in reconstruction. *)
