@@ -30,18 +30,18 @@ long long GLOBALMUL64=0;
 long long GLOBALCPUMUL=0;
 int main(){
 
-    LONG p=9223372036854775783;
+    LONG p=4294967291; // This is prevprime(2^32-1) from maple. 
     recint P=recip1(p);
     int degN=5;
     int degD=5;
-    const int ITER=1000;
-    const int STEP=7;
+    const int CALLS=1000; 
+    const int ITER=5;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
-    logFile<<"CALLS -> "<<ITER<<"\n";
+    logFile<<"CALLS -> "<<CALLS<<"\n";
     logFile<<left
-        <<setw(10)<<"STEP"
+        <<setw(10)<<"ITER"
         <<setw(10)<<"degN"
         <<setw(10)<<"degD"
         <<setw(28)<<"avgTimeNewton(mulRec)"
@@ -54,7 +54,7 @@ int main(){
         <<setw(18)<<"mulsRR"
         << "\n";
 
-    for(int step=1;step<STEP;step++){
+    for(int step=1;step<ITER;step++){
         vector<LONG>n(degN+1,0);
         vector<LONG>d(degD+1,0);
 
@@ -110,7 +110,7 @@ int main(){
         // Timer for newton interpolation using mulrec64 routine.
         GLOBALMUL=0;
         auto start=chrono::steady_clock::now();
-        for(int i=0;i<ITER;i++){
+        for(int i=0;i<CALLS;i++){
             copy(y.begin(),y.end(),yCopy.begin());
             int degU=newtonInterpMulRec(x.data(),yCopy.data(),m,p,P);
         };
@@ -119,7 +119,7 @@ int main(){
         // Timer for newton interpolation using mul64b routine.
         GLOBALMUL64=0;
         auto newton2Start=chrono::steady_clock::now();
-        for(int i=0;i<ITER;i++){
+        for(int i=0;i<CALLS;i++){
             copy(y.begin(),y.end(),yCopy.begin());
             int degU=newtonInterpMulNormal(x.data(),yCopy.data(),m,p);
         }
@@ -127,18 +127,18 @@ int main(){
         
         // Timer for copying y into y0 for newton interpolation.
         auto cpStart=chrono::steady_clock::now();
-        for(int i=0;i<ITER;i++){
+        for(int i=0;i<CALLS;i++){
             copy(y.begin(),y.end(),yCopy.begin());
         }
         auto cpStop=chrono::steady_clock::now();
         double cpTotal=chrono::duration<double,std::micro>(cpStop-cpStart).count();
         double total=chrono::duration<double,std::micro>(stop-start).count();
         double newton2Total=chrono::duration<double,std::micro>(newton2Stop-newton2Start).count();
-        double avgTimeCp=cpTotal/ITER;
-        double avgTimeNewton=(total/ITER)-avgTimeCp;
-        double avgTimeNewton2=(newton2Total/ITER)-avgTimeCp;
-        long long newtonMuls=GLOBALMUL/ITER;
-        long long newtonMuls2=GLOBALMUL64/ITER;
+        double avgTimeCp=cpTotal/CALLS;
+        double avgTimeNewton=(total/CALLS)-avgTimeCp;
+        double avgTimeNewton2=(newton2Total/CALLS)-avgTimeCp;
+        long long newtonMuls=GLOBALMUL/CALLS;
+        long long newtonMuls2=GLOBALMUL64/CALLS;
         vector<LONG>M(m+1,0);
         M[0]=1;
         int degM=mkM(M,x,p);
@@ -175,7 +175,7 @@ int main(){
         vector<LONG> yCP3=y;
         GLOBALMUL=0;
         auto start2=chrono::steady_clock::now();
-        for(int k=0;k<ITER;k++){
+        for(int k=0;k<CALLS;k++){
             flag=ratReconFastKernelWS(M,y,m,degU,
             degN,degD,p,W,rOut.data(),degR,tOut.data(),degT,P);
         }
@@ -183,27 +183,27 @@ int main(){
         GLOBALCPUMUL=0;
         GLOBALMUL64=0;
         auto rrNormStart=chrono::steady_clock::now();
-        for(int k=0;k<ITER;k++){
+        for(int k=0;k<CALLS;k++){
             flag2=ratReconNormal(MCP,yCP2,mCP,degUCP,
             degNCP,degDCP,p,W2,rOut2.data(),degR2,tOut2.data(),degT2);
         }
         auto rrNormStop=chrono::steady_clock::now();
         auto rrNorm2Start=chrono::steady_clock::now();
-        for(int k=0;k<ITER;k++){
+        for(int k=0;k<CALLS;k++){
             flag3=ratRecon2(MCP3,yCP3,mCP3,degUCP3,
             degNCP3,degDCP3,p,W3,rOut3.data(),degR3,tOut3.data(),degT3,P);
         }
         auto rrNorm2Stop=chrono::steady_clock::now();
         
-        long long RRmuls=GLOBALMUL/ITER;
-        long long cpuMULRR=GLOBALCPUMUL/ITER;
+        long long RRmuls=GLOBALMUL/CALLS;
+        long long cpuMULRR=GLOBALCPUMUL/CALLS;
         long long totalRRMuls=RRmuls;
         double total2=chrono::duration<double,std::micro>(stop2-start2).count();
         double rrNormTotal=chrono::duration<double,std::micro>(rrNormStop-rrNormStart).count();
         double rrNorm2Total=chrono::duration<double,std::micro>(rrNorm2Stop-rrNorm2Start).count();
-        double avgTimeRR=total2/ITER;
-        double avgTimeRRNorm=rrNormTotal/ITER;
-        double avgTimeRRNorm2=rrNorm2Total/ITER;
+        double avgTimeRR=total2/CALLS;
+        double avgTimeRRNorm=rrNormTotal/CALLS;
+        double avgTimeRRNorm2=rrNorm2Total/CALLS;
         
         logFile<<left<<
                  setw(10)<<step<<
