@@ -1,7 +1,7 @@
 #pragma once 
 
 #include<cstdint>
-extern long long GLOBALMUL64;
+// extern long long GLOBALMUL64;
 using LONG=int64_t;
 using ULNG=uint_fast64_t;
 using ULNG128=__uint128_t;
@@ -21,7 +21,7 @@ static inline LONG sub64b(LONG a,LONG b,LONG p){
     return r;
 };
 static inline LONG mul64b(LONG a,LONG b,LONG p){
-    GLOBALMUL64++;
+    // GLOBALMUL64++;
     ULNG128 res=(ULNG128)a*b;
     ULNG r =(ULNG)(res%p);
     return r;

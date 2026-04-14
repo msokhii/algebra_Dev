@@ -51,8 +51,9 @@ lastOP := 0:
 cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
     global lastOP;
     local n,xArr,yArr,outLen,yOut,degOut,cppRet,poly,i;
-
-    n := nops(xVals):
+    
+    (* Since input values are array's already. *)
+    n := numelems(xVals):
 
     outLen := n:
     yOut := Array(0..outLen-1,datatype=integer[8]):
@@ -66,10 +67,8 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
                                 outLen,yOut,degOut
         ):
     od: 
-    cStop := time()-cStart(): 
+    cStop := time()-cStart: 
     printf("Local newton routine timing: %.9f\n",cStop/10^3):
-    quit;
-
     lastOP := cppRet:
     if cppRet <> 0 then
         return FAIL:
@@ -112,10 +111,10 @@ POPX := proc(argA::posint)
 local xVec,numPT,i: 
 
 numPT := argA:
-xVec := Array(1..numPT):
+xVec := Array(0..numPT-1,datatype=integer[8]):
 
-for i from 1 to numPT do 
-    xVec[i] := i: 
+for i from 1 to numPT-1 do 
+    xVec[i] := i+1: 
 od: 
 return xVec:
 end proc:     
@@ -126,17 +125,17 @@ local tempDEval,tempNEval,invDEval,g,yArr,n,d,numPT,i:
 n := argA:
 d := argB:
 numPT := argC: 
-yArr := Array(1..numPT): 
+yArr := Array(0..numPT-1,datatype=integer[8]): 
 
-for i from 1 to numPT do
+for i from 0 to numPT-1 do
     tempDEval := Eval(d,x=xArr[i]) mod p:
     if tempDEval=0 then
-        return 'FAIL':
+        return -1:
     fi:
     tempNEval := Eval(n,x=xArr[i]) mod p:
     g := Gcdex(tempDEval,p,x,'s','t') mod p:
     if g<>1 then
-        return 'FAIL':
+        return -2:
     fi: 
     invDEval := s: 
     yArr[i] := Expand(tempNEval*invDEval) mod p:
@@ -155,6 +154,7 @@ prNum := rand(p):
 degN := 5: 
 degD := 5: 
 for i from 1 to CT do
+    printf("DEG N: %d DEG D: %d\n",degN,degD):
     n := x^degN+randpoly(x,coeffs=prNum,degree=degN) mod p:
     d := x^degD+randpoly(x,coeffs=prNum,degree=degD) mod p:
     n,d := MAKEMONIC(n,d,degN,degD,p): 
@@ -169,4 +169,8 @@ for i from 1 to CT do
     tStop := time()-tStart:
     printf("Maple newton routine timing: %.9f\n",tStop/10^3):
     localU := cppNewtonInterp(xArr,yArr,z,p):
+    newtCheck := mapU-localU:
+    print(newtCheck): 
+    degN := degN*2:
+    degD := degD*2: 
 od:
