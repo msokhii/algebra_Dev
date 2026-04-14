@@ -33,6 +33,7 @@ extern "C" int ratRECON_C(int mLen,
     static long long time_u_ns = 0;
     static long long time_r_ns = 0;
     static long long time_t_ns = 0;
+    static long long time_struct = 0;
 
     if (!M || !U || !nOut || !dOut || !degNOUT || !degDOUT) return -1;
     if (degM < 0 || degU < 0) return -1;
@@ -50,27 +51,29 @@ extern "C" int ratRECON_C(int mLen,
     auto t0 = clock::now();
     std::vector<LONG> m(M, M + (degM + 1));
     auto t1 = clock::now();
-    time_m_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+    time_m_ns += chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
 
     t0 = clock::now();
     std::vector<LONG> u(U, U + (degU + 1));
     t1 = clock::now();
-    time_u_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+    time_u_ns += chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
 
     t0 = clock::now();
     std::vector<LONG> rTmp(wsSize, 0);
     t1 = clock::now();
-    time_r_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+    time_r_ns += chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
 
     t0 = clock::now();
     std::vector<LONG> tTmp(wsSize, 0);
     t1 = clock::now();
-    time_t_ns += std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+    time_t_ns += chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
 
     int degROut = -1;
     int degTOut = -1;
-
+    t0 = clock::now();
     RatReconFastWS W(wsSize);
+    t1 = clock::now();
+    time_struct += chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count();
     recint P = recip1(p);
 
     int rc = ratReconFastKernelWS(m,
@@ -90,11 +93,12 @@ extern "C" int ratRECON_C(int mLen,
     calls++;
 
     if (calls % 1000 == 0) {
-        printf("Average vector times over %lld calls:\n", calls);
-        printf("m    : %.3f ns\n", (double)time_m_ns / calls);
-        printf("u    : %.3f ns\n", (double)time_u_ns / calls);
-        printf("rTmp : %.3f ns\n", (double)time_r_ns / calls);
-        printf("tTmp : %.3f ns\n", (double)time_t_ns / calls);
+        printf("Average vector times: \n");
+        printf("m    : %.5f ns\n", (double)time_m_ns / calls);
+        printf("u    : %.5f ns\n", (double)time_u_ns / calls);
+        printf("rTmp : %.5f ns\n", (double)time_r_ns / calls);
+        printf("tTmp : %.5f ns\n", (double)time_t_ns / calls);
+        printf("tStruct : %.5f ns\n", (double)time_struct / calls);
         fflush(stdout);
     }
 

@@ -8,10 +8,8 @@ restart:
 # libNewton := "/local-scratch/localhome/mss59/Desktop/research_Works/development/pol_ALGO/newton.so":
 # libR := "/localhome/mss59/Desktop/research_Works/development/pol_ALGO/rfr.so":
 
-# libNewton := "/cecm/home/mss59/Desktop/rep/pol_ALGO/newton.so": 
-# libR := "/cecm/home/mss59/Desktop/rep/pol_ALGO/rfr.so":
-libNewton := "/localhome/mss59/Desktop/repAPR14/pol_ALGO/newton.so":
-libR := "/localhome/mss59/Desktop/repAPR14/pol_ALGO/rfr.so":
+libNewton := "/cecm/home/mss59/Desktop/repAPR14/pol_ALGO/newton.so": 
+libR := "/cecm/home/mss59/Desktop/repAPR14/pol_ALGO/rfr.so":
 # libVC := "/cecm/home/mss59/Desktop/rep/pol_ALGO/vc.so":
 
 CALLS := 10^3:
@@ -353,7 +351,7 @@ end proc:
 (* Global Variables: *)
 
 p := prevprime(2^32-1):
-CT := 3:
+CT := 6:
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):
