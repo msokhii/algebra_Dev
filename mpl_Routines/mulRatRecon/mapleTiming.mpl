@@ -5,9 +5,12 @@ restart:
 (* Function makes the denominator monic and scales the numerator 
    by the inverse of the denominator. *)
 
-libNewton := "/local-scratch/localhome/mss59/Desktop/research_Works/development/pol_ALGO/newton.so":
-libR := "/localhome/mss59/Desktop/research_Works/development/pol_ALGO/rfr.so":
+# libNewton := "/local-scratch/localhome/mss59/Desktop/research_Works/development/pol_ALGO/newton.so":
+# libR := "/localhome/mss59/Desktop/research_Works/development/pol_ALGO/rfr.so":
 
+libNewton := "/cecm/home/mss59/Desktop/rep/pol_ALGO/newton.so": 
+libR := "/cecm/home/mss59/Desktop/rep/pol_ALGO/rfr.so":
+CALLS := 10^3:
 mRATRECON := define_external(
                             'ratRECON_C',
                             mLen::integer[4],
@@ -111,9 +114,18 @@ cppRR := proc(Uin,
         mLen := degM+1:
 
         (* Prepare inputs for cpp routine. *)
-        UArr := convertPY2ARR(Upoly,var,degU,p):
-        MArr := convertPY2ARR(Mpoly,var,degM,p):
-
+        t1Start := time():
+        to CALLS do:
+            UArr := convertPY2ARR(Upoly,var,degU,p):
+        od: 
+        t1Stop := time()-t1Start:
+        t2Start := time():
+        to CALLS do:
+            MArr := convertPY2ARR(Mpoly,var,degM,p):
+        od: 
+        t2Stop := time()-t2Start:
+        printf("RR INPUT CONVERSIONS: "):
+        printf("U TIME: %.9f M TIME: %.9f\n",t1Stop/CALLS,t2Stop/CALLS):
         (* This is what the cpp routine will output. *)
         nOLEN := N+1:
         dOLEN := DBound+1:
@@ -125,7 +137,7 @@ cppRR := proc(Uin,
         degDOUT := -1:
         
         cStart2 := time(): 
-        to 10^3 do:
+        to CALLS do:
             cppRet := mRATRECON(
                                 mLen,degM,MArr,
                                 uLen,degU,UArr,
@@ -135,7 +147,7 @@ cppRR := proc(Uin,
             ):
         od: 
         cStop2 := time()-cStart2: 
-        printf("Local newton routine timing: %.9f\n",cStop2/10^3):
+        printf("Local ratrecon routine timing: %.9f\n",cStop2/CALLS):
         lastOP := cppRet:
         
         (* 0 flag means success in reconstruction. *)
@@ -160,9 +172,18 @@ cppRR := proc(Uin,
         fi:
         
         (* Prepare output for maple rep. *)
-        nn := convertARR2PY(nOUT,degNOUT,var):
-        dd := convertARR2PY(dOUT,degDOUT,var):
-
+        t3Start := time(): 
+        to CALLS do:
+            nn := convertARR2PY(nOUT,degNOUT,var):
+        od: 
+        t3Stop := time()-t3Start:
+        t4Start := time():
+        to CALLS do:
+            dd := convertARR2PY(dOUT,degDOUT,var):
+        od:
+        t4Stop := time()-t4Start:
+        printf("RR OUTPUT CONVERSIONS: "):
+        printf("U TIME: %.9f M TIME: %.9f\n",t3Stop/CALLS,t4Stop/CALLS):
         if dd=0 then
             print("DD=0 : ",dd):
             return FAIL:
@@ -224,7 +245,7 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
     yOut := Array(0..outLen-1,datatype=integer[8]):
     degOut := 0:
     cStart := time():
-    to 10^3 do
+    to CALLS do
         cppRet := mNEWTONINTERP(
                                 n,xVals,
                                 n,yVals,
@@ -233,7 +254,7 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
         ):
     od: 
     cStop := time()-cStart: 
-    printf("Local newton routine timing: %.9f\n",cStop/10^3):
+    printf("Local newton routine timing: %.9f\n",cStop/CALLS):
     lastOP := cppRet:
     if cppRet <> 0 then
         return FAIL:
@@ -310,7 +331,7 @@ end proc:
 (* Global Variables: *)
 
 p := prevprime(2^32-1):
-CT := 5:
+CT := 6:
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):
@@ -322,31 +343,37 @@ for i from 1 to CT do
     printf("DEG N: %d DEG D: %d\n",degN,degD):
     n := x^degN+randpoly(x,coeffs=prNum,degree=degN) mod p:
     d := x^degD+randpoly(x,coeffs=prNum,degree=degD) mod p:
-    n,d := MAKEMONIC(n,d,degN,degD,p): 
+    g := Gcd(n,d) mod p:
+    while g<>1 do: 
+         n := x^degN+randpoly(x,coeffs=prNum,degree=degN) mod p:
+         d := x^degD+randpoly(x,coeffs=prNum,degree=degD) mod p:
+         g := Gcd(n,d) mod p:
+    od: 
+    n,d := MAKEMONIC(n,d,degN,degD,p):
     f := n/d: 
     numPT := degN+degD+1:
     xArr := POPX(numPT):
     yArr := EVALND(n,d,numPT,p):
     tStart := time(): 
-    to 10^3 do:
+    to CALLS do:
         mapU := Interp(xArr,yArr,z) mod p:
     od: 
     tStop := time()-tStart:
-    printf("Maple newton routine timing: %.9f\n",tStop/10^3):
+    printf("Maple newton routine timing: %.9f\n",tStop/CALLS):
     localU := cppNewtonInterp(xArr,yArr,z,p):
     newtCheck := mapU-localU:
-    print(newtCheck);
-    M := [seq(z-xArr[i],i=1..numelems(xArr))]:
+    printf("CHECKING NEWTON RESULTS: %d\n",newtCheck);
+    M := [seq(z-xArr[i],i=0..numelems(xArr)-1)]:
     M := Expand(convert(M,`*`)) mod p:
     tStart2 := time(): 
-    to 10^3 do: 
-        mapR := RatRecon(mapU,M,z,degN,degD) mod p: 
+    to CALLS do: 
+        mapR := Ratrecon(mapU,M,z,degN,degD) mod p: 
     od: 
     tStop2 := time()-tStart2: 
-    printf("Maple ratrecon routine timing: %.9f\n",tStop2/10^3):
+    printf("Maple ratrecon routine timing: %.9f\n",tStop2/CALLS):
     localRR := cppRR(localU,M,z,degN,degD,p):
     rrCheck := mapR-localRR:
-    print(rrCheck);
+    printf("CHECKING RR RESULTS: %d\n",rrCheck);
     degN := degN*2:
     degD := degD*2: 
 od:

@@ -35,7 +35,7 @@ int main(){
     int degN=5;
     int degD=5;
     const int CALLS=1000; 
-    const int ITER=5;
+    const int ITER=7;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
