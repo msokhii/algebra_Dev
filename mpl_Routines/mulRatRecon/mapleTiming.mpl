@@ -10,6 +10,8 @@ restart:
 
 libNewton := "/cecm/home/mss59/Desktop/rep/pol_ALGO/newton.so": 
 libR := "/cecm/home/mss59/Desktop/rep/pol_ALGO/rfr.so":
+libVC := "/cecm/home/mss59/Desktop/rep/pol_ALGO/vc.so":
+
 CALLS := 10^3:
 mRATRECON := define_external(
                             'ratRECON_C',
@@ -51,6 +53,23 @@ mRATRECON := subsop(1=(
                        dOUT,
                        degDOUT),
                        op(mRATRECON)):
+
+mBENCHVECS := define_external(
+    'benchmarkVectorCreations_C',
+    mLen::integer[4],
+    degM::integer[4],
+    M::ARRAY(0..mLen-1, datatype=integer[8]),
+    uLen::integer[4],
+    degU::integer[4],
+    U::ARRAY(0..uLen-1, datatype=integer[8]),
+    repeats::integer[4],
+    timeM::REF(integer[8]),
+    timeU::REF(integer[8]),
+    timeR::REF(integer[8]),
+    timeT::REF(integer[8]),
+    RETURN::integer[4],
+    LIB=libR
+):
 
 (* Converts a polynomial in Maple rep. to an array of coeffs. *)
 convertPY2ARR := proc(poly,var,deg,p) option inline:
@@ -126,6 +145,38 @@ cppRR := proc(Uin,
         t2Stop := time()-t2Start:
         printf("RR INPUT CONVERSIONS: "):
         printf("U TIME: %.9f M TIME: %.9f\n",t1Stop/CALLS,t2Stop/CALLS):
+
+        (* TIMING VECTOR *)
+
+        benchRepeats := 100000:
+
+        timeM := 0:
+        timeU := 0:
+        timeR := 0:
+        timeT := 0:
+
+        rcBench := mBENCHVECS(
+            mLen, degM, MArr,
+            uLen, degU, UArr,
+            benchRepeats,
+            timeM, timeU, timeR, timeT
+        ):
+
+        if rcBench <> 0 then
+            error "benchmarkVectorCreations_C failed with code %1", rcBench:
+        fi:
+
+        printf("Vector benchmark totals over %d repeats (ns):\n", benchRepeats):
+        printf("m    : %d\n", timeM):
+        printf("u    : %d\n", timeU):
+        printf("rTmp : %d\n", timeR):
+        printf("tTmp : %d\n", timeT):
+
+        printf("Vector benchmark averages per call:\n"):
+        printf("m    : %.6f ns\n", evalf(timeM/benchRepeats)):
+        printf("u    : %.6f ns\n", evalf(timeU/benchRepeats)):
+        printf("rTmp : %.6f ns\n", evalf(timeR/benchRepeats)):
+        printf("tTmp : %.6f ns\n", evalf(timeT/benchRepeats)):
         (* This is what the cpp routine will output. *)
         nOLEN := N+1:
         dOLEN := DBound+1:
@@ -331,7 +382,7 @@ end proc:
 (* Global Variables: *)
 
 p := prevprime(2^32-1):
-CT := 6:
+CT := 1:
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):
