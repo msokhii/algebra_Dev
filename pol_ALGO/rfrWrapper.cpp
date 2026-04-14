@@ -34,6 +34,8 @@ extern "C" int ratRECON_C(int mLen,
     static long long time_r_ns = 0;
     static long long time_t_ns = 0;
     static long long time_struct = 0;
+    static long long cp1 = 0;
+    static long long cp2 = 0;
 
     if (!M || !U || !nOut || !dOut || !degNOUT || !degDOUT) return -1;
     if (degM < 0 || degU < 0) return -1;
@@ -99,6 +101,8 @@ extern "C" int ratRECON_C(int mLen,
         printf("rTmp : %.5f ns\n", (double)time_r_ns / calls);
         printf("tTmp : %.5f ns\n", (double)time_t_ns / calls);
         printf("tStruct : %.5f ns\n", (double)time_struct / calls);
+        printf("CP1 : %.5f ns\n",(double)cp1/calls);
+        printf("CP2: %.5f ns\n",(double)cp2/calls);
         fflush(stdout);
     }
 
@@ -112,9 +116,14 @@ extern "C" int ratRECON_C(int mLen,
     if (degROut >= wsSize || degTOut >= wsSize) return -3;
     if (degROut + 1 > nOutLen) return -4;
     if (degTOut + 1 > dOutLen) return -5;
-
+    t0 = clock::now();
     std::copy_n(rTmp.data(), degROut + 1, nOut);
+    t1 = clock::now();
+    cp1 += std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count();
+    t0 = clock::now();
     std::copy_n(tTmp.data(), degTOut + 1, dOut);
+    t1 = clock::now();
+    cp2 += std::chrono::duration_cast<std::chrono::nanoseconds>(t1-t0).count();
 
     *degNOUT = degROut;
     *degDOUT = degTOut;
