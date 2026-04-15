@@ -5,8 +5,8 @@ restart:
 (* Function makes the denominator monic and scales the numerator 
    by the inverse of the denominator. *)
 
-libNewton := "/cecm/home/mss59/Desktop/repAPR14/pol_ALGO/newton.so": 
-libR := "/cecm/home/mss59/Desktop/repAPR14/pol_ALGO/rfr.so":
+libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
+libR := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
 
 CALLS := 10^3:
 mRATRECON := define_external(
