@@ -40,31 +40,31 @@ LONG rand64s(LONG p){
     return(x);
 }
 
-LONG add64b(LONG a,LONG b,LONG p){
+inline LONG add64b(LONG a,LONG b,LONG p){
     LONG r=(a+b)-p;
     r+=(r>>63)&p;
     return r;
 }
 
-LONG sub64b(LONG a,LONG b,LONG p){
+inline LONG sub64b(LONG a,LONG b,LONG p){
     LONG r=(a-b);
     r+=(r>>63)&p;
     return r;
 }
 
-LONG mul64b(LONG a,LONG b, LONG p){
+inline LONG mul64bASM(LONG a,LONG b, LONG p){
     ULNG128 res=(ULNG128)a*b;
     ULNG r=(ULNG)(res%p);
     return r;
 }
 
-LONG neg64s(LONG a,LONG p){ 
+inline LONG neg64s(LONG a,LONG p){ 
     return (a==0)?0:p-a; 
 };
 
 // Assuming 0<=a,b<p for the following routines. 
 
-LONG mul64bASM(LONG a,LONG b,LONG p){
+inline LONG mul64bASM(LONG a,LONG b,LONG p){
     LONG q, r;
     __asm__ __volatile__(           \
     "       mulq    %%rdx           \n\t" \
@@ -73,7 +73,7 @@ LONG mul64bASM(LONG a,LONG b,LONG p){
     return r;
 }
 
-LONG mul64bASM2(LONG a,LONG b,LONG p){
+inline LONG mul64bASM2(LONG a,LONG b,LONG p){
     LONG q;
     LONG r;
     __asm__ __volatile__(
@@ -88,21 +88,21 @@ LONG mul64bASM2(LONG a,LONG b,LONG p){
     return r;
 }
 
-LONG powmod64s(LONG a,LONG n,LONG p){   
+inline LONG powmod64s(LONG a,LONG n,LONG p){   
     LONG r,s;
     a+=(a>>63)&p; // No bad input.
     if(n==0){return 1;}
     if(n==1){return a;}
     for(r=1,s=a;n>0;n/=2){ 
         if(n&1){
-            r=mul64b(r,s,p); 
-            s=mul64b(s,s,p); 
+            r=mul64bASM(r,s,p); 
+            s=mul64bASM(s,s,p); 
         }
     }
     return r;
 };
 
-LONG modinv64b(LONG c,LONG p){   
+inline LONG modinv64b(LONG c,LONG p){   
     LONG d,r,q,r1,c1,d1;
     d=p;
     c1=1;
@@ -206,7 +206,7 @@ struct GCDEXHIST{
     "       xorq    %0, %0  \n\t" \
             : "=a"(z[1]), "=d"(z[0]) : "a"(z[0]), "d"(z[1] < p ? z[1] : z[1] % p), "r"(p))
 
-static inline vector<LONG> genVEC64(const int deg,const LONG p){
+vector<LONG> genVEC64(const int deg,const LONG p){
 vector<LONG> v;
 /*
 Time complexity: O(d+1). 
@@ -221,13 +221,13 @@ for(int i=0;i<=deg;i++){
 return v;
 };
 
-static inline vector<LONG> vecCOPY64(const vector<LONG> &v){
+vector<LONG> vecCOPY64(const vector<LONG> &v){
 vector<LONG> temp; 
 temp=v;
 return temp;
 };
 
-static inline void dispVEC64(const vector<LONG> &v){
+void dispVEC64(const vector<LONG> &v){
 if(v.size()==0) cout<<"O"<<"\n";
 cout<<"[ ";
 for(int i=0;i<v.size();i++){
@@ -369,7 +369,7 @@ pair<vector<LONG>,int> pMULNEW64(const vector<LONG> &a,const vector<LONG> &b,int
 	c.resize(degC+1,0);
 	for(int i=0;i<=degA;i++){
 		for(int j=0;j<=degB;j++){
-			LONG prod=mul64b(a[i],b[j],p);
+			LONG prod=mul64bASM(a[i],b[j],p);
 			c[i+j]=add64b(c[i+j],prod,p);
 		}
 	}
@@ -568,7 +568,7 @@ vector<LONG> polSCMULNEW64(vector<LONG> &a,LONG x,int degA,const LONG p){
 	}
 	else{
 		for(int i=0;i<=degA;i++){
-			temp[i]=mul64b(a[i],x,p);
+			temp[i]=mul64bASM(a[i],x,p);
 		}
 	}
 	return temp;	
@@ -588,7 +588,7 @@ void polSCMULIP64(vector<LONG> &a,LONG x,int degA,const LONG p){
 	}
 	else{
 		for(int i=0;i<=degA;i++){
-			a[i]=mul64b(a[i],x,p);
+			a[i]=mul64bASM(a[i],x,p);
 		}
 	}
 }
@@ -625,7 +625,7 @@ int polSUBMUL64(LONG *a,
 	Constant term is special in the sense b*B does not 
 	have any effect on the degrees so we can compute A=b*B directly.
 	*/
-	t=mul64b(bVal,b[0],p);
+	t=mul64bASM(bVal,b[0],p);
 	a[0]=sub64b(a[0],t,p);
 	/*
 	Basic for loop using 128 bit accumalators to compute 
@@ -642,7 +642,7 @@ int polSUBMUL64(LONG *a,
 	/*
 	Here, we are updating the new leading coefficient.
 	*/
-	t=mul64b(aVal,b[degB],p);
+	t=mul64bASM(aVal,b[degB],p);
 	a[degB+1]=sub64b(a[degB+1],t,p);
 	while(degA>=0 && (a[degA]==0 || a[degA]==p)){
         degA--;
@@ -693,7 +693,7 @@ int polSUBMUL64P(LONG *a,
 LONG evalHORN64(vector<LONG>& a,LONG alpha,LONG p){
     LONG r = 0LL;
 	for (int k=a.size();k-->0;){
-        r=add64b(mul64b(r,alpha,p),a[k],p);
+        r=add64b(mul64bASM(r,alpha,p),a[k],p);
     }
     return r;
 }
@@ -703,7 +703,7 @@ LONG pEVAL64(LONG *a,int d,LONG x,const LONG p){
 	LONG r;
 	if(d==-1){return 0;}
 	for(r=a[d],i=d-1;i>=0;i--){
-		r=add64b(a[i],mul64b(x,r,p),p);
+		r=add64b(a[i],mul64bASM(x,r,p),p);
 	}
 	return r;
 }
@@ -726,7 +726,7 @@ pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,co
     	LONG b0 = b[0] % p; if(b0 < 0) b0 += p;
     	if(b0 == 0){ cout<<"DIV by 0.\n"; exit(1); }
     	LONG inv0 = modinv64b(b0, p);
-    	for(int i=0;i<=degA;i++) a[i] = mul64b(a[i], inv0, p);
+    	for(int i=0;i<=degA;i++) a[i] = mul64bASM(a[i], inv0, p);
     	return {degA, -1};
 	}
 	LONG LTB=b[degB];
@@ -738,9 +738,9 @@ pair<int,int> pDIVDEG(vector<LONG> &a,const vector<LONG> &b,int degA,int degB,co
 			a[i]=0; 
 			continue;
 		}
-		LONG prod1=mul64b(LR,invLTB,p);
+		LONG prod1=mul64bASM(LR,invLTB,p);
 		for(int j=0;j<=degB;j++){
-			LONG prod2=mul64b(prod1,b[j],p);
+			LONG prod2=mul64bASM(prod1,b[j],p);
 			a[k+j]=sub64b(a[k+j],prod2,p);
 		}
 		a[i]=prod1;
@@ -781,7 +781,7 @@ int polDIVIP64(LONG *a,
     if (b0 == 0) { cout << "DIV BY 0.\n"; exit(1); }
 
     LONG inv0 = modinv64b(b0, p);
-    for (int i = 0; i <= degA; i++) a[i] = mul64b(a[i], inv0, p);
+    for (int i = 0; i <= degA; i++) a[i] = mul64bASM(a[i], inv0, p);
 
     // remainder is 0
     return -1;
@@ -799,7 +799,7 @@ int polDIVIP64(LONG *a,
         t=a[degA];
         for(k=0;k<degA;k++){
             if(b[k]){
-				a[k]=sub64b(a[k],mul64b(t,b[k],p),p);
+				a[k]=sub64b(a[k],mul64bASM(t,b[k],p),p);
 			}
 		}
 		for(dr=degA-1;dr>=0 && a[dr]==0;dr--);
@@ -839,7 +839,7 @@ int polDIVIP64(LONG *a,
         t=t%p;
         t+=(t>>63)&p;
         if(k>=degB && inv!=1){
-            t=mul64b(t,inv,p);
+            t=mul64bASM(t,inv,p);
         }
         a[k]=t;
     }
@@ -863,7 +863,7 @@ int polDIVIP64(LONG *a,
         t=a[k]-z[0];
         t+=(t>>63)&p;
         if(k>=degB && inv!=1){
-            t=mul64b(t,inv,p);
+            t=mul64bASM(t,inv,p);
         }
         a[k]=t;
     }
@@ -929,7 +929,7 @@ void polMAKEMONIC64(vector<LONG> &a,const LONG p){
 	LONG invTerm;
 	invTerm=modinv64b(a[degA],p);
 	for(int i=0;i<degA;i++){
-		a[i]=mul64b(invTerm,a[i],p);
+		a[i]=mul64bASM(invTerm,a[i],p);
 	}
 	a[degA]=1;
 }
@@ -1199,9 +1199,9 @@ int ratReconNormal(const vector<LONG> &m,
         int degR,degQ,degT;
         if(degB>0 && degA-degB==1){
             uInv=modinv64b(W.r2[degB],p);
-            aVal=mul64b(W.r1[degA],uInv,p);
-            bVal=mul64b(aVal,W.r2[degB-1],p);
-            bVal=mul64b(uInv,sub64b(W.r1[degA-1],bVal,p),p);
+            aVal=mul64bASM(W.r1[degA],uInv,p);
+            bVal=mul64bASM(aVal,W.r2[degB-1],p);
+            bVal=mul64bASM(uInv,sub64b(W.r1[degA-1],bVal,p),p);
             degR=polSUBMUL64(W.r1.data(),W.r2.data(),
                             aVal,bVal,degA,degB,p);
             degT=polSUBMUL64(W.t1.data(),W.t2.data(),
@@ -1331,7 +1331,7 @@ int main(){
     cout<<a<<" "<<b<<" "<<c<<"\n";
     LONG f1=add64b(a,b,p);
     LONG f2=sub64b(a,b,p);
-    LONG f3M=mul64b(a,b,p);
+    LONG f3M=mul64bASM(a,b,p);
     LONG f3M2=mul64bASM(a,b,p);
     LONG f3M3=mul64bASM2(a,b,p);
     cout<<f1<<" "<<f2<<" "<<f3M<<" "<<f3M2<<" "<<f3M3<<"\n";
