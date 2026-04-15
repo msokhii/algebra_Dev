@@ -8,7 +8,7 @@ restart:
 libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
 libR := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
 
-fd := fopen("mapTimeNoTC.txt", WRITE):
+fd := fopen("mapTimeTC.txt", WRITE):
 fprintf(fd, "%-8s %-8s %-20s %-20s %-20s %-20s\n",
         "degN", "degD",
         "MapleNewton_s", "ExtNewton_s",
@@ -38,7 +38,8 @@ mRATRECON := define_external(
                             ):
 
 (* Remove type checking from mRATRECON. *)
-mRATRECON := subsop(1=(
+
+(* mRATRECON := subsop(1=(
                        mLen,
                        degM,
                        M,
@@ -55,6 +56,7 @@ mRATRECON := subsop(1=(
                        dOUT,
                        degDOUT),
                        op(mRATRECON)):
+*)
 
 (* Converts a polynomial in Maple rep. to an array of coeffs. *)
 convertPY2ARR := proc(poly,var,deg,p) option inline:
@@ -224,7 +226,7 @@ mNEWTONINTERP := define_external(
                                 ):
 
 (* Remove type checking from mNEWTONINTERP. *)
-mNEWTONINTERP := subsop(1=(
+(* mNEWTONINTERP := subsop(1=(
                            xLen,
                            xIn,
                            yLen,
@@ -234,6 +236,7 @@ mNEWTONINTERP := subsop(1=(
                            yOut,
                            degOut),
                            op(mNEWTONINTERP)):
+*)
 
 (* Check if deg(A[i])=0 *)
 checkZeroPY := proc(A,len) option inline:
