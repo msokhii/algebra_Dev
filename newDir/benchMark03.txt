@@ -1,6 +1,11 @@
 PRIME -> 4294967291
 CALLS -> 1000
-ITER    degN    degD    NewtonKernelRec_us      NewtonKernel64_us       NewtonWrapCPP_us        RRKernelFastWS_us       RRWrapCPP_us            
+SERVER -> MAPLE
+Compiled using g++ -O3 intMath.cpp -o OP for cpp. 
+Compiled using g++ -O3 -shared -fPIC -o OP.so intMath.cpp for Maple.
+All timings are in microseconds.
+
+ITER    degN    degD    NewtonKernelRec      NewtonKernel64          NewtonWrapCPP           RRKernelFastWS            RRWrapCPP            
 1       5       5       0.82709                 0.808847                0.874821                1.0438                  1.24681                 
 2       10      10      3.11669                 3.0602                  3.16908                 2.63859                 2.90398                 
 3       20      20      10.5747                 10.5054                 10.627                  7.3838                  7.7102                  
@@ -11,3 +16,31 @@ ITER    degN    degD    NewtonKernelRec_us      NewtonKernel64_us       NewtonWr
 8       640     640     7594.28                 7675.76                 7605.56                 4704.87                 4708.13                 
 9       1280    1280    30080.6                 30418.4                 30076                   18598.2                 18624.2                 
 10      2560    2560    119724                  121060                  119703                  73942.9                 74028.3                 
+
+(* WITH TYPE CHECKING DISABLED *)
+
+degN     degD     MapleNewton          LocalNewton          MapleRR              LocalRR           
+5        5        41                   2                    59                   3         
+10       10       54                   4                    102                  4         
+20       20       125                  11                   208                  9         
+40       40       396                  37                   589                  25         
+80       80       1257                 135                  1852                 86         
+160      160      4698                 503                  6228                 314         
+320      320      17573                1938                 23703                1202         
+640      640      68163                7591                 85865                4696         
+1280     1280     270015               30052                353089               18548         
+2560     2560     1072663              119631               1430754              73928  
+
+(* WITH TYPE CHECKING ENABLED *)
+
+degN     degD     MapleNewton        LocalNewton        MapleRR            LocalRR            
+5        5        42                 2                  55                 3         
+10       10       54                 4                  100                5         
+20       20       125                13                 213                10         
+40       40       375                38                 607                26         
+80       80       1260               136                1856               86         
+160      160      4703               507                6248               315         
+320      320      17644              1938               23520              1204         
+640      640      68535              7648               85492              4698         
+1280     1280     270006             30271              353979             18553         
+2560     2560     1073529            119593             1423668            73727

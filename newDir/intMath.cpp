@@ -1968,8 +1968,6 @@ int main() {
 
         // ------------------------------------------------------------
         // RR wrapper timing in C++
-        // This is the number you compare to Maple's
-        // "Local ratrecon routine timing"
         // ------------------------------------------------------------
         vector<LONG> nOutWrap(degN + 1, 0);
         vector<LONG> dOutWrap(degD + 1, 0);
