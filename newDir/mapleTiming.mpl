@@ -12,7 +12,7 @@ fd := fopen("mapTimeNoTC.txt", WRITE):
 fprintf(fd, "%-8s %-8s %-20s %-20s %-20s %-20s %-20s %-20s\n",
         "degN", "degD",
         "MapleNewton_s", "ExtNewton_s",
-        "MapleRR_s", "ExtRR_s", "Input_Conv", "Ouput_Conv"):
+        "MapleRR_s", "ExtRR_s", "Input_Conv", "Output_Conv"):
 
 CALLS := 10^3:
 
@@ -91,6 +91,8 @@ end proc:
 lastOP := 0:
 lastNewtonExtTime := 0.0:
 lastRRExtTime := 0.0:
+lastIPTime := 0.0:
+lastOPTime := 0.0:
 
 (* Maple wrapper for mRATRECON. We call this maple function. *)
 cppRR := proc(Uin,
@@ -100,7 +102,7 @@ cppRR := proc(Uin,
               DBound,
               p) option inline:
     
-    global lastOP, lastRRExtTime:
+    global lastOP, lastRRExtTime, lastIPTime, lastOPTime:
     local Upoly,Mpoly,degU,degM,uLen,mLen,
           UArr,MArr,nOLEN,dOLEN,nOUT,dOUT,
           degNOUT,degDOUT,cppRet,nn,dd,i,
@@ -136,7 +138,7 @@ cppRR := proc(Uin,
 
         printf("RR INPUT CONVERSIONS: "):
         printf("U TIME: %.9f M TIME: %.9f\n",t1Stop/CALLS,t2Stop/CALLS):
-        ipTime := (t1Stop/CALLS)+(t2Stop/CALLS):
+        lastIPTime := ((t1Stop+t2Stop)/CALLS):
 
         (* This is what the cpp routine will output. *)
         nOLEN := N+1:
@@ -199,8 +201,8 @@ cppRR := proc(Uin,
         t4Stop := time()-t4Start:
 
         printf("RR OUTPUT CONVERSIONS: "):
-        printf("U TIME: %.9f M TIME: %.9f\n",t3Stop/CALLS,t4Stop/CALLS):
-        opTime := (t3Stop/CALLS)+(t4Stop/CALLS):
+        printf("N TIME: %.9f D TIME: %.9f\n",t3Stop/CALLS,t4Stop/CALLS):
+        lastOPTime := ((t3Stop+t4Stop)/CALLS):
 
         if dd=0 then
             print("DD=0 : ",dd):
@@ -411,8 +413,8 @@ for i from 1 to CT do
             lastNewtonExtTime,
             tStop2/CALLS,
             lastRRExtTime,
-            ipTime,
-            opTime):
+            lastIPTime,
+            lastOPTime):
 
     degN := degN*2:
     degD := degD*2: 
