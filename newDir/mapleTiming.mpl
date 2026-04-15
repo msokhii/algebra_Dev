@@ -5,12 +5,8 @@ restart:
 (* Function makes the denominator monic and scales the numerator 
    by the inverse of the denominator. *)
 
-# libNewton := "/local-scratch/localhome/mss59/Desktop/research_Works/development/pol_ALGO/newton.so":
-# libR := "/localhome/mss59/Desktop/research_Works/development/pol_ALGO/rfr.so":
-
 libNewton := "/cecm/home/mss59/Desktop/repAPR14/pol_ALGO/newton.so": 
 libR := "/cecm/home/mss59/Desktop/repAPR14/pol_ALGO/rfr.so":
-# libVC := "/cecm/home/mss59/Desktop/rep/pol_ALGO/vc.so":
 
 CALLS := 10^3:
 mRATRECON := define_external(
@@ -53,24 +49,7 @@ mRATRECON := subsop(1=(
                        dOUT,
                        degDOUT),
                        op(mRATRECON)):
-(* 
-mBENCHVECS := define_external(
-    'benchmarkVectorCreations_C',
-    mLen::integer[4],
-    degM::integer[4],
-    M::ARRAY(0..mLen-1, datatype=integer[8]),
-    uLen::integer[4],
-    degU::integer[4],
-    U::ARRAY(0..uLen-1, datatype=integer[8]),
-    repeats::integer[4],
-    timeM::REF(integer[8]),
-    timeU::REF(integer[8]),
-    timeR::REF(integer[8]),
-    timeT::REF(integer[8]),
-    RETURN::integer[4],
-    LIB=libR
-):
-*)
+
 (* Converts a polynomial in Maple rep. to an array of coeffs. *)
 convertPY2ARR := proc(poly,var,deg,p) option inline:
     local A,i;
