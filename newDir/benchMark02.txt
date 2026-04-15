@@ -5,7 +5,6 @@ Compiled using g++ -O2 intMath.cpp -o OP for cpp.
 Compiled using g++ -O2 -shared -fPIC -o OP.so intMath.cpp for Maple.
 All timings are in microseconds.
 
-
 ITER    degN    degD    NewtonKernelRec      NewtonKernel64          NewtonWrapCPP              RRKernel               RRWrapCPP           
 1       5       5       0.883091                0.811859                0.931661                1.06098                 1.25744                 
 2       10      10      3.31478                 3.05863                 3.36763                 2.64721                 2.92816                 

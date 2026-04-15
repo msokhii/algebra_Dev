@@ -9,10 +9,10 @@ libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
 libR := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
 
 fd := fopen("mapTimeNoTC.txt", WRITE):
-fprintf(fd, "%-8s %-8s %-20s %-20s %-20s %-20s\n",
+fprintf(fd, "%-8s %-8s %-20s %-20s %-20s %-20s %-20s %-20s\n",
         "degN", "degD",
         "MapleNewton_s", "ExtNewton_s",
-        "MapleRR_s", "ExtRR_s"):
+        "MapleRR_s", "ExtRR_s", "Input_Conv", "Ouput_Conv"):
 
 CALLS := 10^3:
 
@@ -136,6 +136,7 @@ cppRR := proc(Uin,
 
         printf("RR INPUT CONVERSIONS: "):
         printf("U TIME: %.9f M TIME: %.9f\n",t1Stop/CALLS,t2Stop/CALLS):
+        ipTime := (t1Stop/CALLS)+(t2Stop/CALLS):
 
         (* This is what the cpp routine will output. *)
         nOLEN := N+1:
@@ -199,6 +200,7 @@ cppRR := proc(Uin,
 
         printf("RR OUTPUT CONVERSIONS: "):
         printf("U TIME: %.9f M TIME: %.9f\n",t3Stop/CALLS,t4Stop/CALLS):
+        opTime := (t3Stop/CALLS)+(t4Stop/CALLS):
 
         if dd=0 then
             print("DD=0 : ",dd):
@@ -403,12 +405,14 @@ for i from 1 to CT do
     rrCheck := mapR-localRR:
     printf("CHECKING RR RESULTS: %d\n",rrCheck);
 
-    fprintf(fd, "%-8d %-8d %-20.9f %-20.9f %-20.9f %-20.9f\n",
+    fprintf(fd, "%-8d %-8d %-20.9f %-20.9f %-20.9f %-20.9f %-20.9f %-20.9f\n",
             degN, degD,
             tStop/CALLS,
             lastNewtonExtTime,
             tStop2/CALLS,
-            lastRRExtTime):
+            lastRRExtTime,
+            ipTime,
+            opTime):
 
     degN := degN*2:
     degD := degD*2: 
