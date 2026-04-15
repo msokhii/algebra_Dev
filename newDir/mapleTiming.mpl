@@ -330,7 +330,7 @@ end proc:
 (* Global Variables: *)
 
 p := prevprime(2^32-1):
-CT := 8:
+CT := 10:
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):

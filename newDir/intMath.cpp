@@ -1749,7 +1749,7 @@ int main() {
     int degD = 5;
 
     const int CALLS = 1000;
-    const int ITER  = 9;
+    const int ITER  = 11;
 
     ofstream logFile("benchMark.txt");
     if (!logFile) {
