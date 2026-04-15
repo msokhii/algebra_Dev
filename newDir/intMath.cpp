@@ -1558,6 +1558,7 @@ std::copy_n(tTmp.data(), degTOut + 1, dOut);
 return 0;
 }
 
+/*
 int main(){
     LONG p=4294967291; // This is prevprime(2^32-1) from maple. 
     recint P=recip1(p);
@@ -1583,9 +1584,7 @@ int main(){
     for(int step=1;step<ITER;step++){
         vector<LONG>n(degN+1,0);
         vector<LONG>d(degD+1,0);
-        /* 
-        Populate the numerator vector.
-        */
+        
         for(int i=0;i<degN+1;i++){
             LONG temp=rand64s(p);
             while(temp==0){
@@ -1593,9 +1592,7 @@ int main(){
             }
             n[i]=temp;
         }
-        /* 
-        Populate the denominator vector.
-        */
+    
         for(int j=0;j<degD+1;j++){
             LONG temp=rand64s(p);
             while(temp==0){
@@ -1603,9 +1600,6 @@ int main(){
             }
             d[j]=temp;
         }
-        /* 
-        Make the denominator monic.
-        */
         if(d[degD]!=1){
             LONG invTerm;
             invTerm=modinv64b(d[degD],p);
@@ -1619,9 +1613,7 @@ int main(){
 
         vector<LONG>nCopy=n;
         vector<LONG>dCopy=d;
-        /* 
-        We need degN+degD+1 points to interpolate. Here we make the x vector. 
-        */
+        // We need degN+degD+1 points to interpolate. Here we make the x vector. 
         int m=degN+degD+1;
         vector<LONG>x(m,0);
         for(int i=0;i<m;i++){
@@ -1743,6 +1735,283 @@ int main(){
         degN*=2;
         degD*=2;
     }
+    logFile.close();
+    return 0;
+}
+*/
+
+
+int main() {
+    LONG p = 4294967291;   // prevprime(2^32-1)
+    recint P = recip1(p);
+
+    int degN = 5;
+    int degD = 5;
+
+    const int CALLS = 1000;
+    const int ITER  = 7;
+
+    ofstream logFile("benchMark.txt");
+    if (!logFile) {
+        cerr << "Could not open benchMark.txt\n";
+        return 1;
+    }
+
+    logFile << "PRIME -> " << p << "\n";
+    logFile << "CALLS -> " << CALLS << "\n";
+    logFile << left
+            << setw(8)  << "ITER"
+            << setw(8)  << "degN"
+            << setw(8)  << "degD"
+            << setw(24) << "NewtonKernelRec_us"
+            << setw(24) << "NewtonKernel64_us"
+            << setw(24) << "NewtonWrapCPP_us"
+            << setw(24) << "RRKernelFastWS_us"
+            << setw(24) << "RRWrapCPP_us"
+            << "\n";
+
+    for (int step = 1; step < ITER; ++step) {
+        // ------------------------------------------------------------
+        // Build random monic rational function n(x)/d(x)
+        // ------------------------------------------------------------
+        vector<LONG> n(degN + 1, 0);
+        vector<LONG> d(degD + 1, 0);
+
+        for (int i = 0; i <= degN; ++i) {
+            LONG temp = rand64s(p);
+            while (temp == 0) temp = rand64s(p);
+            n[i] = temp;
+        }
+
+        for (int j = 0; j <= degD; ++j) {
+            LONG temp = rand64s(p);
+            while (temp == 0) temp = rand64s(p);
+            d[j] = temp;
+        }
+
+        if (d[degD] != 1) {
+            LONG invTerm = modinv64b(d[degD], p);
+            for (int i = 0; i <= degD; ++i) d[i] = mul64b(invTerm, d[i], p);
+            for (int i = 0; i <= degN; ++i) n[i] = mul64b(invTerm, n[i], p);
+        }
+
+        // ------------------------------------------------------------
+        // Sample the rational function at m = degN+degD+1 points
+        // ------------------------------------------------------------
+        int m = degN + degD + 1;
+
+        vector<LONG> x(m, 0);
+        for (int i = 0; i < m; ++i) x[i] = i + 1;
+
+        vector<LONG> yVals(m, 0);
+        for (int i = 0; i < m; ++i) {
+            LONG denEval = pEVAL64(d.data(), degD, x[i], p);
+            if (denEval == 0) {
+                cerr << "Encountered zero denominator evaluation.\n";
+                return 1;
+            }
+            LONG numEval = pEVAL64(n.data(), degN, x[i], p);
+            yVals[i] = mul64b(numEval, modinv64b(denEval, p), p);
+        }
+
+        // ------------------------------------------------------------
+        // Newton kernel timings
+        // We time:
+        //   (copy + kernel) - (copy only)
+        // so the result is kernel-only.
+        // ------------------------------------------------------------
+        vector<LONG> yWork(m, 0);
+
+        auto cpStart = chrono::steady_clock::now();
+        for (int i = 0; i < CALLS; ++i) {
+            copy(yVals.begin(), yVals.end(), yWork.begin());
+        }
+        auto cpStop = chrono::steady_clock::now();
+        double copyOnly_us =
+            chrono::duration<double, std::micro>(cpStop - cpStart).count() / CALLS;
+
+        // mulRec kernel
+        int degU_rec = -1;
+        auto nRecStart = chrono::steady_clock::now();
+        for (int i = 0; i < CALLS; ++i) {
+            copy(yVals.begin(), yVals.end(), yWork.begin());
+            degU_rec = newtonInterpMulRec(x.data(), yWork.data(), m, p, P);
+        }
+        auto nRecStop = chrono::steady_clock::now();
+        double newtonRecWithCopy_us =
+            chrono::duration<double, std::micro>(nRecStop - nRecStart).count() / CALLS;
+        double newtonKernelRec_us = newtonRecWithCopy_us - copyOnly_us;
+
+        if (degU_rec < 0) {
+            cerr << "newtonInterpMulRec failed.\n";
+            return 1;
+        }
+
+        // Recover coefficient vector Ucoeff from mulRec Newton
+        copy(yVals.begin(), yVals.end(), yWork.begin());
+        degU_rec = newtonInterpMulRec(x.data(), yWork.data(), m, p, P);
+        if (degU_rec < 0) {
+            cerr << "newtonInterpMulRec failed while building Ucoeff.\n";
+            return 1;
+        }
+        vector<LONG> Ucoeff(yWork.begin(), yWork.begin() + (degU_rec + 1));
+
+        // mul64 kernel
+        int degU_64 = -1;
+        auto n64Start = chrono::steady_clock::now();
+        for (int i = 0; i < CALLS; ++i) {
+            copy(yVals.begin(), yVals.end(), yWork.begin());
+            degU_64 = newtonInterpMulNormal(x.data(), yWork.data(), m, p);
+        }
+        auto n64Stop = chrono::steady_clock::now();
+        double newton64WithCopy_us =
+            chrono::duration<double, std::micro>(n64Stop - n64Start).count() / CALLS;
+        double newtonKernel64_us = newton64WithCopy_us - copyOnly_us;
+
+        // ------------------------------------------------------------
+        // Newton wrapper timing in C++
+        // This is the number you compare to Maple's
+        // "Local newton routine timing"
+        // ------------------------------------------------------------
+        vector<LONG> yOutWrap(m, 0);
+        int degOutWrap = -1;
+
+        auto nWrapStart = chrono::steady_clock::now();
+        for (int i = 0; i < CALLS; ++i) {
+            int rc = cppInterp(
+                m, x.data(),
+                m, yVals.data(),
+                p,
+                m, yOutWrap.data(),
+                &degOutWrap
+            );
+            if (rc != 0) {
+                cerr << "cppInterp failed with rc = " << rc << "\n";
+                return 1;
+            }
+        }
+        auto nWrapStop = chrono::steady_clock::now();
+        double newtonWrapCPP_us =
+            chrono::duration<double, std::micro>(nWrapStop - nWrapStart).count() / CALLS;
+
+        // ------------------------------------------------------------
+        // Build M(x) = prod (x - x_i)
+        // ------------------------------------------------------------
+        vector<LONG> M(degN + degD + 2, 0);   // size m+1
+        M[0] = 1;
+        int degM = mkM(M, x, p);              // should be m
+
+        if (degM < 0) {
+            cerr << "mkM failed.\n";
+            return 1;
+        }
+
+        vector<LONG> Mcoeff(M.begin(), M.begin() + (degM + 1));
+
+        // ------------------------------------------------------------
+        // RR kernel timing
+        // We use Ucoeff (coefficients of interpolant), not yVals.
+        // We also subtract copy-only cost to isolate the kernel better.
+        // ------------------------------------------------------------
+        vector<LONG> Mwork = Mcoeff;
+        vector<LONG> Uwork = Ucoeff;
+
+        auto rrCopyStart = chrono::steady_clock::now();
+        for (int i = 0; i < CALLS; ++i) {
+            copy(Mcoeff.begin(), Mcoeff.end(), Mwork.begin());
+            copy(Ucoeff.begin(), Ucoeff.end(), Uwork.begin());
+        }
+        auto rrCopyStop = chrono::steady_clock::now();
+        double rrCopyOnly_us =
+            chrono::duration<double, std::micro>(rrCopyStop - rrCopyStart).count() / CALLS;
+
+        RatReconFastWS W(degM);
+        vector<LONG> rOut(degN + 1, 0);
+        vector<LONG> tOut(degD + 1, 0);
+
+        int flag = -999;
+        int degR = -1;
+        int degT = -1;
+
+        auto rrKernelStart = chrono::steady_clock::now();
+        for (int i = 0; i < CALLS; ++i) {
+            copy(Mcoeff.begin(), Mcoeff.end(), Mwork.begin());
+            copy(Ucoeff.begin(), Ucoeff.end(), Uwork.begin());
+
+            degR = -1;
+            degT = -1;
+            flag = ratReconFastKernelWS(
+                Mwork,
+                Uwork,
+                degM,
+                degU_rec,
+                degN,
+                degD,
+                p,
+                W,
+                rOut.data(),
+                degR,
+                tOut.data(),
+                degT,
+                P
+            );
+
+            if (flag != 0) {
+                cerr << "ratReconFastKernelWS failed with rc = " << flag << "\n";
+                return 1;
+            }
+        }
+        auto rrKernelStop = chrono::steady_clock::now();
+        double rrKernelWithCopy_us =
+            chrono::duration<double, std::micro>(rrKernelStop - rrKernelStart).count() / CALLS;
+        double rrKernelFastWS_us = rrKernelWithCopy_us - rrCopyOnly_us;
+
+        // ------------------------------------------------------------
+        // RR wrapper timing in C++
+        // This is the number you compare to Maple's
+        // "Local ratrecon routine timing"
+        // ------------------------------------------------------------
+        vector<LONG> nOutWrap(degN + 1, 0);
+        vector<LONG> dOutWrap(degD + 1, 0);
+        int degNOutWrap = -1;
+        int degDOutWrap = -1;
+
+        auto rrWrapStart = chrono::steady_clock::now();
+        for (int i = 0; i < CALLS; ++i) {
+            int rc = ratRECON_C(
+                degM + 1, degM, Mcoeff.data(),
+                degU_rec + 1, degU_rec, Ucoeff.data(),
+                degN, degD, p,
+                degN + 1, nOutWrap.data(), &degNOutWrap,
+                degD + 1, dOutWrap.data(), &degDOutWrap
+            );
+            if (rc != 0) {
+                cerr << "ratRECON_C failed with rc = " << rc << "\n";
+                return 1;
+            }
+        }
+        auto rrWrapStop = chrono::steady_clock::now();
+        double rrWrapCPP_us =
+            chrono::duration<double, std::micro>(rrWrapStop - rrWrapStart).count() / CALLS;
+
+        // ------------------------------------------------------------
+        // Log
+        // ------------------------------------------------------------
+        logFile << left
+                << setw(8)  << step
+                << setw(8)  << degN
+                << setw(8)  << degD
+                << setw(24) << newtonKernelRec_us
+                << setw(24) << newtonKernel64_us
+                << setw(24) << newtonWrapCPP_us
+                << setw(24) << rrKernelFastWS_us
+                << setw(24) << rrWrapCPP_us
+                << "\n";
+
+        degN *= 2;
+        degD *= 2;
+    }
+
     logFile.close();
     return 0;
 }
