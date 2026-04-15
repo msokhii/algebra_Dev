@@ -52,7 +52,7 @@ inline LONG sub64b(LONG a,LONG b,LONG p){
     return r;
 }
 
-inline LONG mul64bASM(LONG a,LONG b, LONG p){
+inline LONG mul64b(LONG a,LONG b, LONG p){
     ULNG128 res=(ULNG128)a*b;
     ULNG r=(ULNG)(res%p);
     return r;
