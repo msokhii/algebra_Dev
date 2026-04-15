@@ -106,12 +106,12 @@ int main(){
     LONG a=rand64s(p);
     LONG b=rand64s(p);
     LONG c=rand64s(p);
-    cout<<a<<b<<c<<"\n";
+    cout<<a<<" "<<b<<" "<<c<<"\n";
     LONG f1=add64b(a,b,p);
     LONG f2=sub64b(a,b,p);
     LONG f3M=mul64b(a,b,p);
     LONG f3M2=mul64bASM(a,b,p);
     LONG f3M3=mul64bASM2(a,b,p);
-    cout<<f1<<f2<<f3M<<f3M2<<f3M3<<"\n";
+    cout<<f1<<" "<<f2<<" "<<f3M<<" "<<f3M2<<" "<<f3M3<<"\n";
     return 0;
 }
