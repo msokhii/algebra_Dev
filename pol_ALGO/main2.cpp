@@ -35,7 +35,7 @@ int main(){
     int degN=5;
     int degD=5;
     const int CALLS=1000; 
-    const int ITER=7;
+    const int ITER=5;
 
     ofstream logFile("benchMark.txt");
     logFile<<"PRIME -> "<<p<<"\n";
@@ -57,7 +57,9 @@ int main(){
     for(int step=1;step<ITER;step++){
         vector<LONG>n(degN+1,0);
         vector<LONG>d(degD+1,0);
-
+        /* 
+        Populate the numerator vector.
+        */
         for(int i=0;i<degN+1;i++){
             LONG temp=rand64s(p);
             while(temp==0){
@@ -65,6 +67,9 @@ int main(){
             }
             n[i]=temp;
         }
+        /* 
+        Populate the denominator vector.
+        */
         for(int j=0;j<degD+1;j++){
             LONG temp=rand64s(p);
             while(temp==0){
@@ -72,7 +77,9 @@ int main(){
             }
             d[j]=temp;
         }
-
+        /* 
+        Make the denominator monic.
+        */
         if(d[degD]!=1){
             LONG invTerm;
             invTerm=modinv64b(d[degD],p);
@@ -86,12 +93,15 @@ int main(){
 
         vector<LONG>nCopy=n;
         vector<LONG>dCopy=d;
-
+        /* 
+        We need degN+degD+1 points to interpolate. Here we make the x vector. 
+        */
         int m=degN+degD+1;
         vector<LONG>x(m,0);
         for(int i=0;i<m;i++){
             x[i]=i+1;
-        }
+        }   
+        
 
         vector<LONG>y(m,0);
         for(int i=0;i<m;i++){
