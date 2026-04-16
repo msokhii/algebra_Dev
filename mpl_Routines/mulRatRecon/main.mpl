@@ -66,62 +66,72 @@ print("num_eqn =",num_eqn):
 # test_case:="bsbug":
 # test_case:="bspline":
 # test_case:="mike":
-test_case := "TOP":
-num_lines:=0:
-Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,4):
-counter := 0:
-B := Constuct_Sys_Blackbox(Sys, Vars, params):
+probeCalls := Array(1..8):
+k := 1;
+for ITER from 4 to 6 do:
+	test_case := "TOP":
+	num_lines:=0:
+	Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,ITER):
+	counter := 0:
+	B := Constuct_Sys_Blackbox(Sys, Vars, params):
 
-(* 
-OVERFLOW PRIME.
-primeOF := prevprime(2^33-1):
-*)
+	(* 
+	OVERFLOW PRIME.
+	primeOF := prevprime(2^33-1):	
+	*)
 
-p := prevprime(2^31-1): 
+	p := prevprime(2^31-1): 
 
-try
-    Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
-    catch:
-    lprint("ERROR:", lasterror()):
-end try:
+	try
+    		Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
+    		catch:
+    		lprint("ERROR:", lasterror()):
+	end try:
 
-Ratrecon_num:=table():
-Ratrecon_den:=table():
-Final_rat_poly:=table():
-for i from 1 to num_eqn do 
-    Ratrecon_num[i]:=iratrecon(Num[i],p):
-    print("numerator = ",Ratrecon_num[i]):
-    Ratrecon_den[i]:=iratrecon(Den[i],p):
-    print("denominator = ",Ratrecon_den[i]):
-end do:
+	Ratrecon_num:=table():
+	Ratrecon_den:=table():
+	Final_rat_poly:=table():
+	for i from 1 to num_eqn do 
+    		Ratrecon_num[i]:=iratrecon(Num[i],p):
+    		print("numerator = ",Ratrecon_num[i]):
+    		Ratrecon_den[i]:=iratrecon(Den[i],p):
+    		print("denominator = ",Ratrecon_den[i]):
+	end do:
 
-print("======================================================"):
-print("Displaying the results"):
+	print("======================================================"):
+	print("Displaying the results"):
 
-if(num_eqn >1)then 
-    og_soln:=get_eqn(Sys,Vars):
+	if(num_eqn >1)then 
+    		og_soln:=get_eqn(Sys,Vars):
     # og_unordered_soln:=convert(og_soln,list):
     # og_soln:=reording(og_unordered_soln,nops(Sys)):
     # fin_rat_recon:=Vector(convert(Rat_recon,list)):
-    og_soln:=convert(og_soln,list):
-    for i from 1 to num_eqn do 
-        print("x",i,"="):
-        Final_rat_poly[i]:=Ratrecon_num[i]/Ratrecon_den[i]:
-        lprint("Rat_recon= ",Final_rat_poly[i]):
-        lprint("original_soln =",op(2,og_soln[i])):
+    		og_soln:=convert(og_soln,list):
+    		for i from 1 to num_eqn do 
+        		print("x",i,"="):
+        		Final_rat_poly[i]:=Ratrecon_num[i]/Ratrecon_den[i]:
+        		lprint("Rat_recon= ",Final_rat_poly[i]):
+        		lprint("original_soln =",op(2,og_soln[i])):
         #print("f",i,"/g",i,"-","ff",i,"/gg",i,"=",simplify(Rat_recon[i]-op(2,og_soln[i])));
-        printf("f%d/g%d-ff%d/gg%d = %a\n",i,i,i,i,simplify(Final_rat_poly[i]-op(2,og_soln[i])));
-    end do:
-    elif num_eqn =1 then 
-        Final_rat_poly[1]:=Ratrecon_num[1]/Ratrecon_den[1]:
-        lprint("Rat_recon= ",Final_rat_poly[1]):
-        lprint("Original polynomial =",F/G):
-        printf("f1/g1 - F/G = %a\n",simplify(Final_rat_poly[1]-F/G));
-end if:
+        		printf("f%d/g%d-ff%d/gg%d = %a\n",i,i,i,i,simplify(Final_rat_poly[i]-op(2,og_soln[i])));
+    		end do:
+    	elif num_eqn =1 then 
+        	Final_rat_poly[1]:=Ratrecon_num[1]/Ratrecon_den[1]:
+        	lprint("Rat_recon= ",Final_rat_poly[1]):
+        	lprint("Original polynomial =",F/G):
+        	printf("f1/g1 - F/G = %a\n",simplify(Final_rat_poly[1]-F/G));
+	end if:
 
-print("======================================================"):
-print("Total number of lines generated in get_point_on_affine_line:", num_lines):
-lprint("Total Black Box Calls:", counter):
+	print("======================================================"):
+	print("Total number of lines generated in get_point_on_affine_line:", num_lines):
+	lprint("Total Black Box Calls:", counter):
+        probeCalls[k] := counter:
+        k++;
+        print(ITER);
+        ITER++;
+od:
+print(i);
+probeCalls;
 
 # param1:=6:
 # param2:=2:
