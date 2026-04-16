@@ -1750,7 +1750,7 @@ int main() {
     int degD = 5;
 
     const int CALLS = 1000;
-    const int ITER  = 9;
+    const int ITER  = 3;
 
     ofstream logFile("benchMark.txt");
     if (!logFile) {
@@ -1764,11 +1764,11 @@ int main() {
             << setw(8)  << "ITER"
             << setw(8)  << "degN"
             << setw(8)  << "degD"
-            << setw(24) << "NewtonKernelRec_us"
-            << setw(24) << "NewtonKernel64_us"
-            << setw(24) << "NewtonWrapCPP_us"
-            << setw(24) << "RRKernelFastWS_us"
-            << setw(24) << "RRWrapCPP_us"
+            << setw(24) << "NewtonKernelMULREC"
+            << setw(24) << "NewtonKernelMUL64"
+            << setw(24) << "NewtonWrapperCPP"
+            << setw(24) << "RRKernelMUL64"
+            << setw(24) << "RRWrapperCPP"
             << "\n";
 
     for (int step = 1; step < ITER; ++step) {

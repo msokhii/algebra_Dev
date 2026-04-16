@@ -5,14 +5,14 @@ restart:
 (* Function makes the denominator monic and scales the numerator 
    by the inverse of the denominator. *)
 
-libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
-libR := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
+libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
+libR := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
 
 fd := fopen("mapTimeNoTC.txt", WRITE):
 fprintf(fd, "%-8s %-8s %-20s %-20s %-20s %-20s %-20s %-20s\n",
         "degN", "degD",
-        "MapleNewton_s", "ExtNewton_s",
-        "MapleRR_s", "ExtRR_s", "Input_Conv", "Output_Conv"):
+        "MapleNewton", "LocalNewton",
+        "MapleRR", "LocalRR", "InputConv_U_M", "OutputConv_N_D"):
 
 CALLS := 10^3:
 
