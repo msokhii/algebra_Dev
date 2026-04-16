@@ -1743,7 +1743,7 @@ int main(){
 
 int main() {
    // LONG p = 4294967291;   // prevprime(2^32-1)
-    LONG p = 2147483647;
+    LONG p = 2147483647; //This is 2^31-1.
     recint P = recip1(p);
 
     int degN = 5;
