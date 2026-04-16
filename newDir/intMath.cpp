@@ -1742,14 +1742,15 @@ int main(){
 
 
 int main() {
-    LONG p = 4294967291;   // prevprime(2^32-1)
+   // LONG p = 4294967291;   // prevprime(2^32-1)
+    LONG p = 2147483647;
     recint P = recip1(p);
 
     int degN = 5;
     int degD = 5;
 
     const int CALLS = 1000;
-    const int ITER  = 11;
+    const int ITER  = 8;
 
     ofstream logFile("benchMark.txt");
     if (!logFile) {

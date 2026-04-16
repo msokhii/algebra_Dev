@@ -353,8 +353,8 @@ return yArr:
 end proc:
 
 (* Global Variables: *)
-p := prevprime(2^32-1):
-CT := 10:
+p := 2^31-1:
+CT := 7:
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):

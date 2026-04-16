@@ -8,7 +8,7 @@ restart:
 libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
 libR := "/cecm/home/mss59/Desktop/newDir/newDir/cppObj.so":
 
-fd := fopen("mapTimeNoTC.txt", WRITE):
+fd := fopen("mapTimeTC.txt", WRITE):
 fprintf(fd, "%-8s %-8s %-20s %-20s %-20s %-20s %-20s %-20s\n",
         "degN", "degD",
         "MapleNewton_s", "ExtNewton_s",
@@ -357,8 +357,9 @@ return yArr:
 end proc:
 
 (* Global Variables: *)
-p := prevprime(2^32-1):
-CT := 10:
+# p := prevprime(2^32-1):
+p := 2^31-1:
+CT := 7;
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):
