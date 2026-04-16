@@ -104,7 +104,7 @@ cppRR := proc(Uin,
               DBound,
               p) option inline:
     
-    global lastOP, lastRRExtTime:
+    global lastOP, lastRRExtTime, lastIPTime, lastOPTime:
     local Upoly,Mpoly,degU,degM,uLen,mLen,
           UArr,MArr,nOLEN,dOLEN,nOUT,dOUT,
           degNOUT,degDOUT,cppRet,nn,dd,i,
@@ -359,7 +359,7 @@ end proc:
 (* Global Variables: *)
 # p := prevprime(2^32-1):
 p := 2^31-1:
-CT := 7;
+CT := 8;
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):

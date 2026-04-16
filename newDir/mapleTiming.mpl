@@ -354,7 +354,7 @@ end proc:
 
 (* Global Variables: *)
 p := 2^31-1:
-CT := 7:
+CT := 8:
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):
