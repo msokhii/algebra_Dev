@@ -66,7 +66,7 @@ print("num_eqn =",num_eqn):
 # test_case:="bsbug":
 # test_case:="bspline":
 # test_case:="mike":
-probeCalls := Array(1..6):
+probeCalls := Array(1..7):
 k := 1;
 for ITER from 4 to 10 do:
 	test_case := "TOP":
