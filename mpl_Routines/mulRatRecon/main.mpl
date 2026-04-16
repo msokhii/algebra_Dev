@@ -66,9 +66,9 @@ print("num_eqn =",num_eqn):
 # test_case:="bsbug":
 # test_case:="bspline":
 # test_case:="mike":
-probeCalls := Array(1..8):
+probeCalls := Array(1..6):
 k := 1;
-for ITER from 4 to 6 do:
+for ITER from 4 to 10 do:
 	test_case := "TOP":
 	num_lines:=0:
 	Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,ITER):
@@ -127,10 +127,7 @@ for ITER from 4 to 6 do:
 	lprint("Total Black Box Calls:", counter):
         probeCalls[k] := counter:
         k++;
-        print(ITER);
-        ITER++;
 od:
-print(i);
 probeCalls;
 
 # param1:=6:
