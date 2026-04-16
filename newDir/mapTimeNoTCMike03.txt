@@ -1,4 +1,4 @@
-degN     degD     MapleNewton_s        ExtNewton_s          MapleRR_s            ExtRR_s              Input_Conv           Output_Conv         
+degN     degD     MapleNewton          LocalNewton            MapleRR            LocalRR              Input_Conv           Output_Conv         
 5        5        0.000031000          0.000002000          0.000038000          0.000003000          0.000020000          0.000013000         
 10       10       0.000025000          0.000005000          0.000059000          0.000004000          0.000030000          0.000029000         
 20       20       0.000038000          0.000013000          0.000100000          0.000009000          0.000054000          0.000026000         

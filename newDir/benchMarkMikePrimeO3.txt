@@ -1,5 +1,6 @@
 PRIME -> 2147483647
 CALLS -> 1000
+
 ITER    degN    degD    NewtonKernelRec     NewtonKernel64           NewtonWrapCPP          RRKernelFastWS             RRWrapCPP            
 1       5       5       0.731763                0.717107                0.780051                1.07732                 1.27479                 
 2       10      10      3.05499                 3.02784                 3.11388                 2.75053                 3.01372                 
