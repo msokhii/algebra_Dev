@@ -32,7 +32,13 @@ get_data:=proc(test_case)
 
         elif test_case = "bsbug" then
             Sys := { (2*y3^2*y4-y3*y4^2+3*y3*y4-y4^2+y3+y4+1)*x1 = y3*y4^2 };
-
+        elif test_case = "T4" then
+            Sys := {
+                    2+y1+y2, y1-y2, y1*y2, y1^2+y2^2,
+                    1+y1*y2, 2+y1+y2, y1-y2, y1*y2,
+                    y1^2-y2, 1+y1*y2, 2+y1+y2, y1-y2,
+                    y2^2-y1, y1^2-y2, 1+y1*y2, 2+y1+y2
+                    }:
         elif test_case = 1 then
             print("In test_case = 1 ");
             # ff :=x+5*y:
