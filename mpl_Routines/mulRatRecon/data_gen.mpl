@@ -34,10 +34,10 @@ get_data:=proc(test_case)
             Sys := { (2*y3^2*y4-y3*y4^2+3*y3*y4-y4^2+y3+y4+1)*x1 = y3*y4^2 };
         elif test_case = "T4" then
             Sys := {
-                    2+y1+y2, y1-y2, y1*y2, y1^2+y2^2,
-                    1+y1*y2, 2+y1+y2, y1-y2, y1*y2,
-                    y1^2-y2, 1+y1*y2, 2+y1+y2, y1-y2,
-                    y2^2-y1, y1^2-y2, 1+y1*y2, 2+y1+y2
+                    x1-(2+y1+y2),x2-(y1-y2),x3-(y1*y2),x4-(y1^2+y2^2),
+                    x5-(1+y1*y2),x6-(2+y1+y2),x7-(y1-y2),x8-(y1*y2),
+                    x9-(y1^2-y2),x10-(1+y1*y2),x11-(2+y1+y2),x12-(y1-y2),
+                    x13-(y2^2-y1),x14-(y1^2-y2),x15-(1+y1*y2),x16-(2+y1+y2)
                     }:
         elif test_case = 1 then
             print("In test_case = 1 ");

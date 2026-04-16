@@ -16,8 +16,8 @@ read "./data_gen.mpl":
 read "./helpers.mpl":
 
 (* CPP RATRECON WRAPPER *)
-read "./cppRatRecon.mpl":
-read "./cppNewtonInterp.mpl":
+# read "./cppRatRecon.mpl":
+# read "./cppNewtonInterp.mpl":
 read "./mapleWrapper.mpl":
 
 (* Vars,F,G,num_vars,num_eqn,params := get_data(1):

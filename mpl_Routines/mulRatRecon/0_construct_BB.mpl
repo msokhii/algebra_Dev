@@ -22,7 +22,9 @@ Constuct_Sys_Blackbox:=proc(Sys,Vars,params)
         T := traperror( LinearSolve(p,A,1) ):
         if T="matrix is singular" then return FAIL fi:
         # print("Matrix after Gaussian elimination: ",A):
+        print("BEFORE");
         soln:=convert(A[1..num_eqn,num_eqn+1],list):
+        print("AFTER");
         # print("soln = ",soln):
        return soln: # the solution vector x
     end:
