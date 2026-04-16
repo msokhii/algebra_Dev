@@ -3,7 +3,7 @@
 # 11. DATA GENERATOR FOR TEST CASES
 ########################################################
 
-get_data:=proc(test_case)
+get_data:=proc(test_case,tSize)
     print("in get_data"):
     local Sys,Vars,i,params,ff,gg;
     if nargs = 1 then
@@ -32,13 +32,8 @@ get_data:=proc(test_case)
 
         elif test_case = "bsbug" then
             Sys := { (2*y3^2*y4-y3*y4^2+3*y3*y4-y4^2+y3+y4+1)*x1 = y3*y4^2 };
-        elif test_case = "T4" then
-            Sys := {
-                    x1-(2+y1+y2),x2-(y1-y2),x3-(y1*y2),x4-(y1^2+y2^2),
-                    x5-(1+y1*y2),x6-(2+y1+y2),x7-(y1-y2),x8-(y1*y2),
-                    x9-(y1^2-y2),x10-(1+y1*y2),x11-(2+y1+y2),x12-(y1-y2),
-                    x13-(y2^2-y1),x14-(y1^2-y2),x15-(1+y1*y2),x16-(2+y1+y2)
-                    }:
+        elif test_case = "TOP" then
+            Sys := MKTS(tSize):
         elif test_case = 1 then
             print("In test_case = 1 ");
             # ff :=x+5*y:
@@ -88,4 +83,32 @@ RandRational := proc(N::posint)
         b := rand(1..N)();       # denominator (never zero)
         if a = 0 then 0 else a/b fi
     end proc;
+end proc:
+
+MKTS := proc(n::posint)
+    local i, j, k, d, entry, xvar, Sys;
+
+    Sys := []:
+    k := 1:
+
+    for i from 1 to n do
+        for j from 1 to n do
+            d := j - i;
+
+            if d = 0 then
+                entry := 2 + y1 + y2;
+            elif d > 0 then
+                entry := y1^d + y2^d;
+            else
+                d := -d;
+                entry := y1^d - y2^d;
+            end if;
+
+            xvar := parse(cat("x", k));
+            Sys := {op(Sys), xvar - entry};
+            k := k + 1;
+        end do;
+    end do;
+
+    return Sys;
 end proc:

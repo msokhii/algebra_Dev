@@ -66,9 +66,9 @@ print("num_eqn =",num_eqn):
 # test_case:="bsbug":
 # test_case:="bspline":
 # test_case:="mike":
-test_case := "T4":
+test_case := "TOP":
 num_lines:=0:
-Sys, Vars, params, num_vars, num_eqn:= get_data(test_case):
+Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,4):
 counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
 
