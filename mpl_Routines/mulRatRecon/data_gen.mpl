@@ -34,6 +34,8 @@ get_data:=proc(test_case,tSize)
             Sys := { (2*y3^2*y4-y3*y4^2+3*y3*y4-y4^2+y3+y4+1)*x1 = y3*y4^2 };
         elif test_case = "TOP" then
             Sys := MKTS(tSize):
+            print(Sys);
+            quit;
         elif test_case = 1 then
             print("In test_case = 1 ");
             # ff :=x+5*y:
