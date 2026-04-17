@@ -18,7 +18,7 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
           Roots_num_eval, Roots_den_eval,
           num_mono, den_mono, final_num, final_den,
           tmpNum, tmpDen,
-          maxDoublings, doublingCount;
+          maxDoublings, doublingCount,avgCostBCall;
 
     lprint("RR MRFI ========================================"):
     lprint("RR MRFI Starting"):
@@ -139,7 +139,13 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             Psi_alpha := get_point_on_affine_line(num_vars, alphaVal, direction, sigma_j, p, mMax):
 
             # One shared BB batch
-            BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
+
+            BTimeStart := time():
+            to 10^3 do:
+                BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
+            od: 
+            BTimeStop := time()-BTimeStart: 
+            avgCostBCall := BTimeStop: 
 
             # Reconstruct each component using only its needed prefix length
             for i from 1 to num_eqn do
@@ -473,5 +479,5 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     print("Final jDone =", jDone):
     print("Main-loop probe estimate =", jDone * mMax):
 
-    return final_num, final_den:
+    return final_num, final_den, avgCostBCall:
 end proc:

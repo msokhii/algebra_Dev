@@ -67,6 +67,7 @@ print("num_eqn =",num_eqn):
 # test_case:="bspline":
 # test_case:="mike":
 probeCalls := Array(1..7):
+probeAvg := Array(1..7):
 k := 1;
 for ITER from 4 to 10 do:
 	test_case := "TOP":
@@ -83,11 +84,12 @@ for ITER from 4 to 10 do:
 	p := prevprime(2^31-1): 
 
 	try
-    		Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
+    		Num,Den,costProbe := rrMRFI(B, num_vars, num_eqn, params, p):
     		catch:
     		lprint("ERROR:", lasterror()):
 	end try:
 
+    probeAvg[k] := costProbe:
 	Ratrecon_num:=table():
 	Ratrecon_den:=table():
 	Final_rat_poly:=table():
@@ -129,6 +131,7 @@ for ITER from 4 to 10 do:
         k++;
 od:
 probeCalls;
+avgCostBCall;
 
 # param1:=6:
 # param2:=2:
