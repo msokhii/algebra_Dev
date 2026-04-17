@@ -14,7 +14,7 @@ fprintf(fd, "%-8s %-8s %-20s %-20s %-20s %-20s %-20s %-20s\n",
         "MapleNewton", "LocalNewton",
         "MapleRR", "LocalRR", "InputConv_U_M", "OutputConv_N_D"):
 
-CALLS := 10^3:
+CALLS := 10^4:
 
 mRATRECON := define_external(
                             'ratRECON_C',
@@ -291,7 +291,7 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
         return FAIL:
     fi:
     *)
-    
+
     poly := add(yOut[i]*var^i,i=0..degOut) mod p:
     return poly:
 end proc:

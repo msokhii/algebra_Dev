@@ -1750,8 +1750,8 @@ int main() {
     int degN = 5;
     int degD = 5;
 
-    const int CALLS = 1000;
-    const int ITER  = 7;
+    const int CALLS = 10000;
+    const int ITER  = 8;
 
     ofstream logFile("benchMarkCPP.txt");
     if (!logFile) {
