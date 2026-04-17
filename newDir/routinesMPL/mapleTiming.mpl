@@ -283,13 +283,15 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
     else
         print("INTERPOLATION SUCCESFUL!"):
     fi:
-
+    
+    (* 
     degOut := checkZeroPY(yOut,outLen):
     if degOut<0 then
         print("ZERO POLYNOMIAL : ",degOut):
         return FAIL:
     fi:
-
+    *)
+    
     poly := add(yOut[i]*var^i,i=0..degOut) mod p:
     return poly:
 end proc:

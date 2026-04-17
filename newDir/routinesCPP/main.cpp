@@ -1436,44 +1436,46 @@ extern "C" int cppInterp(int xLen,
     LONG *yOut,
     int *degOut)
 {
-// basic checks
+
+
+// INITIAL CHECKS: 
+
 if (!xIn || !yIn || !yOut || !degOut) {
-return -1;
+    return -1;
 }
 if (xLen <= 0 || yLen <= 0 || outLen <= 0) {
-return -2;
+    return -2;
 }
 if (xLen != yLen) {
-return -3;
+    return -3;
 }
 if (outLen < yLen) {
-return -4;
+    return -4;
 }
 
 const int n = xLen;
 
-// initialize outputs
+// INITIALIZING OUTPUT ARRAY: 
+
 *degOut = -1;
 for (int i = 0; i < outLen; ++i) {
-yOut[i] = 0;
+    yOut[i] = 0;
 }
 
 // local working copies since kernel overwrites y
 vector<LONG> x(xIn, xIn + n);
 vector<LONG> y(yIn, yIn + n);
 
-recint P = recip1(p);
-
-int d = newtonInterpMulRec(x.data(), y.data(), n, p, P);
+int d = newtonInterpMulNormal(x.data(), y.data(), n, p);
 
 if (d < 0) {
-*degOut = -1;
-return d;
+    *degOut = -1;
+    return d;
 }
 
 if (d >= outLen) {
-*degOut = -1;
-return -5;
+    *degOut = -1;
+    return -5;
 }
 
 std::copy_n(y.data(), d + 1, yOut);
@@ -1524,9 +1526,9 @@ std::vector<LONG> tTmp(wsSize, 0);
 int degROut = -1;
 int degTOut = -1;
 RatReconFastWS W(wsSize);
-recint P = recip1(p);
+// recint P = recip1(p);
 
-int rc = ratReconFastKernelWS(m,
+int rc = ratReconNormal(m,
             u,
             degM,
             degU,
@@ -1537,8 +1539,7 @@ int rc = ratReconFastKernelWS(m,
             rTmp.data(),
             degROut,
             tTmp.data(),
-            degTOut,
-            P);
+            degTOut);
 
 if (rc != 0) {
 *degNOUT = -1;
@@ -1750,9 +1751,9 @@ int main() {
     int degD = 5;
 
     const int CALLS = 1000;
-    const int ITER  = 3;
+    const int ITER  = 7;
 
-    ofstream logFile("benchMark.txt");
+    ofstream logFile("benchMarkCPP.txt");
     if (!logFile) {
         cerr << "Could not open benchMark.txt\n";
         return 1;
@@ -1941,7 +1942,7 @@ int main() {
 
             degR = -1;
             degT = -1;
-            flag = ratReconFastKernelWS(
+            flag = ratReconNormal(
                 Mwork,
                 Uwork,
                 degM,
@@ -1953,12 +1954,11 @@ int main() {
                 rOut.data(),
                 degR,
                 tOut.data(),
-                degT,
-                P
+                degT
             );
 
             if (flag != 0) {
-                cerr << "ratReconFastKernelWS failed with rc = " << flag << "\n";
+                cerr << "ratReconNormal failed with rc = " << flag << "\n";
                 return 1;
             }
         }
