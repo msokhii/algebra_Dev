@@ -355,7 +355,7 @@ end proc:
 
 (* Global Variables: *)
 p := 2^31-1:
-CT := 8:
+CT := 7:
 
 (* Pseudo-random number generator: *)
 prNum := rand(p):
@@ -392,8 +392,8 @@ for i from 1 to CT do
 
     localU := cppNewtonInterp(xArr,yArr,z,p):
     newtCheck := mapU-localU:
-    printf("CHECKING NEWTON RESULTS: \n");
-    print(newtCheck);
+    printf("CHECKING NEWTON RESULTS: %d\n",newtCheck);
+    #print(newtCheck);
 
     M := [seq(z-xArr[i],i=0..numelems(xArr)-1)]:
     M := Expand(convert(M,`*`)) mod p:
@@ -403,14 +403,12 @@ for i from 1 to CT do
         mapR := Ratrecon(mapU,M,z,degN,degD) mod p: 
     od: 
     tStop2 := time()-tStart2: 
-    print(mapR);
     printf("Maple ratrecon routine timing: %.9f\n",tStop2/CALLS):
 
     localRR := cppRR(localU,M,z,degN,degD,p):
     rrCheck := mapR-localRR:
-    printf("CHECKING RR RESULTS: \n");
-    print(rrCheck);
-    quit;
+    printf("CHECKING RR RESULTS: %d\n",rrCheck);
+    #print(rrCheck);
     fprintf(fd, "%-8d %-8d %-20.9f %-20.9f %-20.9f %-20.9f %-20.9f %-20.9f\n",
             degN, degD,
             tStop/CALLS,
