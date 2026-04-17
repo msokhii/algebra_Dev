@@ -1,0 +1,1 @@
+degN     degD     MapleNewton          LocalNewton          MapleRR              LocalRR              InputConv_U_M        OutputConv_N_D      

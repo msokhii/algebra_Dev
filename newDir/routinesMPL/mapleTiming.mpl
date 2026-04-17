@@ -284,14 +284,13 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
         print("INTERPOLATION SUCCESFUL!"):
     fi:
     
-    (* 
+     
     degOut := checkZeroPY(yOut,outLen):
     if degOut<0 then
         print("ZERO POLYNOMIAL : ",degOut):
         return FAIL:
     fi:
-    *)
-
+    
     poly := add(yOut[i]*var^i,i=0..degOut) mod p:
     return poly:
 end proc:
@@ -393,7 +392,8 @@ for i from 1 to CT do
 
     localU := cppNewtonInterp(xArr,yArr,z,p):
     newtCheck := mapU-localU:
-    printf("CHECKING NEWTON RESULTS: %d\n",newtCheck);
+    printf("CHECKING NEWTON RESULTS: \n");
+    print(newtCheck);
 
     M := [seq(z-xArr[i],i=0..numelems(xArr)-1)]:
     M := Expand(convert(M,`*`)) mod p:
@@ -403,12 +403,14 @@ for i from 1 to CT do
         mapR := Ratrecon(mapU,M,z,degN,degD) mod p: 
     od: 
     tStop2 := time()-tStart2: 
+    print(mapR);
     printf("Maple ratrecon routine timing: %.9f\n",tStop2/CALLS):
 
     localRR := cppRR(localU,M,z,degN,degD,p):
     rrCheck := mapR-localRR:
-    printf("CHECKING RR RESULTS: %d\n",rrCheck);
-
+    printf("CHECKING RR RESULTS: \n");
+    print(rrCheck);
+    quit;
     fprintf(fd, "%-8d %-8d %-20.9f %-20.9f %-20.9f %-20.9f %-20.9f %-20.9f\n",
             degN, degD,
             tStop/CALLS,
