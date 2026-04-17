@@ -194,7 +194,13 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
             lambda_num[k] := BMEA(num_eval[k], p, Z):
             terms_num[k] := degree(lambda_num[k], Z):
-            R_num[k] := Roots(lambda_num[k]) mod p:
+            rootNumTStart := time():
+            to 10^3 do:
+                R_num[k] := Roots(lambda_num[k]) mod p:
+            od: 
+            rootDenomTStart := time()-rootNumTStart: 
+            printf("MAPLE ROOT TIME: %.9f\n",rootDenomTStart/10^3):
+            quit;
 
             lprint("MRFI lambda_num: ", lambda_num[k]):
             lprint("MRFI terms_num: ", terms_num[k]):
