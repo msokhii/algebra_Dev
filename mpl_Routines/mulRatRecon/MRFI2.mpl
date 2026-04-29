@@ -206,7 +206,6 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             od: 
             rootDenomTStart := time()-rootNumTStart: 
             printf("MAPLE ROOT TIME: %.9f\n",rootDenomTStart/10^3):
-            quit;
 
             lprint("MRFI lambda_num: ", lambda_num[k]):
             lprint("MRFI terms_num: ", terms_num[k]):

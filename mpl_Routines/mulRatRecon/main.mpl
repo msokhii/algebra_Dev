@@ -69,7 +69,7 @@ print("num_eqn =",num_eqn):
 probeCalls := Array(1..7):
 probeAvg := Array(1..7):
 k := 1;
-for ITER from 4 to 10 do:
+for ITER from 4 to 4 do:
 	test_case := "TOP":
 	num_lines:=0:
 	Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,ITER):
