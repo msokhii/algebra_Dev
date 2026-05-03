@@ -51,12 +51,12 @@ read "./mapleWrapper.mpl":
 #  test_case:="small_Sys":
 # test_case:="mike":
 # test_case:="bsbug":
-test_case := "T4":
+test_case := "T5":
 num_lines:=0:
 Sys, Vars, params, num_vars, num_eqn:= get_data(test_case):
 counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
-p:= 2^31 - 1:
+p:= prevprime(2^31 - 1):
 # print("Number of equations:", num_eqn):
 # print("Number of parameters:", num_vars):
 # Create black box
