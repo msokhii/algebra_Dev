@@ -51,6 +51,7 @@ read "./mapleWrapper.mpl":
 #  test_case:="small_Sys":
 # test_case:="mike":
 # test_case:="bsbug":
+test_case := "T4":
 num_lines:=0:
 Sys, Vars, params, num_vars, num_eqn:= get_data(test_case):
 counter := 0:

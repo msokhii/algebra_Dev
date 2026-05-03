@@ -23,6 +23,13 @@ get_data:=proc(test_case)
             Sys:={x1+y1*x2+y2*x3-1,y2*x1+x2+y1*x3-2,(y1-y2)*x1-x2+y2*x3-7}:
         elif test_case ="small_Sys" then
             Sys:={x1+y1*x2+y1-3,y2*x1+x2+y1-1}:
+        elif test_case ="T4" then
+            Sys := {
+                   (1+y1)*x1 + y2*x2 + (y1*y3+2)*x3 + (y4^2-3)*x4 - (y1+1),
+                   y2*x1 + (1+y1)*x2 + y2*x3 + (y1*y3+2)*x4 - (y2-2),
+                   (y1*y3+2)*x1 + y2*x2 + (1+y1)*x3 + y2*x4 - y3^2,
+                   (y4^2-3)*x1 + (y1*y3+2)*x2 + y2*x3 + (1+y1)*x4 - (y1*y4+5)
+                   }:
         elif test_case ="mike" then
             Sys:={y1*x1+y1*x2-1, y1*y2*x1-x2-1}:
         elif test_case = "example" then
