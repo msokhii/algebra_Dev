@@ -5,7 +5,7 @@
 get_data:=proc(test_case,nSize)
     print("in get_data"):
     local Sys,Vars,i,params,ff,gg;
-    if nargs = 1 then
+    if nargs = 2 then
         if test_case = "bspline" then 
             Sys := {x7 + x12 - 1, x8 + x13 - 1, x21 + x6 + x11 - 1, 
                     x1*y1 + x1 - x2, x11*y3 + x11 - x12, x16*y5 - x17*y5 - x17, 
