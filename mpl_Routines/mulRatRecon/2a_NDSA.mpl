@@ -40,7 +40,8 @@ NDSA:=proc(B,sigma_,beta_,num_var,p,num_points,num_eqn)
         
         if row =1 then 
             lin_sys:=false:
-            u:=Interp(alpha,Y,x)mod p:
+            #u:=Interp(alpha,Y,x)mod p:
+            u := cppNewtonInterp(alpha,Y,x,p):
             # lprint("NDSA: Single equation case - u: ",u):
             result:=[[MQRFR(m,u,0,1,p)]]:
             # lprint("result =",result):

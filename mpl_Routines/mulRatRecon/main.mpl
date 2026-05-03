@@ -51,7 +51,9 @@ read "./mapleWrapper.mpl":
 #  test_case:="small_Sys":
 # test_case:="mike":
 # test_case:="bsbug":
-matSize := 8:
+matSize := 2:
+BBCalls := Array(1..8):
+for i from 1 to 6 do
 test_case := "TS":
 num_lines:=0:
 Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,matSize):
@@ -95,7 +97,7 @@ if(num_eqn >1)then
     end do:
     elif num_eqn =1 then 
         Final_rat_poly[1]:=Ratrecon_num[1]/Ratrecon_den[1]:
-        lprint("Rat_recon= ",Final_rat_poly[1]):
+        lprint("Recovered Polynomial = ",Final_rat_poly[1]):
         lprint("Original polynomial =",F/G):
         printf("f1/g1 - F/G = %a\n",simplify(Final_rat_poly[1]-F/G));
 end if:
@@ -103,20 +105,7 @@ end if:
 print("======================================================"):
 print("Total number of lines generated in get_point_on_affine_line:", num_lines):
 lprint("Total Black Box Calls:", counter):
-
-# param1:=6:
-# param2:=2:
-# debug_point:=B([param1,param2],p):
-# print("B([",param1,",",param2,"],p) = ",debug_point):
-# For param1=6, param2=2 we get "B([", 6, ",", 2, "],p) = ", [1366580498, 1561806289]
-#  where igcd(1366580498, 1561806289)=1
-# For rvr_bspline/main.mpl
-# "B([", 6, ",", 2, "],p) = ", [976128928, 195225786]
-# igcd(976128928, 195225786) = 2 and the reduced form is [488064464, 97612893]
-# LEts try 111
-# param1:=111:
-# param2:=111:
-# debug_point:=B([param1,param2],p):
-# print("B([",param1,",",param2,"],p) = ",debug_point):
-# print("igcd(debug_point[1], debug_point[2]) = ", igcd(debug_point[1], debug_point[2]) mod p):
+BBCalls[i] := counter:
+matSize++:
+od:
 
