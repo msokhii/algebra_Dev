@@ -98,11 +98,11 @@ TS := proc(n::posint)
             d := abs(i-j):
 
             if d = 0 then
-                A[i,j] := y1 + 3:
+                A[i,j] := y1 + 1:
             elif d = 1 then
-                A[i,j] := y2 + 1:
+                A[i,j] := y2:
             else
-                A[i,j] := d:
+                A[i,j] := 0:
             end if:
 
         end do:

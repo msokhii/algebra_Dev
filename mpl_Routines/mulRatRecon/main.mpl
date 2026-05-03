@@ -43,7 +43,6 @@ read "./mapleWrapper.mpl":
 # lprint("Variables:", Vars):
 # lprint("Numerator F:", F):
 # lprint("Denominator G:", G):
-# print("num_eqn =",num_eqn):
 
 # test_case:="example":
 # test_case:="small_sys_low_deg":
@@ -52,14 +51,17 @@ read "./mapleWrapper.mpl":
 # test_case:="mike":
 # test_case:="bsbug":
 matSize := 2:
-BBCalls := Array(1..8):
-for i from 1 to 6 do
+maxTS := 14:
+BBCalls := table():
+for k from 1 to maxTS do
+termsN := 0:
+termsD := 0:
 test_case := "TS":
 num_lines:=0:
 Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,matSize):
 counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
-p:= prevprime(2^32-1):
+p:= 2^31-1:
 # print("Number of equations:", num_eqn):
 # print("Number of parameters:", num_vars):
 # Create black box
@@ -68,15 +70,20 @@ Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
     catch:
     lprint("ERROR:", lasterror()):
 end try:
+print("NUM",Num);
+print("DENUM",Den);
 Ratrecon_num:=table():
 Ratrecon_den:=table():
 Final_rat_poly:=table():
 for i from 1 to num_eqn do 
     Ratrecon_num[i]:=iratrecon(Num[i],p):
-    print("numerator = ",Ratrecon_num[i]):
+    #print("numerator = ",Ratrecon_num[i]):
     Ratrecon_den[i]:=iratrecon(Den[i],p):
-    print("denominator = ",Ratrecon_den[i]):
+    #print("denominator = ",Ratrecon_den[i]):
 end do:
+
+#print("IRAT NUM",convert(Ratrecon_num,list));
+#print("IRAT DENUM",convert(Ratrecon_den,list));
 
 print("======================================================"):
 print("Displaying the results"):
@@ -90,13 +97,17 @@ if(num_eqn >1)then
     for i from 1 to num_eqn do 
         print("x",i,"="):
         Final_rat_poly[i]:=Ratrecon_num[i]/Ratrecon_den[i]:
-        lprint("Rat_recon= ",Final_rat_poly[i]):
-        lprint("original_soln =",op(2,og_soln[i])):
+        termsN := termsN+nops(Ratrecon_num[i]):
+        termsD := termsD+nops(Ratrecon_den[i]):
+        lprint("Recovered Polynomial = ",Final_rat_poly[i]):
+        lprint("Original Polynomial =",op(2,og_soln[i])):
         #print("f",i,"/g",i,"-","ff",i,"/gg",i,"=",simplify(Rat_recon[i]-op(2,og_soln[i])));
         printf("f%d/g%d-ff%d/gg%d = %a\n",i,i,i,i,simplify(Final_rat_poly[i]-op(2,og_soln[i])));
     end do:
     elif num_eqn =1 then 
         Final_rat_poly[1]:=Ratrecon_num[1]/Ratrecon_den[1]:
+        termsN := termsN+nops(Ratrecon_num[i]):
+        termsD := termsD+nops(Ratrecon_den[i]):
         lprint("Recovered Polynomial = ",Final_rat_poly[1]):
         lprint("Original polynomial =",F/G):
         printf("f1/g1 - F/G = %a\n",simplify(Final_rat_poly[1]-F/G));
@@ -105,7 +116,9 @@ end if:
 print("======================================================"):
 print("Total number of lines generated in get_point_on_affine_line:", num_lines):
 lprint("Total Black Box Calls:", counter):
-BBCalls[i] := counter:
+BBCalls[k] := [matSize,counter,floor(evalf(termsN/num_eqn)),floor(evalf(termsD/num_eqn))]:
 matSize++:
 od:
 
+BBCalls := convert(BBCalls,list):
+print(BBCalls);
