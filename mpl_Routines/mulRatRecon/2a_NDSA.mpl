@@ -87,7 +87,7 @@ NDSA:=proc(B,sigma_,beta_,num_var,p,num_points,num_eqn)
         
         if dq > 1 then  
             print("NDSA: Termination condition met"):       
-            return result,T, lin_sys:
+            return result,T,lin_sys:
             # if num_points <> T then  
             #     return result,T,lin_sys:
             # else

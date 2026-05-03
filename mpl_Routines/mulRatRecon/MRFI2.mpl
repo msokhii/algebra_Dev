@@ -138,14 +138,8 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             # One shared affine-line sample set
             Psi_alpha := get_point_on_affine_line(num_vars, alphaVal, direction, sigma_j, p, mMax):
 
-            # One shared BB batch
-
-            BTimeStart := time():
-            to 10^3 do:
-                BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
-            od: 
-            BTimeStop := time()-BTimeStart: 
-            avgCostBCall := BTimeStop: 
+            
+            BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]: 
 
             # Reconstruct each component using only its needed prefix length
             for i from 1 to num_eqn do
@@ -200,13 +194,10 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
             lambda_num[k] := BMEA(num_eval[k], p, Z):
             terms_num[k] := degree(lambda_num[k], Z):
-            rootNumTStart := time():
-            to 10^3 do:
+           
+            
                 R_num[k] := Roots(lambda_num[k]) mod p:
-            od: 
-            rootDenomTStart := time()-rootNumTStart: 
-            printf("MAPLE ROOT TIME: %.9f\n",rootDenomTStart/10^3):
-
+             
             lprint("MRFI lambda_num: ", lambda_num[k]):
             lprint("MRFI terms_num: ", terms_num[k]):
             lprint("MRFI R_num: ", R_num[k]):
@@ -478,5 +469,5 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     print("Final jDone =", jDone):
     print("Main-loop probe estimate =", jDone * mMax):
 
-    return final_num, final_den, avgCostBCall:
+    return final_num, final_den:
 end proc:

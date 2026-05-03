@@ -47,8 +47,8 @@ read "./mapleWrapper.mpl":
 
 # test_case:="example":
 # test_case:="small_sys_low_deg":
-#  test_case:="bspline":
-test_case:="small_Sys":
+ test_case:="bspline":
+#  test_case:="small_Sys":
 # test_case:="mike":
 # test_case:="bsbug":
 num_lines:=0:
@@ -60,7 +60,7 @@ p:= 2^31 - 1:
 # print("Number of parameters:", num_vars):
 # Create black box
 try
-Num,Den := MRFI(B, num_vars, num_eqn, params, p):
+Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
     catch:
     lprint("ERROR:", lasterror()):
 end try:
