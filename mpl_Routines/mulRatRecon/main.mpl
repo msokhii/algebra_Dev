@@ -15,41 +15,21 @@ read "./9_rvr.mpl":
 read "./data_gen.mpl":
 read "./helpers.mpl":
 
-(* CPP RATRECON WRAPPER *)
+(* CPP RATRECON WRAPPER OLD *)
 # read "./cppRatRecon.mpl":
 # read "./cppNewtonInterp.mpl":
+
+(* CPP RATRECON + NEWTONINTERP WRAPPER OLD *)
 read "./mapleWrapper.mpl":
 
-# test_case:="rand":
-# num_var:=3:
-# num_terms:=11:
-# den_terms:=9:
-# Vars,F,G,num_vars,num_eqn,params:=get_data(test_case,num_var,num_terms,den_terms):
-# counter := 0:
-# num_lines:=0:
-# B:= Construct_Rational_Blackbox(F,G,Vars):
-
-
-# test_case:="rat_rand":
-# num_var:=3:
-# num_terms:=11:
-# den_terms:=9:
-# num_coeff_bound:=20:
-# den_coeff_bound:=20:
-# Vars,F,G,num_vars,num_eqn,params:=get_data(test_case,num_var,num_terms,den_terms,num_coeff_bound,den_coeff_bound):
-# counter := 0:
-# B:= Construct_Rational_Blackbox(F,G,Vars):
-
-# lprint("Variables:", Vars):
-# lprint("Numerator F:", F):
-# lprint("Denominator G:", G):
-
+(* SAMPLE TEST CASES *)
 # test_case:="example":
 # test_case:="small_sys_low_deg":
 # test_case:="bspline":
 #  test_case:="small_Sys":
 # test_case:="mike":
 # test_case:="bsbug":
+
 matSize := 2:
 maxTS := 14:
 BBCalls := table():
@@ -62,9 +42,6 @@ Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,matSize):
 counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
 p:= 2^31-1:
-# print("Number of equations:", num_eqn):
-# print("Number of parameters:", num_vars):
-# Create black box
 try
 Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
     catch:
@@ -90,9 +67,6 @@ print("Displaying the results"):
 
 if(num_eqn >1)then 
     og_soln:=get_eqn(Sys,Vars):
-    # og_unordered_soln:=convert(og_soln,list):
-    # og_soln:=reording(og_unordered_soln,nops(Sys)):
-    # fin_rat_recon:=Vector(convert(Rat_recon,list)):
     og_soln:=convert(og_soln,list):
     for i from 1 to num_eqn do 
         print("x",i,"="):
@@ -100,8 +74,7 @@ if(num_eqn >1)then
         termsN := termsN+nops(Ratrecon_num[i]):
         termsD := termsD+nops(Ratrecon_den[i]):
         lprint("Recovered Polynomial = ",Final_rat_poly[i]):
-        lprint("Original Polynomial =",op(2,og_soln[i])):
-        #print("f",i,"/g",i,"-","ff",i,"/gg",i,"=",simplify(Rat_recon[i]-op(2,og_soln[i])));
+        lprint("Original Polynomial  = ",op(2,og_soln[i])):
         printf("f%d/g%d-ff%d/gg%d = %a\n",i,i,i,i,simplify(Final_rat_poly[i]-op(2,og_soln[i])));
     end do:
     elif num_eqn =1 then 
@@ -109,14 +82,14 @@ if(num_eqn >1)then
         termsN := termsN+nops(Ratrecon_num[i]):
         termsD := termsD+nops(Ratrecon_den[i]):
         lprint("Recovered Polynomial = ",Final_rat_poly[1]):
-        lprint("Original polynomial =",F/G):
+        lprint("Original polynomial  = ",F/G):
         printf("f1/g1 - F/G = %a\n",simplify(Final_rat_poly[1]-F/G));
 end if:
 
 print("======================================================"):
 print("Total number of lines generated in get_point_on_affine_line:", num_lines):
 lprint("Total Black Box Calls:", counter):
-BBCalls[k] := [matSize,counter,floor(evalf(termsN/num_eqn)),floor(evalf(termsD/num_eqn))]:
+BBCalls[k] := [matSize,counter,floor(evalf(termsN/num_eqn)),floor(evalf(termsD/num_eqn)),num_eqn,num_vars]:
 matSize++:
 od:
 
