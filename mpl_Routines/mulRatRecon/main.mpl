@@ -47,7 +47,7 @@ read "./mapleWrapper.mpl":
 
 # test_case:="example":
 # test_case:="small_sys_low_deg":
- test_case:="bspline":
+# test_case:="bspline":
 #  test_case:="small_Sys":
 # test_case:="mike":
 # test_case:="bsbug":
