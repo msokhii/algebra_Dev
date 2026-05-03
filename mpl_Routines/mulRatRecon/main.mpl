@@ -51,9 +51,10 @@ read "./mapleWrapper.mpl":
 #  test_case:="small_Sys":
 # test_case:="mike":
 # test_case:="bsbug":
-test_case := "T5":
+matSize := 4:
+test_case := "TS":
 num_lines:=0:
-Sys, Vars, params, num_vars, num_eqn:= get_data(test_case):
+Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,matSize):
 counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
 p:= prevprime(2^31 - 1):
@@ -74,7 +75,6 @@ for i from 1 to num_eqn do
     Ratrecon_den[i]:=iratrecon(Den[i],p):
     print("denominator = ",Ratrecon_den[i]):
 end do:
-
 
 print("======================================================"):
 print("Displaying the results"):
