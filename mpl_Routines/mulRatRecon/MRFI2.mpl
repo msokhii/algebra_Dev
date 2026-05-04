@@ -18,7 +18,7 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
           Roots_num_eval, Roots_den_eval,
           num_mono, den_mono, final_num, final_den,
           tmpNum, tmpDen,
-          maxDoublings, doublingCount,avgCostBCall;
+          maxDoublings, doublingCount,avgCostBCall,timeOne;
 
     lprint("RR MRFI ========================================"):
     lprint("RR MRFI Starting"):
@@ -71,7 +71,7 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     # Phase 1: initial degree discovery from NDSA
     # ============================================================
     Tinit := 4:
-    mqrfr_results, Tcur, lin_sys := NDSA(B, initialPoint, direction, num_vars, p, Tinit, num_eqn):
+    mqrfr_results,Tcur,lin_sys,timeOne := NDSA(B, initialPoint, direction, num_vars, p, Tinit, num_eqn):
 
     Numerators   := [seq(mqrfr_results[i][1], i=1..nops(mqrfr_results))]:
     Denominators := [seq(mqrfr_results[i][2], i=1..nops(mqrfr_results))]:
@@ -82,11 +82,11 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     sampleCounts := [seq(deg_num[i] + deg_den[i] + 1, i=1..num_eqn)]:
     mMax := max(op(sampleCounts)):
 
-    print("deg_num      =", deg_num):
-    print("deg_den      =", deg_den):
-    print("sampleCounts =", sampleCounts):
-    print("mMax         =", mMax):
-    print("T from NDSA  =", Tcur):
+    print("deg_num      = ", deg_num):
+    print("deg_den      = ", deg_den):
+    print("sampleCounts = ", sampleCounts):
+    print("mMax         = ", mMax):
+    print("T from NDSA  = ", Tcur):
 
     common_den_flag := true:
     for k from 2 to num_eqn do
@@ -110,6 +110,9 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     all_done := false:
     maxDoublings := 20:
     doublingCount := 0:
+    
+    bbMaxTime := 0:
+    bbTime := 0:
 
     while not all_done do
         print("=============================================================="):
@@ -138,8 +141,15 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             # One shared affine-line sample set
             Psi_alpha := get_point_on_affine_line(num_vars, alphaVal, direction, sigma_j, p, mMax):
 
-            
-            BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]: 
+            startTime2 := time():
+            to 10^3 do:
+                BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]: 
+            od:
+            stopTime2 := time()-startTime2:
+            bbTime := evalf(stopTime2/10^3):
+            if bbTime>bbMaxTime then
+                bbMaxTime=bbTime:
+            fi:
 
             # Reconstruct each component using only its needed prefix length
             for i from 1 to num_eqn do
@@ -469,5 +479,5 @@ rrMRFI:= proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     print("Final jDone =", jDone):
     print("Main-loop probe estimate =", jDone * mMax):
 
-    return final_num, final_den:
+    return final_num, final_den, bbMaxTime+timeOne:
 end proc:

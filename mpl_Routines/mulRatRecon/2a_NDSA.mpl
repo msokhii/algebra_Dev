@@ -6,7 +6,7 @@ with(LinearAlgebra):
 
 NDSA:=proc(B,sigma_,beta_,num_var,p,num_points,num_eqn)
     local correct_degree,T,alpha,m,phi_,Psi_alpha,Y,u,f,g,dq,lcg,np,nv,i,r,
-          lin_sys,temp,result,count,M,row,col,DQ,MQRFR_done:
+          lin_sys,temp,result,count,M,row,col,DQ,MQRFR_done,timeNDSA,startTime,stopTime:
     print("In NDSA");
     # print("NDSA: num_eqn:= ",num_eqn);
     MQRFR_done:=[seq(false, i=1..num_eqn)]:
@@ -31,7 +31,13 @@ NDSA:=proc(B,sigma_,beta_,num_var,p,num_points,num_eqn)
         lprint("NDSA:m: ",m):
         Psi_alpha:=get_point_on_affine_line(num_var,alpha,beta_,sigma_,p,T):
         lprint("NDSA:Psi_alpha: ",Psi_alpha):
-        Y := [seq(B(Psi_alpha[i],p), i=1..T)];
+        timeNDSA := 0:
+        startTime := time():
+        to 10^3 do:
+            Y := [seq(B(Psi_alpha[i],p),i=1..T)];
+        od:
+        stopTime := time()-startTime:
+        timeNDSA := evalf(stopTime/10^4):
         # M:=convert(Y,Matrix):
         M:=Matrix(Y):
         lprint("Matrix M: ",M):
@@ -88,7 +94,7 @@ NDSA:=proc(B,sigma_,beta_,num_var,p,num_points,num_eqn)
         
         if dq > 1 then  
             print("NDSA: Termination condition met"):       
-            return result,T,lin_sys:
+            return result,T,lin_sys,timeNDSA:
             # if num_points <> T then  
             #     return result,T,lin_sys:
             # else

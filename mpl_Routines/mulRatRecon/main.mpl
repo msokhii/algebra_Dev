@@ -45,12 +45,13 @@ counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
 p:= 2^31-1:
 try
-Num,Den := rrMRFI(B, num_vars, num_eqn, params, p):
+Num,Den,totalTime := rrMRFI(B, num_vars, num_eqn, params, p):
     catch:
     lprint("ERROR:", lasterror()):
 end try:
 print("NUM",Num);
 print("DENUM",Den);
+print("TOTAL TIME",totalTime);
 Ratrecon_num:=table():
 Ratrecon_den:=table():
 Final_rat_poly:=table():
@@ -101,7 +102,7 @@ if(num_eqn >1)then
 print("======================================================"):
 print("Number of lines generated in AFFINE_LINE routine: ", num_lines):
 lprint("Black Box Probes: ", counter):
-BBCalls[k] := [matSize,counter,maxTermsN,maxTermsD,num_eqn,num_vars]:
+BBCalls[k] := [matSize,counter,maxTermsN,maxTermsD,num_eqn,num_vars,totalTime]:
 matSize++:
 od:
 
