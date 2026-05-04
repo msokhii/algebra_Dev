@@ -35,7 +35,9 @@ maxTS := 14:
 BBCalls := table():
 for k from 1 to maxTS do
 termsN := 0:
+maxTermsN := -1:
 termsD := 0:
+maxTermsD := -1:
 test_case := "TS":
 num_lines:=0:
 Sys, Vars, params, num_vars, num_eqn:= get_data(test_case,matSize):
@@ -63,33 +65,43 @@ end do:
 #print("IRAT DENUM",convert(Ratrecon_den,list));
 
 print("======================================================"):
-print("Displaying the results"):
+print("RESULTS:"):
 
 if(num_eqn >1)then 
     og_soln:=get_eqn(Sys,Vars):
     og_soln:=convert(og_soln,list):
+    resTable := table():
     for i from 1 to num_eqn do 
         print("x",i,"="):
         Final_rat_poly[i]:=Ratrecon_num[i]/Ratrecon_den[i]:
-        termsN := termsN+nops(Ratrecon_num[i]):
-        termsD := termsD+nops(Ratrecon_den[i]):
-        lprint("Recovered Polynomial = ",Final_rat_poly[i]):
-        lprint("Original Polynomial  = ",op(2,og_soln[i])):
-        printf("f%d/g%d-ff%d/gg%d = %a\n",i,i,i,i,simplify(Final_rat_poly[i]-op(2,og_soln[i])));
-    end do:
-    elif num_eqn =1 then 
+        termsN := nops(Ratrecon_num[i]):
+        if termsN>maxTermsN then
+            maxTermsN := termsN:
+        fi:
+        termsD := nops(Ratrecon_den[i]):
+        if termsD>maxTermsD then
+            maxTermsD := termsD:
+        fi:
+        temp := simplify(Final_rat_poly[i]-op(2,og_soln[i])):
+        resTable[i] := temp:
+        #lprint("Recovered Polynomial = ",Final_rat_poly[i]):
+        #lprint("Original Polynomial  = ",op(2,og_soln[i])):
+        #printf("f%d/g%d-ff%d/gg%d = %a\n",i,i,i,i,simplify(Final_rat_poly[i]-op(2,og_soln[i])));
+    od:
+    print(convert(resTable,list)):
+    elif num_eqn = 1 then 
         Final_rat_poly[1]:=Ratrecon_num[1]/Ratrecon_den[1]:
         termsN := termsN+nops(Ratrecon_num[i]):
         termsD := termsD+nops(Ratrecon_den[i]):
         lprint("Recovered Polynomial = ",Final_rat_poly[1]):
         lprint("Original polynomial  = ",F/G):
         printf("f1/g1 - F/G = %a\n",simplify(Final_rat_poly[1]-F/G));
-end if:
+    fi:
 
 print("======================================================"):
-print("Total number of lines generated in get_point_on_affine_line:", num_lines):
-lprint("Total Black Box Calls:", counter):
-BBCalls[k] := [matSize,counter,floor(evalf(termsN/num_eqn)),floor(evalf(termsD/num_eqn)),num_eqn,num_vars]:
+print("Number of lines generated in AFFINE_LINE routine: ", num_lines):
+lprint("Black Box Probes: ", counter):
+BBCalls[k] := [matSize,counter,maxTermsN,maxTermsD,num_eqn,num_vars]:
 matSize++:
 od:
 

@@ -24,7 +24,7 @@ get_data:=proc(test_case,nSize)
         elif test_case ="small_Sys" then
             Sys:={x1+y1*x2+y1-3,y2*x1+x2+y1-1}:
         elif test_case = "TS" then
-            Sys := TS(nSize):
+            Sys := TM(nSize):
         elif test_case ="mike" then
             Sys:={y1*x1+y1*x2-1, y1*y2*x1-x2-1}:
         elif test_case = "example" then
@@ -85,37 +85,38 @@ RandRational := proc(N::posint)
     end proc;
 end proc:
 
-TS := proc(n::posint)
-    local i, j, d, A, b, Sys, Vars, params, num_vars, num_eqn;
+TM := proc(n::posint)
+local i,j,d,matA,b,tempSys,vars,params:
 
-    Vars := [seq(cat(x,i), i=1..n)]:
-    params := [y1,y2]:
-
-    A := Matrix(n,n):
-
-    for i from 1 to n do
-        for j from 1 to n do
-            d := abs(i-j):
-
-            if d = 0 then
-                A[i,j] := y1 + 1:
-            elif d = 1 then
-                A[i,j] := y2:
-            else
-                A[i,j] := 0:
-            end if:
-
-        end do:
-    end do:
-
-    b := Vector([seq(i, i=1..n)]):
-
-    Sys := [
-        seq(
-            add(A[i,j]*Vars[j], j=1..n) - b[i],
-            i=1..n
-        )
-    ]:
-
-    return Sys:
+vars := [seq(cat(x,i),i=1..n)]:
+params := [y1,y2]:
+mat := Matrix(n,n):
+for i from 1 to n do
+   for j from 1 to n do
+       d := abs(i-j):
+       if d=0 then
+           mat[i,j] := y1+1:
+       elif d=1 then
+           mat[i,j] := y2:
+       else
+           mat[i,j] := 0:
+       fi:
+   od:
+od:
+b := Vector([seq(i,i=1..n)]):
+tempSys := [seq(add(mat[i,j]*vars[j],j=1..n)-b[i],i=1..n)]:
+return tempSys:
 end proc:
+
+localTM := proc(argA::posint)
+local n,vars,i,params,mat,b,sys,j:
+
+n := argA:
+vars := [seq(cat(x,i),i=1..n)]:
+params := [seq(cat(y,i),i=1..n)]:
+mat := ToeplitzMatrix(params,n,symmetric):
+b := Vector([seq(1,i=1..n)]):
+tempSys := [seq(add(mat[i,j]*vars[j], j=1..n) - b[i],i=1..n)]:
+return tempSys:
+end proc:
+
