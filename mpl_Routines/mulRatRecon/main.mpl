@@ -101,8 +101,8 @@ if(num_eqn >1)then
 
 print("======================================================"):
 print("Number of lines generated in AFFINE_LINE routine: ", num_lines):
-lprint("Black Box Probes: ", counter):
-BBCalls[k] := [matSize,counter,maxTermsN,maxTermsD,num_eqn,num_vars,totalTime]:
+#lprint("Black Box Probes: ", counter):
+BBCalls[k] := [matSize,counter/10^3,maxTermsN,maxTermsD,num_eqn,num_vars,totalTime]:
 matSize++:
 od:
 
