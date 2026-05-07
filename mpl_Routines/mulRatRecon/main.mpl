@@ -30,8 +30,8 @@ read "./mapleWrapper.mpl":
 # test_case:="mike":
 # test_case:="bsbug":
 
-matSize := 2:
-maxTS := 14:
+matSize := 4:
+maxTS := 1:
 BBCalls := table():
 for k from 1 to maxTS do
 termsN := 0:
@@ -45,7 +45,7 @@ counter := 0:
 B := Constuct_Sys_Blackbox(Sys, Vars, params):
 p:= 2^31-1:
 try
-Num,Den,totalTime := rrMRFI(B, num_vars, num_eqn, params, p):
+Num,Den,totalTime := rrMRFI5(B, num_vars, num_eqn, params, p):
     catch:
     lprint("ERROR:", lasterror()):
 end try:
@@ -85,8 +85,8 @@ if(num_eqn >1)then
         fi:
         temp := simplify(Final_rat_poly[i]-op(2,og_soln[i])):
         resTable[i] := temp:
-        #lprint("Recovered Polynomial = ",Final_rat_poly[i]):
-        #lprint("Original Polynomial  = ",op(2,og_soln[i])):
+        lprint("Recovered Polynomial = ",Final_rat_poly[i]):
+        lprint("Original Polynomial  = ",op(2,og_soln[i])):
         #printf("f%d/g%d-ff%d/gg%d = %a\n",i,i,i,i,simplify(Final_rat_poly[i]-op(2,og_soln[i])));
     od:
     print(convert(resTable,list)):

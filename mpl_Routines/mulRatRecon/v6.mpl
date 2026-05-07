@@ -1,6 +1,5 @@
 read "./mapleWrapper.mpl":
 
-restart:
 with(LinearAlgebra):
 with(IntegerRelations):
 
@@ -619,7 +618,7 @@ test_prime := 2^31 - 1:    # Mersenne prime, fits integer[8]
 
 # Adjust this if you only want to test a sub-range:
 n_min := 4:
-n_max := 5:
+n_max := 7:
 
 # Set to false to skip the symbolic reference solve (faster for large n;
 # Maple's symbolic LinearSolve on a 12x12 with 12 parameters can be slow).

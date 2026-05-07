@@ -24,7 +24,7 @@ get_data:=proc(test_case,nSize)
         elif test_case ="small_Sys" then
             Sys:={x1+y1*x2+y1-3,y2*x1+x2+y1-1}:
         elif test_case = "TS" then
-            Sys := TM(nSize):
+            Sys := make_TM(nSize):
         elif test_case ="mike" then
             Sys:={y1*x1+y1*x2-1, y1*y2*x1-x2-1}:
         elif test_case = "example" then
@@ -108,15 +108,15 @@ tempSys := [seq(add(mat[i,j]*vars[j],j=1..n)-b[i],i=1..n)]:
 return tempSys:
 end proc:
 
-localTM := proc(argA::posint)
-local n,vars,i,params,mat,b,sys,j:
+make_TM := proc(n::posint)
+local Y,X,A,b,i,sys:
 
-n := argA:
-vars := [seq(cat(x,i),i=1..n)]:
-params := [seq(cat(y,i),i=1..n)]:
-mat := ToeplitzMatrix(params,n,symmetric):
-b := Vector([seq(1,i=1..n)]):
-tempSys := [seq(add(mat[i,j]*vars[j], j=1..n) - b[i],i=1..n)]:
-return tempSys:
+Y := [seq(y||i,i=1..n)]:
+X := [seq(x||i,i=1..n)]:
+b := [seq(1,i=1..n)]:
+
+A := ToeplitzMatrix(Y,symmetric):
+sys := {seq(add(A[i,j]*X[j],j=1..n)-b[i],i=1..n)}:
+
+return sys:
 end proc:
-
