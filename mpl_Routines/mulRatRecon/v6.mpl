@@ -1,3 +1,5 @@
+read "./mapleWrapper.mpl":
+
 restart:
 with(LinearAlgebra):
 with(IntegerRelations):
