@@ -357,8 +357,9 @@ Deterministic_NDSA := proc(B, sigma_, beta_, num_var, p, num_points, max_points,
         M := convert(Y[1..num_points[i]], Matrix);
         row, col := Dimension(M):
         if row = 1 then
-            u := Interp(alpha[1..num_points[i]], Y[1..num_points[i]], x) mod p:
-        else
+            #u := Interp(alpha[1..num_points[i]], Y[1..num_points[i]], x) mod p:
+            u := cppNewtonInterp(alpha[1..num_points[i]],Y[1..num_points[i]],x,p):
+	else
             lin_sys := true;
             u := Deterministic_get_u(M, i, alpha[1..num_points[i]], p);
         end if;
@@ -723,7 +724,7 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 4:
+n_max := 20:
 do_verify := true:
 do_ffge := true:
 summary := []:
@@ -845,7 +846,7 @@ for n_test from n_min to n_max do
                     end if;
                 end do;
                 if all_match then
-                    printf("  PASS  n=%2d "
+                    printf("  PASS  n=%2d   "
                            "BB-calls=%d  bb/call=%.3e s  bb-total=%.3f s\n",
                            n_test, mrfi_calls,
                            bb_per_call, bb_total_est):
@@ -855,15 +856,14 @@ for n_test from n_min to n_max do
                                  stats_terms_num, stats_terms_den,
                                  stats_deg_num,   stats_deg_den,
                                  stats_common,    stats_mMax,
-                                 ffge_status,     
+                                 ffge_status,     t_ffge,
                                  ffge_terms_num,  ffge_terms_den,
                                  ffge_y_terms,    ffge_det_terms,
                                  ffge_elim_swell, ffge_backsub_swell]]:
                 else
-                    printf("  FAIL  n=%2d (mismatch)  MRFI=%.2fs  ref=%.2fs\n",
-                           n_test, t_mrfi, t_ref):
+                    printf("  FAIL  n=%2d (mismatch)\n", n_test):
                     summary := [op(summary),
-                                [n_test, "FAIL-mismatch", t_mrfi, t_ref, mrfi_calls,
+                                [n_test, "FAIL-mismatch", mrfi_calls,
                                  bb_per_call, bb_total_est,
                                  stats_terms_num, stats_terms_den,
                                  stats_deg_num,   stats_deg_den,
@@ -874,13 +874,12 @@ for n_test from n_min to n_max do
                                  ffge_elim_swell, ffge_backsub_swell]]:
                 end if;
             catch:
-                printf("  PARTIAL  n=%2d   MRFI=%.2fs  (ref solve threw)\n",
-                       n_test, t_mrfi):
+                printf("  PARTIAL  n=%2d   (ref solve threw)\n", n_test):
                 for i from 1 to num_eqn do
                     printf("    x%d = %a\n", i, Final_rat_poly[i]):
                 end do;
                 summary := [op(summary),
-                            [n_test, "NO-VERIFY", t_mrfi, infinity, mrfi_calls,
+                            [n_test, "NO-VERIFY", mrfi_calls,
                              bb_per_call, bb_total_est,
                              stats_terms_num, stats_terms_den,
                              stats_deg_num,   stats_deg_den,
@@ -891,13 +890,13 @@ for n_test from n_min to n_max do
                                  ffge_elim_swell, ffge_backsub_swell]]:
             end try;
         else
-            printf("  RECOVERED (unverified) n=%2d  MRFI=%.2fs  BB-calls=%d\n",
-                   n_test, t_mrfi, mrfi_calls):
+            printf("  RECOVERED (unverified) n=%2d  BB-calls=%d\n",
+                   n_test, mrfi_calls):
             for i from 1 to num_eqn do
                 printf("    x%d = %a\n", i, Final_rat_poly[i]):
             end do;
             summary := [op(summary),
-                        [n_test, "UNVERIFIED", t_mrfi, infinity, mrfi_calls,
+                        [n_test, "UNVERIFIED", mrfi_calls,
                          bb_per_call, bb_total_est,
                          stats_terms_num, stats_terms_den,
                          stats_deg_num,   stats_deg_den,
@@ -910,7 +909,7 @@ for n_test from n_min to n_max do
     else
         printf("  FAIL  n=%2d   %s\n", n_test, status):
         summary := [op(summary),
-                    [n_test, status, t_mrfi, infinity, mrfi_calls,
+                    [n_test, status, mrfi_calls,
                      bb_per_call, bb_total_est,
                      stats_terms_num, stats_terms_den,
                      stats_deg_num,   stats_deg_den,
@@ -922,17 +921,14 @@ for n_test from n_min to n_max do
     end if;
 end do;
 
-(*print("=================================================================="):
+print("=================================================================="):
 print("  SUMMARY"):
 print("=================================================================="):
 printf("%4s  %-15s  %10s  %12s  %12s\n",
-       "n", "status", "BB-calls",
-       "bb/call(s)", "bb-total(s)"):
+       "n", "status", "BB-calls", "bb/call(s)", "bb-total(s)"):
 for entry in summary do
-    printf("%4d  %-15s  %10.2f  %10.2f  %10d  %12.3e  %12.3f\n",
-           entry[1], entry[2], entry[3],
-           `if`(entry[4] = infinity, -1.0, entry[4]),
-           entry[5], entry[6], entry[7]):
+    printf("%4d  %-15s  %10d  %12.3e  %12.3f\n",
+           entry[1], entry[2], entry[3], entry[4], entry[5]):
 end do;
 
 print(""):
@@ -944,44 +940,42 @@ printf("%4s  %-22s  %-22s  %-22s  %-22s  %10s\n",
        "FFGE max swell"):
 for entry in summary do
     printf("%4d  %-22a  %-22a  %-22a  %-22a  %10a\n",
-           entry[1], entry[8], entry[16], entry[9], entry[17],
-           max(entry[20], entry[21])):
-end do;*)
+           entry[1], entry[6], entry[14], entry[7], entry[15],
+           max(entry[18], entry[19])):
+end do;
 
-# ----- Detailed report file -----
-report_path := "toeplitz_benchmark.txt":
+report_path := "TimingsTN.txt":
 fd := fopen(report_path, WRITE):
 fprintf(fd, "============================================================\n"):
 fprintf(fd, "  Symmetric Toeplitz MRFI benchmark\n"):
-fprintf(fd, "  prime p = %d\n", test_prime):
-fprintf(fd, "  range   n = %d .. %d\n", n_min, n_max):
+fprintf(fd, "  Prime p = %d\n", test_prime):
+fprintf(fd, "  Range   n = %d .. %d\n", n_min, n_max):
 fprintf(fd, "============================================================\n\n"):
 
 for entry in summary do
-    fprintf(fd, "----- n = %d -----\n",                  entry[1]):
+    fprintf(fd, "  n = %d\n",                  entry[1]):
     fprintf(fd, "  MRFI Status              : %s\n",     entry[2]):
-#            `if`(entry[4] = infinity, -1.0, entry[4])):
-    fprintf(fd, "  Total BB calls           : %d\n",     entry[5]):
-    fprintf(fd, "  Per call BB time         : %.9f\n",   entry[6]):
-    fprintf(fd, "  Total BB time (s)        : %.9f\n",   entry[7]):
-    fprintf(fd, "  Deg_num (per equation)   : %a\n",     entry[10]):
-    fprintf(fd, "  Deg_den (per equation)   : %a\n",     entry[11]):
-    fprintf(fd, "  Terms_num (per equation) : %a\n",     entry[8]):
-    fprintf(fd, "  Terms_den (per equation) : %a\n",     entry[9]):
-    fprintf(fd, " \n\n"):
-    fprintf(fd, "  FFGE status              : %s\n",     entry[14]):
-    fprintf(fd, "  FFGE f[i] terms (==num)  : %a\n",     entry[16]):
-    fprintf(fd, "  FFGE g[i] terms (==den)  : %a\n",     entry[17]):
-    fprintf(fd, "  FFGE y[i] terms (Pre GCD): %a\n",     entry[18]):
-    fprintf(fd, "  FFGE det(A) terms        : %a\n",     entry[19]):
+    fprintf(fd, "  Total BB calls           : %d\n",     entry[3]):
+    fprintf(fd, "  Per call BB time         : %.9f\n",   entry[4]):
+    fprintf(fd, "  Total BB time            : %.9f\n",   entry[5]):
+    fprintf(fd, "  Deg_num (per equation)   : %a\n",     entry[8]):
+    fprintf(fd, "  Deg_den (per equation)   : %a\n",     entry[9]):
+    fprintf(fd, "  Terms_num (per equation) : %a\n",     entry[6]):
+    fprintf(fd, "  Terms_den (per equation) : %a\n",     entry[7]):
+    fprintf(fd, " \n"):
+    fprintf(fd, "  FFGE status              : %s\n",     entry[12]):
+    fprintf(fd, "  FFGE f[i] terms (==num)  : %a\n",     entry[14]):
+    fprintf(fd, "  FFGE g[i] terms (==den)  : %a\n",     entry[15]):
+    fprintf(fd, "  FFGE y[i] terms (Pre GCD): %a\n",     entry[16]):
+    fprintf(fd, "  FFGE det(A) terms        : %a\n",     entry[17]):
     fprintf(fd, "  FFGE Max Elim. step swell: %a  (numterms(num) before exact div)\n",
-            entry[20]):
+            entry[18]):
     fprintf(fd, "  FFGE max Back sub swell  : %a  (numterms(N[i]) before exact div)\n",
-            entry[21]):
+            entry[19]):
     fprintf(fd, "  Term count comparison (MRFI vs FFGE)\n"):
-    fprintf(fd, "  Numerator terms MRFI     : %a\n",     entry[8]):
-    fprintf(fd, "  Numerator terms FFGE     : %a\n",     entry[16]):
-    fprintf(fd, "  Denominator terms MRFI   : %a\n",     entry[9]):
-    fprintf(fd, "  Denominator terms FFGE   : %a\n\n",   entry[17]):
+    fprintf(fd, "  Numerator terms MRFI     : %a\n",     entry[6]):
+    fprintf(fd, "  Numerator terms FFGE     : %a\n",     entry[14]):
+    fprintf(fd, "  Denominator terms MRFI   : %a\n",     entry[7]):
+    fprintf(fd, "  Denominator terms FFGE   : %a\n\n",   entry[15]):
 end do:
 fclose(fd):
