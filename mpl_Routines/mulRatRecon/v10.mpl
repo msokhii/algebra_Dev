@@ -27,7 +27,6 @@ end proc:
 get_u := proc(M, col, alpha, p)
     local F, U, i;
     F := [seq(convert(M[..,i], list), i=1..col)];
-    #U := [seq(Interp(alpha, F[i], x) mod p, i=1..col)];
     U := [seq(cppNewtonInterp(alpha,F[i],x,p),i=1..col)];
     return U;
 end proc:
@@ -35,27 +34,9 @@ end proc:
 Deterministic_get_u := proc(M, col, alpha, p)
     local F, U;
     F := convert(M[..,col][..numelems(alpha)], list);
-    #U := Interp(alpha, F, x) mod p;
     U := cppNewtonInterp(alpha,F,x,p);
     return U;
 end proc:
-
-###############################################################################
-#  Lipson's fraction-free Gaussian elimination + back-substitution.
-#  Solves A*x = b for x with A,b polynomial in Y[1..n].  Returns (det, f, g)
-#  where x[i] = f[i]/g[i] in lowest terms (so f[i]/g[i] = y[i]/det after gcd).
-#
-#  In addition to the prints from the original FFGE driver, this version
-#  populates a global `ffge_stats` table that captures:
-#      ffge_stats["elim_num_max"]     = max  numterms(num)         over elim
-#      ffge_stats["elim_post_max"]    = max  numterms(B[k+1,k+1])  over elim
-#      ffge_stats["backsub_N_max"]    = max  numterms(N[i])        over back-sub
-#      ffge_stats["y_terms"]          = [numterms(y[1])..numterms(y[n])]
-#      ffge_stats["det_terms"]        = numterms(det)
-#      ffge_stats["f_terms"]          = [numterms(f[1])..numterms(f[n])]
-#      ffge_stats["g_terms"]          = [numterms(g[1])..numterms(g[n])]
-#  so the driver can print a side-by-side comparison with MRFI.
-###############################################################################
 
 FFGE := proc(A::Matrix, b::Vector, Y::list(name))
 local n, m, B, mu, i, j, k, det, x, y, num, r, numterms, f, g, h, mons,
@@ -75,7 +56,7 @@ local n, m, B, mu, i, j, k, det, x, y, num, r, numterms, f, g, h, mons,
         i := k;
         while i<=n and B[i,k]=0 do i := i+1; od;
         if i>n then return 0 fi;
-        if i>k then # interchange row i and k
+        if i>k then 
             for j from k to n+1 do B[i,j],B[k,j] := B[k,j],B[i,j] od;
             det := -det;
         fi;
@@ -94,36 +75,36 @@ local n, m, B, mu, i, j, k, det, x, y, num, r, numterms, f, g, h, mons,
         mu := B[k,k];
     od;
     det := det*B[n,n];
-    printf("#det=%d\n",numterms(det));
+    #printf("#det=%d\n",numterms(det));
     # Lipson's back substitution
     y := Vector(n);
     y[n] := B[n,n+1];
-    printf("#y[%d]=%d\n",n,numterms(B[n,n+1]));
+    #printf("#y[%d]=%d\n",n,numterms(B[n,n+1]));
     backsub_N_max := 0:
     for i from n-1 by -1 to 1 do
         num := expand(B[i,n+1]*B[n,n]-add(B[i,j]*y[j],j=i+1..n));
         divide(num,B[i,i],evaln(y[i]));
-        printf("#N[%d]=%d  #y[%d]=%d\n",i,numterms(num),i,numterms(y[i]));
+        #printf("#N[%d]=%d  #y[%d]=%d\n",i,numterms(num),i,numterms(y[i]));
         if numterms(num) > backsub_N_max then backsub_N_max := numterms(num) end if;
     od;
     f := Vector(n);
     g := Vector(n);
     for i from 1 to n do
         h := gcd(y[i],B[n,n],evaln(f[i]),evaln(g[i]));
-        printf("#f[%d]=%d #g[%d]=%d #h=%d",i,numterms(f[i]),
+        #printf("#f[%d]=%d #g[%d]=%d #h=%d",i,numterms(f[i]),
              i,numterms(g[i]),numterms(h));
-        printf("   deg(f[%d])=%d deg(g[%d])=%d\n",i,degree(f[i]),i,degree(g[i]));
+        #printf("   deg(f[%d])=%d deg(g[%d])=%d\n",i,degree(f[i]),i,degree(g[i]));
     od;
     r := {seq(Y[i]=ithprime(i),i=1..nops(Y))};
     for i from 1 to n do
         coeffs(f[i],Y,'mons');
         mons := subs(r,[mons]);
         m := max(op(mons));
-        printf("f[%d]: max m[%d] = %d = %a\n",i,i,m,ifactor(m));
+        #printf("f[%d]: max m[%d] = %d = %a\n",i,i,m,ifactor(m));
         coeffs(g[i],Y,'mons');
         mons := subs(r,[mons]);
         m := max(op(mons));
-        printf("g[%d]: max m[%d] = %d = %a\n",i,i,m,ifactor(m));
+        #printf("g[%d]: max m[%d] = %d = %a\n",i,i,m,ifactor(m));
     od;
 
     # Publish stats for the driver.
@@ -141,10 +122,6 @@ local n, m, B, mu, i, j, k, det, x, y, num, r, numterms, f, g, h, mons,
 
     return det,f,g;
 end:
-
-###############################################################################
-#  Original codebase from here down.
-###############################################################################
 
 Constuct_Sys_Blackbox := proc(Sys, Vars, params)
     local Lin_BB, L;
@@ -320,12 +297,12 @@ NDSA := proc(B, sigma_, beta_, num_var, p, num_points, num_eqn)
         alpha := [seq(i mod p, i=1..T)]:
         m := Expand(product(x - alpha[j], j=1..T)) mod p:
         Psi_alpha := get_point_on_affine_line(num_var, alpha, beta_, sigma_, p, T):
+        (* Black Box call *)
         Y := [seq(B(Psi_alpha[i], p), i=1..T)]:
         M := Matrix(Y);
         row, col := Dimension(M):
         if row = 1 then
             lin_sys := false;
-            #u := Interp(alpha, Y, x) mod p:
             u := cppNewtonInterp(alpha,Y,x,p);
             result := [[MQRFR(m, u, 0, 1, p)]];
             dq := result[1][3];
@@ -357,7 +334,6 @@ NDSA := proc(B, sigma_, beta_, num_var, p, num_points, num_eqn)
             end do;
             DQ := [];
         end if;
-        # F7: safety break raised from 2^5 to 2^10
         if T > 2^10 then
             print("NDSA: hit safety break at T=", T);
             return result, lin_sys;
@@ -407,22 +383,21 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
           final_num, final_den, temp, common_den_flag,
           bmea_done, temp_den, all_den_done, all_done, max_num_points_mqrfr,
           init_sigma,
-          # locals for the cppRR-based main loop:
           sampleCounts, mMax, tempG, ratReconVal,
           sigma_j, alphaVal, modulusTable, modulusPoly,
           Psi_alpha, BBvals, m_i, Y, interpVal, rr, tmpNum, tmpDen;
     global mrfi_stats;
 
-    print("MRFI -- num_vars=", num_vars, " num_eqn=", num_eqn, " p=", p);
+    #print("MRFI -- num_vars=", num_vars, " num_eqn=", num_eqn, " p=", p);
 
     Primes := [seq(ithprime(i), i=1..num_vars)]:
-    # F3: was   direction := [7]:    -- only correct for num_vars=2
     direction := [seq(i + 6, i=1..num_vars - 1)]:
-    print("MRFI direction = ", direction);
+    #print("MRFI direction = ", direction);
 
-    # F10: initial sigma was [1,1,...,1] which makes a symmetric Toeplitz matrix
-    #      degenerate to the all-ones matrix (rank 1, singular).  Use distinct
-    #      primes so the first evaluation point is non-degenerate.
+    (* Originally, the initial sigma array was [1,1,...,1] which makes a symmetric Toeplitz matrix
+    degenerate to the all-ones matrix (rank 1, singular) so now we are using distinct
+    primes so the first evaluation point is non-degenerate. *)
+
     init_sigma := Primes:
 
     sigma_ := []:
@@ -464,22 +439,14 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         num_points_mqrfr[i] := deg_num[i] + deg_den[i] + 2:
     end do:
     max_num_points_mqrfr := max(op(deg_num)) + max(op(deg_den)) + 2:
-    print("MRFI num_points_mqrfr = ", num_points_mqrfr);
-    print("MRFI max_num_points_mqrfr = ", max_num_points_mqrfr);
+    #print("MRFI num_points_mqrfr = ", num_points_mqrfr);
+    #print("MRFI max_num_points_mqrfr = ", max_num_points_mqrfr);
 
-    # Per-equation sample counts and max for the cppRR-based loop.
-    # sampleCounts[i] is exactly num_points_mqrfr[i]; alias for readability.
     sampleCounts := num_points_mqrfr:
     mMax         := max_num_points_mqrfr:
-
-    # Random alpha generator and rational-reconstruction storage.
     tempG        := rand(1..p-1):
     ratReconVal  := table():
     for i from 1 to num_eqn do ratReconVal[i] := table() end do:
-
-    # Loop bookkeeping: jDone tracks the last processed sigma index, Tcur is
-    # the current doubling level (matches T_old/T convention but renamed to
-    # match the cppRR-loop snippet).
     jDone := 0:
 
     common_den_flag := true:
@@ -488,7 +455,7 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             common_den_flag := false; break;
         end if;
     end do;
-    print("MRFI common_den_flag = ", common_den_flag);
+    #print("MRFI common_den_flag = ", common_den_flag);
 
     while true do
         for j from jDone+1 to 2*Tcur do
@@ -496,7 +463,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             sigma_  := [op(sigma_), sigma_j]:
 
             if lin_sys then
-                # ===== One shared alpha list and modulus prefix table. =====
                 alphaVal := [seq(tempG(), s=1..mMax)]:
 
                 modulusTable := table():
@@ -505,16 +471,11 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
                     modulusPoly       := Expand(modulusPoly*(x-alphaVal[s])) mod p:
                     modulusTable[s]   := modulusPoly:
                 end do:
-
-                # ===== One shared affine-line sample of length mMax. =====
                 Psi_alpha := get_point_on_affine_line(num_vars, alphaVal,
                                                      direction, sigma_j,
                                                      p, mMax):
-
-                # ===== Single BB sweep -- all equations share these samples. =====
+                (* Black Box call *)
                 BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
-
-                # ===== Per-equation cppNewtonInterp + cppRR. =====
                 for i from 1 to num_eqn do
                     if numerator_done[i] and denominator_done[i] then next end if:
                     m_i := sampleCounts[i]:
@@ -537,7 +498,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
                     end if:
                 end do:
             else
-                # Single-equation rational BB path -- keep the original NDSA.
                 mqrfr_results, lin_sys := NDSA(B, sigma_j, direction,
                                                 num_vars, p,
                                                 max_num_points_mqrfr, 1):
@@ -560,7 +520,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
         jDone := 2*Tcur:
 
-        # ----- BMEA on numerators -----
         all_done := true:
         for k from 1 to num_eqn do
             if numerator_done[k] then next; end if;
@@ -574,14 +533,10 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             end if;
             if nops(R_num[k]) = terms_num[k]
                and terms_num[k] < iquo(nops(num_eval[k]), 2) then
-                # F12: original `terms_num[k] <= T` falsely terminated when
-                # BMEA returned a spurious polynomial at the degree cap.
-                # The robust criterion is BM's polynomial strictly below cap.
                 numerator_done[k] := true:
             end if;
         end do;
 
-        # ----- BMEA on denominators -----
         all_den_done := true:
         if common_den_flag then
             if not denominator_done[1] then
@@ -594,7 +549,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
                 end if;
                 if nops(R_den[1]) = terms_den[1]
                    and terms_den[1] < iquo(nops(den_eval[1]), 2) then
-                    # F12: see numerator block above
                     for k from 1 to num_eqn do
                         denominator_done[k] := true:
                     end do;
@@ -612,7 +566,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
                 end if;
                 if nops(R_den[k]) = terms_den[k]
                    and terms_den[k] < iquo(nops(den_eval[k]), 2) then
-                    # F12: see numerator block above
                     denominator_done[k] := true:
                 end if;
             end do;
@@ -623,11 +576,10 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         end do;
         all_done := true;
         for i from 1 to num_eqn do all_done := all_done and bmea_done[i]; end do;
-        print("MRFI bmea_done = ", bmea_done, " all_done = ", all_done);
+        #print("MRFI bmea_done = ", bmea_done, " all_done = ", all_done);
         if all_done then break; end if;
 
         Tcur := 2*Tcur:
-        # F6: safety break raised from 2^6 to 2^14
         if Tcur > 2^14 then
             print("MRFI: hit safety break at Tcur=", Tcur);
             break;
@@ -650,10 +602,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         num_mono[k] := temp;
         coeff_num[k] := Zippel_Transpose_Vandermonde_solver(num_eval[k],
                               terms_num[k], Roots_num_eval[k], lambda_num[k], p):
-        # F11 + F13: undo the index shift -- since num_eval starts at v_1 (not
-        # v_0), the solver returns c_i * P_i; divide by P_i to recover c_i.
-        # Build a fresh list with seq so we don't trip Maple's long-list limit
-        # (lists with > 100 elements cannot be indexed-assigned).
         coeff_num[k] := [seq(coeff_num[k][i] / Roots_num_eval[k][i] mod p,
                              i=1..terms_num[k])]:
     end do;
@@ -664,7 +612,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         den_mono[1]  := temp;
         coeff_den[1] := Zippel_Transpose_Vandermonde_solver(den_eval[1],
                               terms_den[1], Roots_den_eval[1], lambda_den[1], p):
-        # F11 + F13: same shift correction for the denominator
         coeff_den[1] := [seq(coeff_den[1][i] / Roots_den_eval[1][i] mod p,
                              i=1..terms_den[1])]:
         for k from 2 to num_eqn do
@@ -678,19 +625,16 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             den_mono[k] := temp;
             coeff_den[k] := Zippel_Transpose_Vandermonde_solver(den_eval[k],
                               terms_den[k], Roots_den_eval[k], lambda_den[k], p):
-            # F11 + F13: same shift correction
             coeff_den[k] := [seq(coeff_den[k][i] / Roots_den_eval[k][i] mod p,
                                  i=1..terms_den[k])]:
         end do;
     end if;
 
-    # ----- normalize so that the leading monomial of the denominator is monic -----
     for k from 1 to num_eqn do
         lcoeff(add(mon, mon in den_mono[k]), vars, 'mon');
         if not member(mon, den_mono[k], 'i') then
             error "bug in leading monomial";
         end if;
-        # F4: was   u := 1/coeff_den[k][-1] mod p;   -- last entry, not the LC.
         u := 1/coeff_den[k][i] mod p;
         coeff_num[k] := u * coeff_num[k] mod p:
         coeff_den[k] := u * coeff_den[k] mod p:
@@ -698,8 +642,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         final_den[k] := construct_final_polynomial(coeff_den[k], den_mono[k]):
     end do;
 
-    # Publish stats so the driver can read them without us having to widen
-    # the proc's return signature.
     mrfi_stats := table():
     mrfi_stats["terms_num"]       := [seq(terms_num[k], k=1..num_eqn)]:
     mrfi_stats["terms_den"]       := [seq(terms_den[k], k=1..num_eqn)]:
@@ -711,12 +653,6 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
     return final_num, final_den;
 end proc:
-
-###############################################################################
-#  data_gen.mpl     Original test cases preserved + new "toeplitz" branch
-#  F1: Vars returned as an ORDERED LIST (was a set)
-#  F8: New "toeplitz" test case
-###############################################################################
 
 RandRational := proc(N::posint)
     return proc() local a, b;
@@ -768,12 +704,7 @@ get_data := proc(test_case)
             ff := randpoly(Vars, coeffs=RandRational(args[5]), terms=args[3]):
             gg := randpoly(Vars, coeffs=RandRational(args[6]), terms=args[4]):
             return Vars, ff, gg, numelems(Vars), 1, Vars;
-        elif test_case = "toeplitz" then
-            # F8: New case.
-            #   args[2] = n (matrix size)
-            #   T_{ij} = y_{|i-j|+1},  RHS  b_i = 1.
-            # (Switched from b_i = i to b_i = 1 so it matches the
-            # Lipson FFGE driver and we can compare term counts directly.)
+        elif test_case = "TP" then
             n := args[2]:
             Vars   := [seq(x||i, i=1..n)]:
             params := [seq(y||i, i=1..n)]:
@@ -790,47 +721,31 @@ get_data := proc(test_case)
     return Sys, Vars, params, nops(params), nops(Vars);
 end proc:
 
-###############################################################################
-#  Driver: loop over n = 4..12, build a symmetric Toeplitz system, run MRFI,
-#          rational-reconstruct, verify against a symbolic reference.
-###############################################################################
-
-test_prime := 2^31 - 1:    # Mersenne prime, fits integer[8]
-
-# Adjust this if you only want to test a sub-range:
+test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 10:
-
-# Set to false to skip the symbolic reference solve (faster for large n;
-# Maple's symbolic LinearSolve on a 12x12 with 12 parameters can be slow).
+n_max := 4:
 do_verify := true:
-
-# Set to false to skip Lipson FFGE (also can be slow as n grows).
 do_ffge := true:
-
 summary := []:
 
 for n_test from n_min to n_max do
-    print("=================================================================="):
-    printf("  TEST: symmetric Toeplitz, n = %d\n", n_test):
-    print("=================================================================="):
+    #print("=================================================================="):
+    #printf("  TEST: symmetric Toeplitz, n = %d\n", n_test):
+    #print("=================================================================="):
 
-    Sys, Vars, params, num_vars, num_eqn := get_data("toeplitz",n_test):
-    print("Vars   = ", Vars):
-    print("params = ", params):
-    print("|Sys|  = ", nops(Sys)):
+    Sys, Vars, params, num_vars, num_eqn := get_data("TP",n_test):
+    #print("Vars   = ", Vars):
+    #print("params = ", params):
+    #print("|Sys|  = ", nops(Sys)):
 
     counter := 0:
     num_lines := 0:
-    forget(get_point_on_affine_line):    # clear the option-remember cache
+    forget(get_point_on_affine_line): 
 
     B := Constuct_Sys_Blackbox(Sys, Vars, params):
 
-    t_start := time():
     Num, Den := 'Num', 'Den':
     status := "OK":
-    # Wrap into a list so we can detect a single-value FAIL return without
-    # tripping the multiple-assignment.
     mrfi_out := []:
     try
         mrfi_out := [MRFI(B, num_vars, num_eqn, params, test_prime)]:
@@ -838,7 +753,6 @@ for n_test from n_min to n_max do
         status := cat("ERROR: ", StringTools:-FormatMessage(lastexception[2..-1])):
         print("MRFI threw: ", status):
     end try;
-    t_mrfi := time() - t_start:
     mrfi_calls := counter:    # snapshot before benchmark inflates counter
     if status = "OK" then
         if nops(mrfi_out) = 2 and mrfi_out <> [FAIL, FAIL] then
@@ -849,8 +763,6 @@ for n_test from n_min to n_max do
         end if;
     end if;
 
-    # ===== Dedicated BB-probe benchmark: 1000 calls at a fixed point. =====
-    # Pick a non-degenerate point (non-uniform so Toeplitz isn't singular).
     bench_point := [seq(ithprime(i)+1, i=1..num_vars)]:
     bench_calls := 1000:
     t_bb_start  := time():
@@ -859,11 +771,8 @@ for n_test from n_min to n_max do
     end do:
     t_bb_total  := time() - t_bb_start:
     bb_per_call := evalf(t_bb_total / bench_calls):
-    # bb_total_est is the TIME the BB probes consumed during MRFI itself,
-    # extrapolated from the per-probe cost we just measured.
     bb_total_est := evalf(bb_per_call * mrfi_calls):
 
-    # Capture stats published by MRFI (only meaningful if MRFI succeeded).
     if status = "OK" then
         stats_terms_num := mrfi_stats["terms_num"]:
         stats_terms_den := mrfi_stats["terms_den"]:
@@ -877,15 +786,11 @@ for n_test from n_min to n_max do
         stats_common    := false: stats_mMax := 0:
     end if;
 
-    # ===== Lipson FFGE on the same problem for term-count comparison. =====
-    # Re-build A, b symbolically so FFGE matches the same Toeplitz system
-    # MRFI just solved (b = ones).  This is independent of the BB pipeline.
     if do_ffge then
         Y_ffge := [seq(y||i, i=1..n_test)]:
         A_ffge := LinearAlgebra:-ToeplitzMatrix(Y_ffge, symmetric):
         b_ffge := Vector(n_test, fill=1):
         ffge_status := "OK":
-        t_ffge_start := time():
         try
             det_ffge, f_ffge, g_ffge := FFGE(A_ffge, b_ffge, Y_ffge):
         catch:
@@ -893,7 +798,6 @@ for n_test from n_min to n_max do
                                StringTools:-FormatMessage(lastexception[2..-1])):
             print("FFGE threw: ", ffge_status):
         end try:
-        t_ffge := time() - t_ffge_start:
 
         if ffge_status = "OK" then
             ffge_terms_num   := ffge_stats["f_terms"]:
@@ -925,22 +829,19 @@ for n_test from n_min to n_max do
             Final_rat_poly[i] := Ratrecon_num[i] / Ratrecon_den[i]:
         end do;
 
-        # ---- F9: symbolic reference via LinearSolve (always ordered) ----
         if do_verify then
-            t_ref := time():
             try
                 A_ref, b_ref := GenerateMatrix(Sys, Vars):
                 x_ref := LinearSolve(A_ref, b_ref):
-                t_ref := time() - t_ref:
                 all_match := true:
                 for i from 1 to num_eqn do
                     diff_i := normal(Final_rat_poly[i] - x_ref[i]):
                     if diff_i <> 0 then
                         all_match := false:
-                        printf("  x%d MISMATCH: residue = %a\n",
-                               i, diff_i):
-                        printf("    recovered = %a\n", Final_rat_poly[i]):
-                        printf("    reference = %a\n", x_ref[i]):
+                        #printf("  x%d MISMATCH: residue = %a\n",
+                               #i, diff_i):
+                        #printf("    recovered = %a\n", Final_rat_poly[i]):
+                        #printf("    reference = %a\n", x_ref[i]):
                     end if;
                 end do;
                 if all_match then
@@ -1021,10 +922,6 @@ for n_test from n_min to n_max do
     end if;
 end do;
 
-###############################################################################
-#  Print compact summary to stdout and write a full benchmark report to disk.
-###############################################################################
-
 print("=================================================================="):
 print("  SUMMARY"):
 print("=================================================================="):
@@ -1039,7 +936,7 @@ for entry in summary do
 end do;
 
 print(""):
-print("  Term-count comparison: MRFI vs Lipson FFGE"):
+print("  Term count comparison: MRFI vs Lipson FFGE"):
 printf("%4s  %-22s  %-22s  %-22s  %-22s  %10s\n",
        "n",
        "MRFI num terms", "FFGE f terms",
@@ -1058,44 +955,33 @@ fprintf(fd, "============================================================\n"):
 fprintf(fd, "  Symmetric Toeplitz MRFI benchmark\n"):
 fprintf(fd, "  prime p = %d\n", test_prime):
 fprintf(fd, "  range   n = %d .. %d\n", n_min, n_max):
-fprintf(fd, "  per-call BB cost is measured by 1000 dedicated probes\n"):
-fprintf(fd, "  at a fixed non-degenerate point [ithprime(i)+1].\n"):
-fprintf(fd, "  bb-total = bb/call * (BB calls observed during MRFI),\n"):
-fprintf(fd, "  i.e. the benchmark probes are NOT counted in BB-calls.\n"):
 fprintf(fd, "============================================================\n\n"):
 
 for entry in summary do
     fprintf(fd, "----- n = %d -----\n",                  entry[1]):
-    fprintf(fd, "  status                   : %s\n",     entry[2]):
-    fprintf(fd, "  total MRFI time (s)      : %.9f\n",   entry[3]):
-    fprintf(fd, "  reference solve time (s) : %.9f\n",
+    fprintf(fd, "  MRFI Status              : %s\n",     entry[2]):
             `if`(entry[4] = infinity, -1.0, entry[4])):
-    fprintf(fd, "  BB calls (during MRFI)   : %d\n",     entry[5]):
-    fprintf(fd, "  per-call BB time (s)     : %.9f\n",   entry[6]):
-    fprintf(fd, "  total BB time est. (s)   : %.9f\n",   entry[7]):
-    fprintf(fd, "  deg_num (per equation)   : %a\n",     entry[10]):
-    fprintf(fd, "  deg_den (per equation)   : %a\n",     entry[11]):
-    fprintf(fd, "  terms_num (per equation) : %a\n",     entry[8]):
-    fprintf(fd, "  terms_den (per equation) : %a\n",     entry[9]):
-    fprintf(fd, "  common denominator?      : %a\n",     entry[12]):
-    fprintf(fd, "  mMax (max sample count)  : %a\n",     entry[13]):
-    fprintf(fd, "  --- Lipson FFGE -----------------------------\n"):
+    fprintf(fd, "  Total BB calls           : %d\n",     entry[5]):
+    fprintf(fd, "  Per call BB time         : %.9f\n",   entry[6]):
+    fprintf(fd, "  Total BB time (s)        : %.9f\n",   entry[7]):
+    fprintf(fd, "  Deg_num (per equation)   : %a\n",     entry[10]):
+    fprintf(fd, "  Deg_den (per equation)   : %a\n",     entry[11]):
+    fprintf(fd, "  Terms_num (per equation) : %a\n",     entry[8]):
+    fprintf(fd, "  Terms_den (per equation) : %a\n",     entry[9]):
+    fprintf(fd, " \n\n"):
     fprintf(fd, "  FFGE status              : %s\n",     entry[14]):
-    fprintf(fd, "  FFGE total time (s)      : %.4f\n",   entry[15]):
     fprintf(fd, "  FFGE f[i] terms (==num)  : %a\n",     entry[16]):
     fprintf(fd, "  FFGE g[i] terms (==den)  : %a\n",     entry[17]):
-    fprintf(fd, "  FFGE y[i] terms (pre-gcd): %a\n",     entry[18]):
+    fprintf(fd, "  FFGE y[i] terms (Pre GCD): %a\n",     entry[18]):
     fprintf(fd, "  FFGE det(A) terms        : %a\n",     entry[19]):
-    fprintf(fd, "  FFGE max elim-step swell : %a  (numterms(num) before exact div)\n",
+    fprintf(fd, "  FFGE Max Elim. step swell: %a  (numterms(num) before exact div)\n",
             entry[20]):
-    fprintf(fd, "  FFGE max back-sub swell  : %a  (numterms(N[i]) before exact div)\n",
+    fprintf(fd, "  FFGE max Back sub swell  : %a  (numterms(N[i]) before exact div)\n",
             entry[21]):
-    fprintf(fd, "  --- Term-count comparison (MRFI vs FFGE) ----\n"):
-    fprintf(fd, "  numerator terms MRFI     : %a\n",     entry[8]):
-    fprintf(fd, "  numerator terms FFGE f   : %a\n",     entry[16]):
-    fprintf(fd, "  denominator terms MRFI   : %a\n",     entry[9]):
-    fprintf(fd, "  denominator terms FFGE g : %a\n\n",   entry[17]):
+    fprintf(fd, "  Term count comparison (MRFI vs FFGE)\n"):
+    fprintf(fd, "  Numerator terms MRFI     : %a\n",     entry[8]):
+    fprintf(fd, "  Numerator terms FFGE     : %a\n",     entry[16]):
+    fprintf(fd, "  Denominator terms MRFI   : %a\n",     entry[9]):
+    fprintf(fd, "  Denominator terms FFGE   : %a\n\n",   entry[17]):
 end do:
 fclose(fd):
-printf("\nWrote detailed report to %s\n", report_path):
-

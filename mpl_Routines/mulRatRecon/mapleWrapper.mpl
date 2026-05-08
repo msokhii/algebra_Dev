@@ -158,8 +158,8 @@ cppRR := proc(Uin,
         degNOUT := -1:
         degDOUT := -1:
         
-        printf("START\n"):
-        printlevel := 1000: 
+        #printf("START\n"):
+        #printlevel := 1000: 
         cppRet := mRATRECON(
                             mLen,degM,MArr,
                             uLen,degU,UArr,
@@ -167,15 +167,13 @@ cppRR := proc(Uin,
                             nOLEN,nOUT,degNOUT,
                             dOLEN,dOUT,degDOUT
         ):
-        printlevel := 1:
-        printf("FINISH\n"):
+        #printlevel := 1:
+        #printf("FINISH\n"):
         lastOP := cppRet:
         
         (* 0 flag means success in reconstruction. *)
         if cppRet <> 0 then
             return FAIL:
-        else
-            print("RECONSTRUCTION SUCCESFULL!"):
         fi:
         if degNOUT<0 or degNOUT>N then
             degNOUT := checkZeroPY(nOUT,nOLEN);
@@ -244,8 +242,6 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
     lastOP := cppRet:
     if cppRet <> 0 then
         return FAIL:
-    else
-        print("INTERPOLATION SUCCESFUL!"):
     fi:
     degOut := checkZeroPY(yOut,outLen):
     if degOut<0 then
