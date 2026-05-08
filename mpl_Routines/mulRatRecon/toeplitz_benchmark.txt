@@ -1,7 +1,7 @@
 ============================================================
   Symmetric Toeplitz MRFI benchmark
   prime p = 2147483647
-  range   n = 4 .. 12
+  range   n = 4 .. 10
   per-call BB cost is measured by 1000 dedicated probes
   at a fixed non-degenerate point [ithprime(i)+1].
   bb-total = bb/call * (BB calls observed during MRFI),
@@ -10,71 +10,197 @@
 
 ----- n = 4 -----
   status                   : PASS
-  total MRFI time (s)      : 0.1500
-  reference solve time (s) : 0.0090
-  BB calls (during MRFI)   : 604
-  per-call BB time (s)     : 7.300000e-05
-  total BB time est. (s)   : 0.0441
-  deg_num (per equation)   : [3, 3, 3, 3]
-  deg_den (per equation)   : [4, 4, 4, 4]
-  terms_num (per equation) : [15, 16, 17, 15]
-  terms_den (per equation) : [12, [], [], []]
+  total MRFI time (s)      : 0.028000000
+  reference solve time (s) : 0.021000000
+  BB calls (during MRFI)   : 92
+  per-call BB time (s)     : 0.000019000
+  total BB time est. (s)   : 0.001748000
+  deg_num (per equation)   : [1, 1, 1, 1]
+  deg_den (per equation)   : [2, 2, 2, 2]
+  terms_num (per equation) : [2, 4, 4, 2]
+  terms_den (per equation) : [7, [], [], []]
   common denominator?      : true
-  mMax (max sample count)  : 9
+  mMax (max sample count)  : 5
+  --- Lipson FFGE -----------------------------
+  FFGE status              : OK
+  FFGE total time (s)      : 0.0090
+  FFGE f[i] terms (==num)  : [2, 4, 4, 2]
+  FFGE g[i] terms (==den)  : [7, 7, 7, 7]
+  FFGE y[i] terms (pre-gcd): [13, 16, 16, 13]
+  FFGE det(A) terms        : 12
+  FFGE max elim-step swell : 19  (numterms(num) before exact div)
+  FFGE max back-sub swell  : 47  (numterms(N[i]) before exact div)
+  --- Term-count comparison (MRFI vs FFGE) ----
+  numerator terms MRFI     : [2, 4, 4, 2]
+  numerator terms FFGE f   : [2, 4, 4, 2]
+  denominator terms MRFI   : [7, [], [], []]
+  denominator terms FFGE g : [7, 7, 7, 7]
 
 ----- n = 5 -----
   status                   : PASS
-  total MRFI time (s)      : 0.3800
-  reference solve time (s) : 0.0210
-  BB calls (during MRFI)   : 1436
-  per-call BB time (s)     : 8.200000e-05
-  total BB time est. (s)   : 0.1178
-  deg_num (per equation)   : [4, 4, 2, 4, 4]
-  deg_den (per equation)   : [5, 5, 3, 5, 5]
-  terms_num (per equation) : [46, 47, 11, 49, 48]
-  terms_den (per equation) : [35, 35, 12, 35, 35]
-  common denominator?      : false
-  mMax (max sample count)  : 11
+  total MRFI time (s)      : 0.048000000
+  reference solve time (s) : 0.009000000
+  BB calls (during MRFI)   : 236
+  per-call BB time (s)     : 0.000019000
+  total BB time est. (s)   : 0.004484000
+  deg_num (per equation)   : [2, 2, 2, 2, 2]
+  deg_den (per equation)   : [3, 3, 3, 3, 3]
+  terms_num (per equation) : [7, 8, 11, 8, 7]
+  terms_den (per equation) : [12, [], [], [], []]
+  common denominator?      : true
+  mMax (max sample count)  : 7
+  --- Lipson FFGE -----------------------------
+  FFGE status              : OK
+  FFGE total time (s)      : 0.0130
+  FFGE f[i] terms (==num)  : [7, 8, 11, 8, 7]
+  FFGE g[i] terms (==den)  : [12, 12, 12, 12, 12]
+  FFGE y[i] terms (pre-gcd): [41, 41, 44, 41, 41]
+  FFGE det(A) terms        : 35
+  FFGE max elim-step swell : 89  (numterms(num) before exact div)
+  FFGE max back-sub swell  : 259  (numterms(N[i]) before exact div)
+  --- Term-count comparison (MRFI vs FFGE) ----
+  numerator terms MRFI     : [7, 8, 11, 8, 7]
+  numerator terms FFGE f   : [7, 8, 11, 8, 7]
+  denominator terms MRFI   : [12, [], [], [], []]
+  denominator terms FFGE g : [12, 12, 12, 12, 12]
 
 ----- n = 6 -----
   status                   : PASS
-  total MRFI time (s)      : 2.3240
-  reference solve time (s) : 0.0300
-  BB calls (during MRFI)   : 6684
-  per-call BB time (s)     : 9.000000e-05
-  total BB time est. (s)   : 0.6016
-  deg_num (per equation)   : [5, 5, 5, 5, 5, 5]
-  deg_den (per equation)   : [6, 6, 6, 6, 6, 6]
-  terms_num (per equation) : [157, 173, 182, 180, 172, 157]
-  terms_den (per equation) : [120, [], [], [], [], []]
+  total MRFI time (s)      : 0.203000000
+  reference solve time (s) : 0.017000000
+  BB calls (during MRFI)   : 908
+  per-call BB time (s)     : 0.000018000
+  total BB time est. (s)   : 0.016344000
+  deg_num (per equation)   : [2, 2, 2, 2, 2, 2]
+  deg_den (per equation)   : [3, 3, 3, 3, 3, 3]
+  terms_num (per equation) : [7, 14, 15, 15, 14, 7]
+  terms_den (per equation) : [32, [], [], [], [], []]
   common denominator?      : true
-  mMax (max sample count)  : 13
+  mMax (max sample count)  : 7
+  --- Lipson FFGE -----------------------------
+  FFGE status              : OK
+  FFGE total time (s)      : 0.0340
+  FFGE f[i] terms (==num)  : [7, 14, 15, 15, 14, 7]
+  FFGE g[i] terms (==den)  : [32, 32, 32, 32, 32, 32]
+  FFGE y[i] terms (pre-gcd): [141, 162, 171, 171, 162, 141]
+  FFGE det(A) terms        : 120
+  FFGE max elim-step swell : 575  (numterms(num) before exact div)
+  FFGE max back-sub swell  : 1512  (numterms(N[i]) before exact div)
+  --- Term-count comparison (MRFI vs FFGE) ----
+  numerator terms MRFI     : [7, 14, 15, 15, 14, 7]
+  numerator terms FFGE f   : [7, 14, 15, 15, 14, 7]
+  denominator terms MRFI   : [32, [], [], [], [], []]
+  denominator terms FFGE g : [32, 32, 32, 32, 32, 32]
 
 ----- n = 7 -----
   status                   : PASS
-  total MRFI time (s)      : 26.8950
-  reference solve time (s) : 0.4000
-  BB calls (during MRFI)   : 30748
-  per-call BB time (s)     : 1.730000e-04
-  total BB time est. (s)   : 5.3194
-  deg_num (per equation)   : [6, 6, 6, 3, 6, 6, 6]
-  deg_den (per equation)   : [7, 7, 7, 4, 7, 7, 7]
-  terms_num (per equation) : [539, 598, 635, 52, 648, 593, 537]
-  terms_den (per equation) : [427, 427, 427, 56, 427, 427, 427]
-  common denominator?      : false
-  mMax (max sample count)  : 15
+  total MRFI time (s)      : 0.312000000
+  reference solve time (s) : 0.057000000
+  BB calls (during MRFI)   : 1180
+  per-call BB time (s)     : 0.000020000
+  total BB time est. (s)   : 0.023600000
+  deg_num (per equation)   : [3, 3, 3, 3, 3, 3, 3]
+  deg_den (per equation)   : [4, 4, 4, 4, 4, 4, 4]
+  terms_num (per equation) : [32, 43, 49, 52, 49, 43, 32]
+  terms_den (per equation) : [56, [], [], [], [], [], []]
+  common denominator?      : true
+  mMax (max sample count)  : 9
+  --- Lipson FFGE -----------------------------
+  FFGE status              : OK
+  FFGE total time (s)      : 0.1130
+  FFGE f[i] terms (==num)  : [32, 43, 49, 52, 49, 43, 32]
+  FFGE g[i] terms (==den)  : [56, 56, 56, 56, 56, 56, 56]
+  FFGE y[i] terms (pre-gcd): [477, 534, 574, 560, 574, 534, 477]
+  FFGE det(A) terms        : 427
+  FFGE max elim-step swell : 3277  (numterms(num) before exact div)
+  FFGE max back-sub swell  : 9206  (numterms(N[i]) before exact div)
+  --- Term-count comparison (MRFI vs FFGE) ----
+  numerator terms MRFI     : [32, 43, 49, 52, 49, 43, 32]
+  numerator terms FFGE f   : [32, 43, 49, 52, 49, 43, 32]
+  denominator terms MRFI   : [56, [], [], [], [], [], []]
+  denominator terms FFGE g : [56, 56, 56, 56, 56, 56, 56]
 
 ----- n = 8 -----
   status                   : PASS
-  total MRFI time (s)      : 1750.9810
-  reference solve time (s) : 5.5460
-  BB calls (during MRFI)   : 139324
-  per-call BB time (s)     : 1.340000e-04
-  total BB time est. (s)   : 18.6694
-  deg_num (per equation)   : [7, 7, 7, 7, 7, 7, 7, 7]
-  deg_den (per equation)   : [8, 8, 8, 8, 8, 8, 8, 8]
-  terms_num (per equation) : [1932, 2222, 2338, 2381, 2387, 2333, 2220, 1913]
-  terms_den (per equation) : [1628, [], [], [], [], [], [], []]
+  total MRFI time (s)      : 1.224000000
+  reference solve time (s) : 0.391000000
+  BB calls (during MRFI)   : 4636
+  per-call BB time (s)     : 0.000021000
+  total BB time est. (s)   : 0.097356000
+  deg_num (per equation)   : [3, 3, 3, 3, 3, 3, 3, 3]
+  deg_den (per equation)   : [4, 4, 4, 4, 4, 4, 4, 4]
+  terms_num (per equation) : [30, 65, 77, 78, 78, 77, 65, 30]
+  terms_den (per equation) : [167, [], [], [], [], [], [], []]
   common denominator?      : true
-  mMax (max sample count)  : 17
+  mMax (max sample count)  : 9
+  --- Lipson FFGE -----------------------------
+  FFGE status              : OK
+  FFGE total time (s)      : 0.8290
+  FFGE f[i] terms (==num)  : [30, 65, 77, 78, 78, 77, 65, 30]
+  FFGE g[i] terms (==den)  : [167, 167, 167, 167, 167, 167, 167, 167]
+  FFGE y[i] terms (pre-gcd): [1731, 2076, 2208, 2275, 2275, 2208, 2076, 1731]
+  FFGE det(A) terms        : 1628
+  FFGE max elim-step swell : 21016  (numterms(num) before exact div)
+  FFGE max back-sub swell  : 56007  (numterms(N[i]) before exact div)
+  --- Term-count comparison (MRFI vs FFGE) ----
+  numerator terms MRFI     : [30, 65, 77, 78, 78, 77, 65, 30]
+  numerator terms FFGE f   : [30, 65, 77, 78, 78, 77, 65, 30]
+  denominator terms MRFI   : [167, [], [], [], [], [], [], []]
+  denominator terms FFGE g : [167, 167, 167, 167, 167, 167, 167, 167]
+
+----- n = 9 -----
+  status                   : PASS
+  total MRFI time (s)      : 4.745000000
+  reference solve time (s) : 2.663000000
+  BB calls (during MRFI)   : 11292
+  per-call BB time (s)     : 0.000020000
+  total BB time est. (s)   : 0.225840000
+  deg_num (per equation)   : [4, 4, 4, 4, 4, 4, 4, 4, 4]
+  deg_den (per equation)   : [5, 5, 5, 5, 5, 5, 5, 5, 5]
+  terms_num (per equation) : [167, 208, 243, 267, 274, 267, 243, 208, 167]
+  terms_den (per equation) : [294, [], [], [], [], [], [], [], []]
+  common denominator?      : true
+  mMax (max sample count)  : 11
+  --- Lipson FFGE -----------------------------
+  FFGE status              : OK
+  FFGE total time (s)      : 5.0170
+  FFGE f[i] terms (==num)  : [167, 208, 243, 267, 274, 267, 243, 208, 167]
+  FFGE g[i] terms (==den)  : [294, 294, 294, 294, 294, 294, 294, 294, 294]
+  FFGE y[i] terms (pre-gcd): [6409, 7262, 7758, 7988, 7930, 7988, 7758, 7262, 6409]
+  FFGE det(A) terms        : 6090
+  FFGE max elim-step swell : 128530  (numterms(num) before exact div)
+  FFGE max back-sub swell  : 345088  (numterms(N[i]) before exact div)
+  --- Term-count comparison (MRFI vs FFGE) ----
+  numerator terms MRFI     : [167, 208, 243, 267, 274, 267, 243, 208, 167]
+  numerator terms FFGE f   : [167, 208, 243, 267, 274, 267, 243, 208, 167]
+  denominator terms MRFI   : [294, [], [], [], [], [], [], [], []]
+  denominator terms FFGE g : [294, 294, 294, 294, 294, 294, 294, 294, 294]
+
+----- n = 10 -----
+  status                   : PASS
+  total MRFI time (s)      : 18.152000000
+  reference solve time (s) : 71.107000000
+  BB calls (during MRFI)   : 22556
+  per-call BB time (s)     : 0.000023000
+  total BB time est. (s)   : 0.518788000
+  deg_num (per equation)   : [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+  deg_den (per equation)   : [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  terms_num (per equation) : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  terms_den (per equation) : [931, [], [], [], [], [], [], [], [], []]
+  common denominator?      : true
+  mMax (max sample count)  : 11
+  --- Lipson FFGE -----------------------------
+  FFGE status              : OK
+  FFGE total time (s)      : 77.0160
+  FFGE f[i] terms (==num)  : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  FFGE g[i] terms (==den)  : [931, 931, 931, 931, 931, 931, 931, 931, 931, 931]
+  FFGE y[i] terms (pre-gcd): [24023, 27904, 29736, 30813, 31188, 31188, 30813, 29736, 27904, 24023]
+  FFGE det(A) terms        : 23797
+  FFGE max elim-step swell : 813638  (numterms(num) before exact div)
+  FFGE max back-sub swell  : 2122800  (numterms(N[i]) before exact div)
+  --- Term-count comparison (MRFI vs FFGE) ----
+  numerator terms MRFI     : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  numerator terms FFGE f   : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  denominator terms MRFI   : [931, [], [], [], [], [], [], [], [], []]
+  denominator terms FFGE g : [931, 931, 931, 931, 931, 931, 931, 931, 931, 931]
 

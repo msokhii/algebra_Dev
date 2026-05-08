@@ -799,7 +799,7 @@ test_prime := 2^31 - 1:    # Mersenne prime, fits integer[8]
 
 # Adjust this if you only want to test a sub-range:
 n_min := 4:
-n_max := 12:
+n_max := 10:
 
 # Set to false to skip the symbolic reference solve (faster for large n;
 # Maple's symbolic LinearSolve on a 12x12 with 12 parameters can be slow).
@@ -815,7 +815,7 @@ for n_test from n_min to n_max do
     printf("  TEST: symmetric Toeplitz, n = %d\n", n_test):
     print("=================================================================="):
 
-    Sys, Vars, params, num_vars, num_eqn := get_data("toeplitz", n_test):
+    Sys, Vars, params, num_vars, num_eqn := get_data("toeplitz",n_test):
     print("Vars   = ", Vars):
     print("params = ", params):
     print("|Sys|  = ", nops(Sys)):
