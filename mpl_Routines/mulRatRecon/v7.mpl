@@ -407,11 +407,11 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
 
                 # ===== Single BB sweep -- all equations share these samples. =====
                 startTime2 := time():
-                to 10^3 do
+                to 1 do
                     BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
                 end do:
                 stopTime2 := time() - startTime2:
-                bbTime    := evalf(stopTime2/10^3):
+                bbTime    := evalf(stopTime2/1):
                 if bbTime > bbMaxTime then bbMaxTime := bbTime end if:
 
                 # ===== Per-equation cppNewtonInterp + cppRR. =====
@@ -686,7 +686,7 @@ test_prime := 2^31 - 1:    # Mersenne prime, fits integer[8]
 
 # Adjust this if you only want to test a sub-range:
 n_min := 4:
-n_max := 7:
+n_max := 4:
 
 # Set to false to skip the symbolic reference solve (faster for large n;
 # Maple's symbolic LinearSolve on a 12x12 with 12 parameters can be slow).
@@ -699,7 +699,7 @@ for n_test from n_min to n_max do
     printf("  TEST: symmetric Toeplitz, n = %d\n", n_test):
     print("=================================================================="):
 
-    Sys, Vars, params, num_vars, num_eqn := get_data("toeplitz", n_test):
+    Sys, Vars, params, num_vars, num_eqn := get_data("mike"):
     print("Vars   = ", Vars):
     print("params = ", params):
     print("|Sys|  = ", nops(Sys)):

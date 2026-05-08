@@ -1,0 +1,80 @@
+============================================================
+  Symmetric Toeplitz MRFI benchmark
+  prime p = 2147483647
+  range   n = 4 .. 12
+  per-call BB cost is measured by 1000 dedicated probes
+  at a fixed non-degenerate point [ithprime(i)+1].
+  bb-total = bb/call * (BB calls observed during MRFI),
+  i.e. the benchmark probes are NOT counted in BB-calls.
+============================================================
+
+----- n = 4 -----
+  status                   : PASS
+  total MRFI time (s)      : 0.1500
+  reference solve time (s) : 0.0090
+  BB calls (during MRFI)   : 604
+  per-call BB time (s)     : 7.300000e-05
+  total BB time est. (s)   : 0.0441
+  deg_num (per equation)   : [3, 3, 3, 3]
+  deg_den (per equation)   : [4, 4, 4, 4]
+  terms_num (per equation) : [15, 16, 17, 15]
+  terms_den (per equation) : [12, [], [], []]
+  common denominator?      : true
+  mMax (max sample count)  : 9
+
+----- n = 5 -----
+  status                   : PASS
+  total MRFI time (s)      : 0.3800
+  reference solve time (s) : 0.0210
+  BB calls (during MRFI)   : 1436
+  per-call BB time (s)     : 8.200000e-05
+  total BB time est. (s)   : 0.1178
+  deg_num (per equation)   : [4, 4, 2, 4, 4]
+  deg_den (per equation)   : [5, 5, 3, 5, 5]
+  terms_num (per equation) : [46, 47, 11, 49, 48]
+  terms_den (per equation) : [35, 35, 12, 35, 35]
+  common denominator?      : false
+  mMax (max sample count)  : 11
+
+----- n = 6 -----
+  status                   : PASS
+  total MRFI time (s)      : 2.3240
+  reference solve time (s) : 0.0300
+  BB calls (during MRFI)   : 6684
+  per-call BB time (s)     : 9.000000e-05
+  total BB time est. (s)   : 0.6016
+  deg_num (per equation)   : [5, 5, 5, 5, 5, 5]
+  deg_den (per equation)   : [6, 6, 6, 6, 6, 6]
+  terms_num (per equation) : [157, 173, 182, 180, 172, 157]
+  terms_den (per equation) : [120, [], [], [], [], []]
+  common denominator?      : true
+  mMax (max sample count)  : 13
+
+----- n = 7 -----
+  status                   : PASS
+  total MRFI time (s)      : 26.8950
+  reference solve time (s) : 0.4000
+  BB calls (during MRFI)   : 30748
+  per-call BB time (s)     : 1.730000e-04
+  total BB time est. (s)   : 5.3194
+  deg_num (per equation)   : [6, 6, 6, 3, 6, 6, 6]
+  deg_den (per equation)   : [7, 7, 7, 4, 7, 7, 7]
+  terms_num (per equation) : [539, 598, 635, 52, 648, 593, 537]
+  terms_den (per equation) : [427, 427, 427, 56, 427, 427, 427]
+  common denominator?      : false
+  mMax (max sample count)  : 15
+
+----- n = 8 -----
+  status                   : PASS
+  total MRFI time (s)      : 1750.9810
+  reference solve time (s) : 5.5460
+  BB calls (during MRFI)   : 139324
+  per-call BB time (s)     : 1.340000e-04
+  total BB time est. (s)   : 18.6694
+  deg_num (per equation)   : [7, 7, 7, 7, 7, 7, 7, 7]
+  deg_den (per equation)   : [8, 8, 8, 8, 8, 8, 8, 8]
+  terms_num (per equation) : [1932, 2222, 2338, 2381, 2387, 2333, 2220, 1913]
+  terms_den (per equation) : [1628, [], [], [], [], [], [], []]
+  common denominator?      : true
+  mMax (max sample count)  : 17
+
