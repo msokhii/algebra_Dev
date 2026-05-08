@@ -49,9 +49,10 @@ Constuct_Sys_Blackbox := proc(Sys, Vars, params)
         global counter;
         counter := counter + 1;
         subs_values := zip((par, pnt) -> par = pnt, params, point_):
-        L_eval := Eval(L, subs_values) mod p:
+        #L_eval := Eval(L, subs_values) mod p:
         num_eqn := numelems(Vars):
-        A := Matrix(num_eqn, num_eqn+1, datatype=integer[8], L_eval):
+        A := Mod(p,L,subs_values,integer[8]):
+        #A := Matrix(num_eqn, num_eqn+1, datatype=integer[8], L_eval):
         T := traperror(LinearSolve(p, A, 1)):
         if T = "matrix is singular" then return FAIL fi:
         soln := convert(A[1..num_eqn, num_eqn+1], list):
@@ -884,12 +885,12 @@ fprintf(fd, "============================================================\n\n"):
 for entry in summary do
     fprintf(fd, "----- n = %d -----\n",                  entry[1]):
     fprintf(fd, "  status                   : %s\n",     entry[2]):
-    fprintf(fd, "  total MRFI time (s)      : %.4f\n",   entry[3]):
-    fprintf(fd, "  reference solve time (s) : %.4f\n",
+    fprintf(fd, "  total MRFI time (s)      : %.9f\n",   entry[3]):
+    fprintf(fd, "  reference solve time (s) : %.9f\n",
             `if`(entry[4] = infinity, -1.0, entry[4])):
     fprintf(fd, "  BB calls (during MRFI)   : %d\n",     entry[5]):
-    fprintf(fd, "  per-call BB time (s)     : %.6e\n",   entry[6]):
-    fprintf(fd, "  total BB time est. (s)   : %.4f\n",   entry[7]):
+    fprintf(fd, "  per-call BB time (s)     : %.9f\n",   entry[6]):
+    fprintf(fd, "  total BB time est. (s)   : %.9f\n",   entry[7]):
     fprintf(fd, "  deg_num (per equation)   : %a\n",     entry[10]):
     fprintf(fd, "  deg_den (per equation)   : %a\n",     entry[11]):
     fprintf(fd, "  terms_num (per equation) : %a\n",     entry[8]):
