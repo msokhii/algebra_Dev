@@ -65,7 +65,7 @@ local n, m, B, mu, i, j, k, det, x, y, num, r, numterms, f, g, h, mons,
                 num := expand(B[k,k]*B[i,j]-B[i,k]*B[k,j]);
                 divide(num,mu,evaln(B[i,j]));
                 if i=k+1 and j=k+1 then
-                    lprint(i,numterms(num),numterms(B[i,j]));
+                    #lprint(i,numterms(num),numterms(B[i,j]));
                     if numterms(num)      > elim_num_max  then elim_num_max  := numterms(num)      end if;
                     if numterms(B[i,j])   > elim_post_max then elim_post_max := numterms(B[i,j])   end if;
                 fi;
@@ -92,7 +92,7 @@ local n, m, B, mu, i, j, k, det, x, y, num, r, numterms, f, g, h, mons,
     for i from 1 to n do
         h := gcd(y[i],B[n,n],evaln(f[i]),evaln(g[i]));
         #printf("#f[%d]=%d #g[%d]=%d #h=%d",i,numterms(f[i]),
-             i,numterms(g[i]),numterms(h));
+             #i,numterms(g[i]),numterms(h));
         #printf("   deg(f[%d])=%d deg(g[%d])=%d\n",i,degree(f[i]),i,degree(g[i]));
     od;
     r := {seq(Y[i]=ithprime(i),i=1..nops(Y))};
@@ -344,7 +344,7 @@ end proc:
 Deterministic_NDSA := proc(B, sigma_, beta_, num_var, p, num_points, max_points, num_eqn)
     local T, alpha, m, Psi_alpha, Y, u, dq, i, r,
           lin_sys, result, M, row, col;
-    print("In Deterministic_NDSA");
+    #print("In Deterministic_NDSA");
     lin_sys := false;
     T := max_points;
     result := [seq([], i=1..num_eqn)]:
@@ -436,9 +436,9 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     deg_num := [seq(degree(Numerators[i],    x), i=1..nops(Numerators))]:
     deg_den := [seq(degree(Denominiators[i], x), i=1..nops(Denominiators))]:
     for i from 1 to numelems(deg_den) do
-        num_points_mqrfr[i] := deg_num[i] + deg_den[i] + 2:
+        num_points_mqrfr[i] := deg_num[i] + deg_den[i] + 1:
     end do:
-    max_num_points_mqrfr := max(op(deg_num)) + max(op(deg_den)) + 2:
+    max_num_points_mqrfr := max(op(deg_num)) + max(op(deg_den)) + 1:
     #print("MRFI num_points_mqrfr = ", num_points_mqrfr);
     #print("MRFI max_num_points_mqrfr = ", max_num_points_mqrfr);
 
@@ -845,17 +845,17 @@ for n_test from n_min to n_max do
                     end if;
                 end do;
                 if all_match then
-                    printf("  PASS  n=%2d   MRFI=%.2fs  ref=%.2fs  "
+                    printf("  PASS  n=%2d "
                            "BB-calls=%d  bb/call=%.3e s  bb-total=%.3f s\n",
-                           n_test, t_mrfi, t_ref, mrfi_calls,
+                           n_test, mrfi_calls,
                            bb_per_call, bb_total_est):
                     summary := [op(summary),
-                                [n_test, "PASS", t_mrfi, t_ref, mrfi_calls,
+                                [n_test, "PASS", mrfi_calls,
                                  bb_per_call, bb_total_est,
                                  stats_terms_num, stats_terms_den,
                                  stats_deg_num,   stats_deg_den,
                                  stats_common,    stats_mMax,
-                                 ffge_status,     t_ffge,
+                                 ffge_status,     
                                  ffge_terms_num,  ffge_terms_den,
                                  ffge_y_terms,    ffge_det_terms,
                                  ffge_elim_swell, ffge_backsub_swell]]:
@@ -922,11 +922,11 @@ for n_test from n_min to n_max do
     end if;
 end do;
 
-print("=================================================================="):
+(*print("=================================================================="):
 print("  SUMMARY"):
 print("=================================================================="):
-printf("%4s  %-15s  %10s  %10s  %10s  %12s  %12s\n",
-       "n", "status", "t_mrfi(s)", "t_ref(s)", "BB-calls",
+printf("%4s  %-15s  %10s  %12s  %12s\n",
+       "n", "status", "BB-calls",
        "bb/call(s)", "bb-total(s)"):
 for entry in summary do
     printf("%4d  %-15s  %10.2f  %10.2f  %10d  %12.3e  %12.3f\n",
@@ -946,7 +946,7 @@ for entry in summary do
     printf("%4d  %-22a  %-22a  %-22a  %-22a  %10a\n",
            entry[1], entry[8], entry[16], entry[9], entry[17],
            max(entry[20], entry[21])):
-end do;
+end do;*)
 
 # ----- Detailed report file -----
 report_path := "toeplitz_benchmark.txt":
@@ -960,7 +960,7 @@ fprintf(fd, "============================================================\n\n"):
 for entry in summary do
     fprintf(fd, "----- n = %d -----\n",                  entry[1]):
     fprintf(fd, "  MRFI Status              : %s\n",     entry[2]):
-            `if`(entry[4] = infinity, -1.0, entry[4])):
+#            `if`(entry[4] = infinity, -1.0, entry[4])):
     fprintf(fd, "  Total BB calls           : %d\n",     entry[5]):
     fprintf(fd, "  Per call BB time         : %.9f\n",   entry[6]):
     fprintf(fd, "  Total BB time (s)        : %.9f\n",   entry[7]):
