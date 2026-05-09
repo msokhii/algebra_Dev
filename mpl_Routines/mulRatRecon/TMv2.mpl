@@ -771,6 +771,8 @@ for n_test from n_min to n_max do
         B(bench_point, test_prime):
     end do:
     t_bb_total  := time() - t_bb_start:
+    print(t_bb_total/1000);
+    quit;
     bb_per_call := evalf(t_bb_total / bench_calls):
     bb_total_est := evalf(bb_per_call * mrfi_calls):
 
@@ -810,7 +812,7 @@ for n_test from n_min to n_max do
 
             # FFGE timing benchmark — same methodology as BB above.
             # Run FFGE ffge_bench_calls times at the same input, average.
-            ffge_bench_calls := 1000:
+            ffge_bench_calls := 1:
             t_ffge_start := time():
             to ffge_bench_calls do
                 FFGE(A_ffge, b_ffge, Y_ffge):
@@ -974,7 +976,7 @@ for entry in summary do
     fprintf(fd, "  Terms_den (per equation) : %a\n",     entry[7]):
     fprintf(fd, " \n"):
     fprintf(fd, "  FFGE status              : %s\n",     entry[12]):
-    fprintf(fd, "  FFGE total time (s)      : %.9f  (avg of 1000 calls)\n",
+    fprintf(fd, "  FFGE total time (s)      : %.9f\n",
             entry[13]):
     fprintf(fd, "  FFGE f[i] terms (==num)  : %a\n",     entry[14]):
     fprintf(fd, "  FFGE g[i] terms (==den)  : %a\n",     entry[15]):
