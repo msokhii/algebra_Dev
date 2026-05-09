@@ -724,7 +724,7 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 20:
+n_max := 15:
 do_verify := true:
 do_ffge := true:
 summary := []:
