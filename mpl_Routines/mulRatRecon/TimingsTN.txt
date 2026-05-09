@@ -7,15 +7,16 @@
   n = 4
   MRFI Status              : PASS
   Total BB calls           : 76
-  Per call BB time         : 0.000019000
-  Total BB time            : 0.001444000
+  Per call BB time         : 0.000021000
+  Total BB time (est)      : 0.001596000  (bb/call * BB-calls)
+  Total BB time (actual)   : 0.003000000  (cumulative inside MRFI)
   Deg_num (per equation)   : [1, 1, 1, 1]
   Deg_den (per equation)   : [2, 2, 2, 2]
   Terms_num (per equation) : [2, 4, 4, 2]
   Terms_den (per equation) : [7, [], [], []]
  
   FFGE status              : OK
-  FFGE total time (s)      : 0.006000000
+  FFGE total time (s)      : 0.004055000  (avg of 1000 calls)
   FFGE f[i] terms (==num)  : [2, 4, 4, 2]
   FFGE g[i] terms (==den)  : [7, 7, 7, 7]
   FFGE y[i] terms (Pre GCD): [13, 16, 16, 13]
@@ -31,15 +32,16 @@
   n = 5
   MRFI Status              : PASS
   Total BB calls           : 204
-  Per call BB time         : 0.000018000
-  Total BB time            : 0.003672000
+  Per call BB time         : 0.000020000
+  Total BB time (est)      : 0.004080000  (bb/call * BB-calls)
+  Total BB time (actual)   : 0.003000000  (cumulative inside MRFI)
   Deg_num (per equation)   : [2, 2, 2, 2, 2]
   Deg_den (per equation)   : [3, 3, 3, 3, 3]
   Terms_num (per equation) : [7, 8, 11, 8, 7]
   Terms_den (per equation) : [12, [], [], [], []]
  
   FFGE status              : OK
-  FFGE total time (s)      : 0.009000000
+  FFGE total time (s)      : 0.008517000  (avg of 1000 calls)
   FFGE f[i] terms (==num)  : [7, 8, 11, 8, 7]
   FFGE g[i] terms (==den)  : [12, 12, 12, 12, 12]
   FFGE y[i] terms (Pre GCD): [41, 41, 44, 41, 41]
@@ -51,76 +53,4 @@
   Numerator terms FFGE     : [7, 8, 11, 8, 7]
   Denominator terms MRFI   : [12, [], [], [], []]
   Denominator terms FFGE   : [12, 12, 12, 12, 12]
-
-  n = 6
-  MRFI Status              : PASS
-  Total BB calls           : 780
-  Per call BB time         : 0.000019000
-  Total BB time            : 0.014820000
-  Deg_num (per equation)   : [2, 2, 2, 2, 2, 2]
-  Deg_den (per equation)   : [3, 3, 3, 3, 3, 3]
-  Terms_num (per equation) : [7, 14, 15, 15, 14, 7]
-  Terms_den (per equation) : [32, [], [], [], [], []]
- 
-  FFGE status              : OK
-  FFGE total time (s)      : 0.053000000
-  FFGE f[i] terms (==num)  : [7, 14, 15, 15, 14, 7]
-  FFGE g[i] terms (==den)  : [32, 32, 32, 32, 32, 32]
-  FFGE y[i] terms (Pre GCD): [141, 162, 171, 171, 162, 141]
-  FFGE det(A) terms        : 120
-  FFGE Max Elim. step swell: 575  (numterms(num) before exact div)
-  FFGE max Back sub swell  : 1512  (numterms(N[i]) before exact div)
-  Term count comparison (MRFI vs FFGE)
-  Numerator terms MRFI     : [7, 14, 15, 15, 14, 7]
-  Numerator terms FFGE     : [7, 14, 15, 15, 14, 7]
-  Denominator terms MRFI   : [32, [], [], [], [], []]
-  Denominator terms FFGE   : [32, 32, 32, 32, 32, 32]
-
-  n = 7
-  MRFI Status              : PASS
-  Total BB calls           : 1052
-  Per call BB time         : 0.000018000
-  Total BB time            : 0.018936000
-  Deg_num (per equation)   : [3, 3, 3, 3, 3, 3, 3]
-  Deg_den (per equation)   : [4, 4, 4, 4, 4, 4, 4]
-  Terms_num (per equation) : [32, 43, 49, 52, 49, 43, 32]
-  Terms_den (per equation) : [56, [], [], [], [], [], []]
- 
-  FFGE status              : OK
-  FFGE total time (s)      : 0.071000000
-  FFGE f[i] terms (==num)  : [32, 43, 49, 52, 49, 43, 32]
-  FFGE g[i] terms (==den)  : [56, 56, 56, 56, 56, 56, 56]
-  FFGE y[i] terms (Pre GCD): [477, 534, 574, 560, 574, 534, 477]
-  FFGE det(A) terms        : 427
-  FFGE Max Elim. step swell: 3277  (numterms(num) before exact div)
-  FFGE max Back sub swell  : 9206  (numterms(N[i]) before exact div)
-  Term count comparison (MRFI vs FFGE)
-  Numerator terms MRFI     : [32, 43, 49, 52, 49, 43, 32]
-  Numerator terms FFGE     : [32, 43, 49, 52, 49, 43, 32]
-  Denominator terms MRFI   : [56, [], [], [], [], [], []]
-  Denominator terms FFGE   : [56, 56, 56, 56, 56, 56, 56]
-
-  n = 8
-  MRFI Status              : PASS
-  Total BB calls           : 4124
-  Per call BB time         : 0.000019000
-  Total BB time            : 0.078356000
-  Deg_num (per equation)   : [3, 3, 3, 3, 3, 3, 3, 3]
-  Deg_den (per equation)   : [4, 4, 4, 4, 4, 4, 4, 4]
-  Terms_num (per equation) : [30, 65, 77, 78, 78, 77, 65, 30]
-  Terms_den (per equation) : [167, [], [], [], [], [], [], []]
- 
-  FFGE status              : OK
-  FFGE total time (s)      : 0.524000000
-  FFGE f[i] terms (==num)  : [30, 65, 77, 78, 78, 77, 65, 30]
-  FFGE g[i] terms (==den)  : [167, 167, 167, 167, 167, 167, 167, 167]
-  FFGE y[i] terms (Pre GCD): [1731, 2076, 2208, 2275, 2275, 2208, 2076, 1731]
-  FFGE det(A) terms        : 1628
-  FFGE Max Elim. step swell: 21016  (numterms(num) before exact div)
-  FFGE max Back sub swell  : 56007  (numterms(N[i]) before exact div)
-  Term count comparison (MRFI vs FFGE)
-  Numerator terms MRFI     : [30, 65, 77, 78, 78, 77, 65, 30]
-  Numerator terms FFGE     : [30, 65, 77, 78, 78, 77, 65, 30]
-  Denominator terms MRFI   : [167, [], [], [], [], [], [], []]
-  Denominator terms FFGE   : [167, 167, 167, 167, 167, 167, 167, 167]
 
