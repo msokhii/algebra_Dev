@@ -127,10 +127,21 @@ Constuct_Sys_Blackbox := proc(Sys, Vars, params)
     local Lin_BB, L;
     L := GenerateMatrix(Sys, Vars, augmented=true):
     Lin_BB := proc(point_::list(integer), p::prime)
-        local A, T, subs_values, num_eqn, soln, L_eval, t0;
+        local A, T, subs_values, num_eqn, soln, L_eval, t0, do_count;
         uses LinearAlgebra:-Modular;
-        global counter, bb_time_total;
-        counter := counter + 1;
+        global counter, bb_time_total, bb_benchmark_mode;
+        if assigned(bb_benchmark_mode) then
+            if bb_benchmark_mode = true then
+                do_count := false;
+            else
+                do_count := true;
+            end if;
+        else
+            do_count := true;
+        end if;
+        if do_count then
+            counter := counter + 1;
+        end if;
         t0 := time();
         subs_values := zip((par, pnt) -> par = pnt, params, point_):
         #L_eval := Eval(L, subs_values) mod p:
@@ -139,11 +150,15 @@ Constuct_Sys_Blackbox := proc(Sys, Vars, params)
         #A := Matrix(num_eqn, num_eqn+1, datatype=integer[8], L_eval):
         T := traperror(LinearSolve(p, A, 1)):
         if T = "matrix is singular" then
-            bb_time_total := bb_time_total + (time() - t0);
+            if do_count then
+                bb_time_total := bb_time_total + (time() - t0);
+            end if;
             return FAIL
         fi:
         soln := convert(A[1..num_eqn, num_eqn+1], list):
-        bb_time_total := bb_time_total + (time() - t0);
+        if do_count then
+            bb_time_total := bb_time_total + (time() - t0);
+        end if;
         return soln;
     end:
 end:
@@ -284,9 +299,48 @@ RVR := proc(L, p, field)
     end if;
 end proc:
 
+Publish_BB_Timing_Stats := proc()
+    local i, ndsaTime, mrfiTime, ndsaCalls, mrfiCalls, totalCalls;
+    global mrfi_stats, ndsa_timing_log, mrfi_timing_log, mrfi_T_timing_log;
+
+    if not assigned(mrfi_stats) then mrfi_stats := table(): end if;
+    if not assigned(ndsa_timing_log) then ndsa_timing_log := []: end if;
+    if not assigned(mrfi_timing_log) then mrfi_timing_log := []: end if;
+    if not assigned(mrfi_T_timing_log) then mrfi_T_timing_log := []: end if;
+
+    ndsaTime := 0.0:
+    ndsaCalls := 0:
+    for i from 1 to nops(ndsa_timing_log) do
+        ndsaCalls := ndsaCalls + ndsa_timing_log[i][3]:
+        ndsaTime  := ndsaTime  + ndsa_timing_log[i][4]:
+    end do:
+
+    mrfiTime := 0.0:
+    mrfiCalls := 0:
+    for i from 1 to nops(mrfi_timing_log) do
+        mrfiCalls := mrfiCalls + mrfi_timing_log[i][4]:
+        mrfiTime  := mrfiTime  + mrfi_timing_log[i][5]:
+    end do:
+
+    totalCalls := ndsaCalls + mrfiCalls:
+
+    mrfi_stats["ndsa_timing_log"]     := ndsa_timing_log:
+    mrfi_stats["mrfi_timing_log"]     := mrfi_timing_log:
+    mrfi_stats["mrfi_T_timing_log"]   := mrfi_T_timing_log:
+    mrfi_stats["ndsa_bb_time_total"]  := evalf(ndsaTime):
+    mrfi_stats["mrfi_bb_time_total"]  := evalf(mrfiTime):
+    mrfi_stats["bench_total_bb_time"] := evalf(ndsaTime + mrfiTime):
+    mrfi_stats["ndsa_bb_calls_total"] := ndsaCalls:
+    mrfi_stats["mrfi_bb_calls_total"] := mrfiCalls:
+    mrfi_stats["timed_bb_calls_total"] := totalCalls:
+end proc:
+
 NDSA := proc(B, sigma_, beta_, num_var, p, num_points, num_eqn)
     local correct_degree, T, alpha, m, Psi_alpha, Y, u, dq, i, r,
-          lin_sys, temp, result, count, M, row, col, DQ, MQRFR_done;
+          lin_sys, temp, result, count, M, row, col, DQ, MQRFR_done,
+          t1Start, t1Stop, t1Total, callsBefore, callsAfter, attemptStatus,
+          Ybench;
+    global counter, bb_benchmark_mode, ndsa_timing_log;
     print("In NDSA");
     MQRFR_done := [seq(false, i=1..num_eqn)]:
     correct_degree := false:
@@ -302,13 +356,23 @@ NDSA := proc(B, sigma_, beta_, num_var, p, num_points, num_eqn)
         alpha := [seq(i mod p, i=1..T)]:
         m := Expand(product(x - alpha[j], j=1..T)) mod p:
         Psi_alpha := get_point_on_affine_line(num_var, alpha, beta_, sigma_, p, T):
-        (* Black Box call *)
+        (* Actual Black Box calls used by the algorithm. *)
+        bb_benchmark_mode := false:
+        callsBefore := counter:
+        Y := [seq(B(Psi_alpha[i], p), i=1..T)]:
+        callsAfter := counter:
+
+        (* Timing benchmark: repeat the same BB block 1000 times,
+           but do not count these repeats as algorithm BB calls. *)
+        bb_benchmark_mode := true:
         t1Start := time():
         to 10^3 do
-            Y := [seq(B(Psi_alpha[i], p), i=1..T)]:
+            Ybench := [seq(B(Psi_alpha[i], p), i=1..T)]:
         od:
         t1Stop := time()-t1Start:
-        t1Total := t1Stop/10^3:
+        bb_benchmark_mode := false:
+        t1Total := evalf(t1Stop/10^3):
+
         M := Matrix(Y);
         row, col := Dimension(M):
         if row = 1 then
@@ -334,9 +398,17 @@ NDSA := proc(B, sigma_, beta_, num_var, p, num_points, num_eqn)
             dq := min(op(DQ));
         end if;
         if dq > 1 then
+            attemptStatus := "accepted":
+            ndsa_timing_log := [op(ndsa_timing_log),
+                                [T, attemptStatus, callsAfter-callsBefore, t1Total]]:
+            Publish_BB_Timing_Stats():
             print("NDSA: termination condition met");
             return result, lin_sys;
         else
+            attemptStatus := "failed":
+            ndsa_timing_log := [op(ndsa_timing_log),
+                                [T, attemptStatus, callsAfter-callsBefore, t1Total]]:
+            Publish_BB_Timing_Stats():
             print("NDSA: MQRFR failed; doubling T");
             T := T*2;
             for i from 1 to num_eqn do
@@ -396,10 +468,19 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
           init_sigma,
           sampleCounts, mMax, tempG, ratReconVal,
           sigma_j, alphaVal, modulusTable, modulusPoly,
-          Psi_alpha, BBvals, m_i, Y, interpVal, rr, tmpNum, tmpDen;
-    global mrfi_stats;
+          Psi_alpha, BBvals, BBbench, m_i, Y, interpVal, rr, tmpNum, tmpDen,
+          t2Start, t2Stop, t2Total, callsBefore, callsAfter,
+          TiterCallsBefore, TiterCallsAfter, TiterTime, TiterStatus;
+    global mrfi_stats, ndsa_timing_log, mrfi_timing_log, mrfi_T_timing_log,
+           bb_benchmark_mode, counter;
 
     #print("MRFI -- num_vars=", num_vars, " num_eqn=", num_eqn, " p=", p);
+
+    mrfi_stats := table():
+    ndsa_timing_log := []:
+    mrfi_timing_log := []:
+    mrfi_T_timing_log := []:
+    Publish_BB_Timing_Stats():
 
     Primes := [seq(ithprime(i), i=1..num_vars)]:
     direction := [seq(i + 6, i=1..num_vars - 1)]:
@@ -469,6 +550,8 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     #print("MRFI common_den_flag = ", common_den_flag);
 
     while true do
+        TiterCallsBefore := counter:
+        TiterTime := 0.0:
         for j from jDone+1 to 2*Tcur do
             sigma_j := [seq(Primes[k]^j mod p, k=1..nops(Primes))]:
             sigma_  := [op(sigma_), sigma_j]:
@@ -485,12 +568,27 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
                 Psi_alpha := get_point_on_affine_line(num_vars, alphaVal,
                                                      direction, sigma_j,
                                                      p, mMax):
-                (* Black Box call *)
+                (* Actual Black Box calls used by the algorithm. *)
+                bb_benchmark_mode := false:
+                callsBefore := counter:
+                BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
+                callsAfter := counter:
+
+                (* Timing benchmark: repeat the same BB block 1000 times,
+                   but do not count these repeats as algorithm BB calls. *)
+                bb_benchmark_mode := true:
                 t2Start := time():
                 to 10^3 do
-                    BBvals := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
+                    BBbench := [seq(B(Psi_alpha[s], p), s=1..mMax)]:
+                od:
                 t2Stop := time()-t2Start:
-                t2Total := t2Stop/10^3:
+                bb_benchmark_mode := false:
+                t2Total := evalf(t2Stop/10^3):
+                TiterTime := TiterTime + t2Total:
+                mrfi_timing_log := [op(mrfi_timing_log),
+                                    [Tcur, j, "sample", callsAfter-callsBefore, t2Total]]:
+                Publish_BB_Timing_Stats():
+
                 for i from 1 to num_eqn do
                     if numerator_done[i] and denominator_done[i] then next end if:
                     m_i := sampleCounts[i]:
@@ -592,6 +690,16 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         all_done := true;
         for i from 1 to num_eqn do all_done := all_done and bmea_done[i]; end do;
         #print("MRFI bmea_done = ", bmea_done, " all_done = ", all_done);
+        if all_done then
+            TiterStatus := "accepted":
+        else
+            TiterStatus := "failed":
+        end if:
+        TiterCallsAfter := counter:
+        mrfi_T_timing_log := [op(mrfi_T_timing_log),
+                              [Tcur, TiterStatus, TiterCallsAfter-TiterCallsBefore,
+                               evalf(TiterTime)]]:
+        Publish_BB_Timing_Stats():
         if all_done then break; end if;
 
         Tcur := 2*Tcur:
@@ -665,6 +773,7 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
     mrfi_stats["common_den_flag"] := common_den_flag:
     mrfi_stats["mMax"]            := mMax:
     mrfi_stats["sampleCounts"]    := sampleCounts:
+    Publish_BB_Timing_Stats():
 
     return final_num, final_den;
 end proc:
@@ -756,6 +865,11 @@ for n_test from n_min to n_max do
     counter := 0:
     num_lines := 0:
     bb_time_total := 0.0:    # accumulator for actual BB wall-clock time inside MRFI
+    bb_benchmark_mode := false:
+    mrfi_stats := table():
+    ndsa_timing_log := []:
+    mrfi_timing_log := []:
+    mrfi_T_timing_log := []:
     forget(get_point_on_affine_line): 
 
     B := Constuct_Sys_Blackbox(Sys, Vars, params):
@@ -782,11 +896,13 @@ for n_test from n_min to n_max do
 
     bench_point := [seq(ithprime(i)+1, i=1..num_vars)]:
     bench_calls := 1000:
+    bb_benchmark_mode := true:
     t_bb_start  := time():
     to bench_calls do
         B(bench_point, test_prime):
     end do:
     t_bb_total  := time() - t_bb_start:
+    bb_benchmark_mode := false:
     bb_per_call := evalf(t_bb_total / bench_calls):
     bb_total_est := evalf(bb_per_call * mrfi_calls):
 
@@ -802,6 +918,43 @@ for n_test from n_min to n_max do
         stats_deg_num   := []: stats_deg_den   := []:
         stats_common    := false: stats_mMax := 0:
     end if;
+
+    if assigned(mrfi_stats["ndsa_timing_log"]) then
+        stats_ndsa_timing_log := mrfi_stats["ndsa_timing_log"]:
+    else
+        stats_ndsa_timing_log := []:
+    end if:
+    if assigned(mrfi_stats["mrfi_timing_log"]) then
+        stats_mrfi_timing_log := mrfi_stats["mrfi_timing_log"]:
+    else
+        stats_mrfi_timing_log := []:
+    end if:
+    if assigned(mrfi_stats["mrfi_T_timing_log"]) then
+        stats_mrfi_T_timing_log := mrfi_stats["mrfi_T_timing_log"]:
+    else
+        stats_mrfi_T_timing_log := []:
+    end if:
+    if assigned(mrfi_stats["ndsa_bb_time_total"]) then
+        stats_ndsa_bb_time_total := mrfi_stats["ndsa_bb_time_total"]:
+    else
+        stats_ndsa_bb_time_total := 0.0:
+    end if:
+    if assigned(mrfi_stats["mrfi_bb_time_total"]) then
+        stats_mrfi_bb_time_total := mrfi_stats["mrfi_bb_time_total"]:
+    else
+        stats_mrfi_bb_time_total := 0.0:
+    end if:
+    stats_timed_bb_total := evalf(stats_ndsa_bb_time_total + stats_mrfi_bb_time_total):
+    if assigned(mrfi_stats["ndsa_bb_calls_total"]) then
+        stats_ndsa_bb_calls_total := mrfi_stats["ndsa_bb_calls_total"]:
+    else
+        stats_ndsa_bb_calls_total := 0:
+    end if:
+    if assigned(mrfi_stats["mrfi_bb_calls_total"]) then
+        stats_mrfi_bb_calls_total := mrfi_stats["mrfi_bb_calls_total"]:
+    else
+        stats_mrfi_bb_calls_total := 0:
+    end if:
 
     if do_ffge then
         Y_ffge := [seq(y||i, i=1..n_test)]:
@@ -886,7 +1039,12 @@ for n_test from n_min to n_max do
                                  ffge_terms_num,  ffge_terms_den,
                                  ffge_y_terms,    ffge_det_terms,
                                  ffge_elim_swell, ffge_backsub_swell,
-                                 bb_actual_total]]:
+                                 bb_actual_total,
+                                 stats_ndsa_timing_log, stats_mrfi_timing_log,
+                                 stats_mrfi_T_timing_log,
+                                 stats_ndsa_bb_time_total, stats_mrfi_bb_time_total,
+                                 stats_timed_bb_total,
+                                 stats_ndsa_bb_calls_total, stats_mrfi_bb_calls_total]]:
                 else
                     printf("  FAIL  n=%2d (mismatch)\n", n_test):
                     summary := [op(summary),
@@ -899,7 +1057,12 @@ for n_test from n_min to n_max do
                                  ffge_terms_num,  ffge_terms_den,
                                  ffge_y_terms,    ffge_det_terms,
                                  ffge_elim_swell, ffge_backsub_swell,
-                                 bb_actual_total]]:
+                                 bb_actual_total,
+                                 stats_ndsa_timing_log, stats_mrfi_timing_log,
+                                 stats_mrfi_T_timing_log,
+                                 stats_ndsa_bb_time_total, stats_mrfi_bb_time_total,
+                                 stats_timed_bb_total,
+                                 stats_ndsa_bb_calls_total, stats_mrfi_bb_calls_total]]:
                 end if;
             catch:
                 printf("  PARTIAL  n=%2d   (ref solve threw)\n", n_test):
@@ -916,7 +1079,12 @@ for n_test from n_min to n_max do
                                  ffge_terms_num,  ffge_terms_den,
                                  ffge_y_terms,    ffge_det_terms,
                                  ffge_elim_swell, ffge_backsub_swell,
-                                 bb_actual_total]]:
+                                 bb_actual_total,
+                                 stats_ndsa_timing_log, stats_mrfi_timing_log,
+                                 stats_mrfi_T_timing_log,
+                                 stats_ndsa_bb_time_total, stats_mrfi_bb_time_total,
+                                 stats_timed_bb_total,
+                                 stats_ndsa_bb_calls_total, stats_mrfi_bb_calls_total]]:
             end try;
         else
             printf("  RECOVERED (unverified) n=%2d  BB-calls=%d\n",
@@ -934,7 +1102,12 @@ for n_test from n_min to n_max do
                                  ffge_terms_num,  ffge_terms_den,
                                  ffge_y_terms,    ffge_det_terms,
                                  ffge_elim_swell, ffge_backsub_swell,
-                                 bb_actual_total]]:
+                                 bb_actual_total,
+                                 stats_ndsa_timing_log, stats_mrfi_timing_log,
+                                 stats_mrfi_T_timing_log,
+                                 stats_ndsa_bb_time_total, stats_mrfi_bb_time_total,
+                                 stats_timed_bb_total,
+                                 stats_ndsa_bb_calls_total, stats_mrfi_bb_calls_total]]:
         end if;
     else
         printf("  FAIL  n=%2d   %s\n", n_test, status):
@@ -948,20 +1121,25 @@ for n_test from n_min to n_max do
                                  ffge_terms_num,  ffge_terms_den,
                                  ffge_y_terms,    ffge_det_terms,
                                  ffge_elim_swell, ffge_backsub_swell,
-                                 bb_actual_total]]:
+                                 bb_actual_total,
+                                 stats_ndsa_timing_log, stats_mrfi_timing_log,
+                                 stats_mrfi_T_timing_log,
+                                 stats_ndsa_bb_time_total, stats_mrfi_bb_time_total,
+                                 stats_timed_bb_total,
+                                 stats_ndsa_bb_calls_total, stats_mrfi_bb_calls_total]]:
     end if;
 end do;
 
 print("=================================================================="):
 print("  SUMMARY"):
 print("=================================================================="):
-printf("%4s  %-15s  %10s  %12s  %12s  %12s  %14s\n",
-       "n", "status", "BB-calls", "bb/call(s)", "bb-est(s)", "bb-actual(s)",
-       "FFGE-total(s)"):
+printf("%4s  %-15s  %10s  %12s  %12s  %12s  %12s  %14s\n",
+       "n", "status", "BB-calls", "bb/call(s)", "bb-est(s)",
+       "bb-actual(s)", "bb-timed(s)", "FFGE-total(s)"):
 for entry in summary do
-    printf("%4d  %-15s  %10d  %12.3e  %12.3f  %12.3f  %14.6f\n",
+    printf("%4d  %-15s  %10d  %12.3e  %12.3f  %12.3f  %12.3f  %14.6f\n",
            entry[1], entry[2], entry[3], entry[4], entry[5], entry[20],
-           entry[13]):
+           entry[26], entry[13]):
 end do;
 
 print(""):
@@ -994,6 +1172,18 @@ for entry in summary do
             entry[5]):
     fprintf(fd, "  Total BB time (actual)   : %.9f  (cumulative inside MRFI)\n",
             entry[20]):
+    fprintf(fd, "  Total BB time (timed)    : %.9f  (NDSA t1Total + MRFI t2Total)\n",
+            entry[26]):
+    fprintf(fd, "  NDSA BB time total       : %.9f\n", entry[24]):
+    fprintf(fd, "  MRFI BB time total       : %.9f\n", entry[25]):
+    fprintf(fd, "  NDSA BB calls total      : %d\n", entry[27]):
+    fprintf(fd, "  MRFI BB calls total      : %d\n", entry[28]):
+    fprintf(fd, "  NDSA timing log          : %a\n", entry[21]):
+    fprintf(fd, "      format: [T, status, BB-calls, t1Total]\n"):
+    fprintf(fd, "  MRFI per-sample timing   : %a\n", entry[22]):
+    fprintf(fd, "      format: [Tcur, j, status, BB-calls, t2Total]\n"):
+    fprintf(fd, "  MRFI per-T timing        : %a\n", entry[23]):
+    fprintf(fd, "      format: [Tcur, status, BB-calls, summed-t2Total]\n"):
     fprintf(fd, "  Deg_num (per equation)   : %a\n",     entry[8]):
     fprintf(fd, "  Deg_den (per equation)   : %a\n",     entry[9]):
     fprintf(fd, "  Terms_num (per equation) : %a\n",     entry[6]):
