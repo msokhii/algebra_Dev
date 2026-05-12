@@ -1,56 +1,42 @@
 ============================================================
   Symmetric Toeplitz MRFI benchmark
   Prime p = 2147483647
-  Range   n = 4 .. 15
+  Range   n = 10 .. 10
 ============================================================
 
-  n = 4
+  n = 10
   MRFI Status              : PASS
-  Total BB calls           : 76
-  Per call BB time         : 0.000021000
-  Total BB time (est)      : 0.001596000  (bb/call * BB-calls)
-  Total BB time (actual)   : 0.003000000  (cumulative inside MRFI)
-  Deg_num (per equation)   : [1, 1, 1, 1]
-  Deg_den (per equation)   : [2, 2, 2, 2]
-  Terms_num (per equation) : [2, 4, 4, 2]
-  Terms_den (per equation) : [7, [], [], []]
+  Total BB calls           : 20508  (NDSA=28, MRFI=20480)
+  BB calls in NDSA         : 28
+  BB calls in MRFI         : 20480
+  Total NDSA time (s)      : 0.000357000  (incl. failed-T attempts)
+  Total MRFI time (s)      : 0.272214000
+  Total BB time (NDSA+MRFI): 0.272571000
+  MRFI wall-clock (s)      : 287.962000000  (FULL solve, includes 1000x BB amplification)
+  MRFI wall-clock corrected: 15.663571000  (= wall-clock - 999*(t_NDSA+t_MRFI))
+  --- Component breakdown (MRFI symbolic work) ---
+    t_cppNewtonInterp (s)  : 0.664000000
+    t_MQRFR (s)            : 0.016000000
+    t_cppRR (s)            : 0.876000000
+    t_BMEA (s)             : 2.084000000
+    t_Vandermonde (s)      : 9.120000000
+    t_iratrecon (s)        : 0.001000000  (post-MRFI lift to Q)
+  Deg_num (per equation)   : [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+  Deg_den (per equation)   : [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  Terms_num (per equation) : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  Terms_den (per equation) : [931, [], [], [], [], [], [], [], [], []]
  
   FFGE status              : OK
-  FFGE total time (s)      : 0.004055000  (avg of 1000 calls)
-  FFGE f[i] terms (==num)  : [2, 4, 4, 2]
-  FFGE g[i] terms (==den)  : [7, 7, 7, 7]
-  FFGE y[i] terms (Pre GCD): [13, 16, 16, 13]
-  FFGE det(A) terms        : 12
-  FFGE Max Elim. step swell: 19  (numterms(num) before exact div)
-  FFGE max Back sub swell  : 47  (numterms(N[i]) before exact div)
+  FFGE total time (s)      : 77.959000000  (avg of 1000 calls)
+  FFGE f[i] terms (==num)  : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  FFGE g[i] terms (==den)  : [931, 931, 931, 931, 931, 931, 931, 931, 931, 931]
+  FFGE y[i] terms (Pre GCD): [24023, 27904, 29736, 30813, 31188, 31188, 30813, 29736, 27904, 24023]
+  FFGE det(A) terms        : 23797
+  FFGE Max Elim. step swell: 813638  (numterms(num) before exact div)
+  FFGE max Back sub swell  : 2122800  (numterms(N[i]) before exact div)
   Term count comparison (MRFI vs FFGE)
-  Numerator terms MRFI     : [2, 4, 4, 2]
-  Numerator terms FFGE     : [2, 4, 4, 2]
-  Denominator terms MRFI   : [7, [], [], []]
-  Denominator terms FFGE   : [7, 7, 7, 7]
-
-  n = 5
-  MRFI Status              : PASS
-  Total BB calls           : 204
-  Per call BB time         : 0.000020000
-  Total BB time (est)      : 0.004080000  (bb/call * BB-calls)
-  Total BB time (actual)   : 0.003000000  (cumulative inside MRFI)
-  Deg_num (per equation)   : [2, 2, 2, 2, 2]
-  Deg_den (per equation)   : [3, 3, 3, 3, 3]
-  Terms_num (per equation) : [7, 8, 11, 8, 7]
-  Terms_den (per equation) : [12, [], [], [], []]
- 
-  FFGE status              : OK
-  FFGE total time (s)      : 0.008517000  (avg of 1000 calls)
-  FFGE f[i] terms (==num)  : [7, 8, 11, 8, 7]
-  FFGE g[i] terms (==den)  : [12, 12, 12, 12, 12]
-  FFGE y[i] terms (Pre GCD): [41, 41, 44, 41, 41]
-  FFGE det(A) terms        : 35
-  FFGE Max Elim. step swell: 89  (numterms(num) before exact div)
-  FFGE max Back sub swell  : 259  (numterms(N[i]) before exact div)
-  Term count comparison (MRFI vs FFGE)
-  Numerator terms MRFI     : [7, 8, 11, 8, 7]
-  Numerator terms FFGE     : [7, 8, 11, 8, 7]
-  Denominator terms MRFI   : [12, [], [], [], []]
-  Denominator terms FFGE   : [12, 12, 12, 12, 12]
+  Numerator terms MRFI     : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  Numerator terms FFGE     : [153, 333, 391, 428, 430, 430, 428, 391, 333, 153]
+  Denominator terms MRFI   : [931, [], [], [], [], [], [], [], [], []]
+  Denominator terms FFGE   : [931, 931, 931, 931, 931, 931, 931, 931, 931, 931]
 

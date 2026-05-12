@@ -729,7 +729,7 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 15:
+n_max := 10:
 do_verify := true:
 do_ffge := true:
 summary := []:
@@ -817,7 +817,7 @@ for n_test from n_min to n_max do
 
             # FFGE timing benchmark — same methodology as BB above.
             # Run FFGE ffge_bench_calls times at the same input, average.
-            ffge_bench_calls := 1000:
+            ffge_bench_calls := 1:
             t_ffge_start := time():
             to ffge_bench_calls do
                 FFGE(A_ffge, b_ffge, Y_ffge):
@@ -981,9 +981,9 @@ for entry in summary do
     fprintf(fd, "  MRFI Status              : %s\n",     entry[2]):
     fprintf(fd, "  Total BB calls           : %d\n",     entry[3]):
     fprintf(fd, "  Per call BB time         : %.9f\n",   entry[4]):
-    fprintf(fd, "  Total BB time (est)      : %.9f  (bb/call * BB-calls)\n",
-            entry[5]):
-    fprintf(fd, "  Total BB time (actual)   : %.9f  (cumulative inside MRFI)\n",
+#    fprintf(fd, "  Total BB time (est)      : %.9f  (bb/call * BB-calls)\n",
+ #           entry[5]):
+    fprintf(fd, "  Total BB time (actual)   : %.9f\n",
             entry[20]):
     fprintf(fd, "  Deg_num (per equation)   : %a\n",     entry[8]):
     fprintf(fd, "  Deg_den (per equation)   : %a\n",     entry[9]):
