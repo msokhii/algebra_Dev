@@ -772,8 +772,8 @@ get_data := proc(test_case)
 end proc:
 
 test_prime := 2^31 - 1:  
-n_min := 8:
-n_max := 8:
+n_min := 4:
+n_max := 12:
 do_verify := true:
 do_ffge := true:
 summary := []:
@@ -864,7 +864,7 @@ for n_test from n_min to n_max do
 
             # FFGE timing benchmark — same methodology as BB above.
             # Run FFGE ffge_bench_calls times at the same input, average.
-            ffge_bench_calls := 1:
+            ffge_bench_calls := 5:
             t_ffge_start := time():
             to ffge_bench_calls do
                 FFGE(A_ffge, b_ffge, Y_ffge):
