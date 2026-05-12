@@ -772,8 +772,8 @@ get_data := proc(test_case)
 end proc:
 
 test_prime := 2^31 - 1:  
-n_min := 10:
-n_max := 10:
+n_min := 8:
+n_max := 8:
 do_verify := true:
 do_ffge := true:
 summary := []:
@@ -1049,38 +1049,34 @@ fprintf(fd, "============================================================\n\n"):
 
 for entry in summary do
     fprintf(fd, "  n = %d\n",                  entry[1]):
-    fprintf(fd, "  MRFI Status              : %s\n",     entry[2]):
-    fprintf(fd, "  Total BB calls           : %d  (NDSA=%d, MRFI=%d)\n",
+    fprintf(fd, "  MRFI Status                           : %s\n",     entry[2]):
+    fprintf(fd, "  Total BB calls                        : %d  (NDSA = %d, MRFI = %d)\n",
             entry[3], entry[4], entry[5]):
-    fprintf(fd, "  BB calls in NDSA         : %d\n",     entry[4]):
-    fprintf(fd, "  BB calls in MRFI         : %d\n",     entry[5]):
-    fprintf(fd, "  Total NDSA time (s)      : %.9f  (incl. failed-T attempts)\n",
+    fprintf(fd, "  BB calls in NDSA                      : %d\n",     entry[4]):
+    fprintf(fd, "  BB calls in MRFI                      : %d\n",     entry[5]):
+    fprintf(fd, "  Total NDSA time for BB calls (s)      : %.9f\n",
             entry[20]):
-    fprintf(fd, "  Total MRFI time (s)      : %.9f\n",   entry[21]):
-    fprintf(fd, "  Total BB time (NDSA+MRFI): %.9f\n",
+    fprintf(fd, "  Total MRFI time for BB calls (s)      : %.9f\n",   entry[21]):
+    fprintf(fd, "  Total BB calls time (NDSA+MRFI)       : %.9f\n",
             entry[20] + entry[21]):
-    fprintf(fd, "  MRFI wall-clock (s)      : %.9f  (FULL solve, includes 1000x BB amplification)\n",
-            entry[22]):
-    fprintf(fd, "  MRFI wall-clock corrected: %.9f  (= wall-clock - 999*(t_NDSA+t_MRFI))\n",
+    fprintf(fd, "  Total time (s)                        : %.9f \n",
             entry[22] - 999.0 * (entry[20] + entry[21])):
-    fprintf(fd, "  --- Component breakdown (MRFI symbolic work) ---\n"):
-    fprintf(fd, "    t_cppNewtonInterp (s)  : %.9f\n",   entry[23]):
-    fprintf(fd, "    t_MQRFR (s)            : %.9f\n",   entry[24]):
-    fprintf(fd, "    t_cppRR (s)            : %.9f\n",   entry[25]):
-    fprintf(fd, "    t_BMEA (s)             : %.9f\n",   entry[26]):
-    fprintf(fd, "    t_Vandermonde (s)      : %.9f\n",   entry[27]):
-    fprintf(fd, "    t_iratrecon (s)        : %.9f  (post-MRFI lift to Q)\n",
-            entry[28]):
+    fprintf(fd, "  Time for MRFI Individual component - \n"):
+    fprintf(fd, "  Time -> cppNewtonInterp (s)  : %.9f\n",   entry[23]):
+    fprintf(fd, "  Time -> MQRFR (s)            : %.9f\n",   entry[24]):
+    fprintf(fd, "  Time -> cppRR (s)            : %.9f\n",   entry[25]):
+    fprintf(fd, "  Time -> BMEA (s)             : %.9f\n",   entry[26]):
+    fprintf(fd, "  Time -> Vandermonde (s)      : %.9f\n",   entry[27]):
     fprintf(fd, "  Deg_num (per equation)   : %a\n",     entry[8]):
     fprintf(fd, "  Deg_den (per equation)   : %a\n",     entry[9]):
     fprintf(fd, "  Terms_num (per equation) : %a\n",     entry[6]):
     fprintf(fd, "  Terms_den (per equation) : %a\n",     entry[7]):
     fprintf(fd, " \n"):
     fprintf(fd, "  FFGE status              : %s\n",     entry[12]):
-    fprintf(fd, "  FFGE total time (s)      : %.9f  (avg of 1000 calls)\n",
+    fprintf(fd, "  FFGE total time (s)      : %.9f\n",
             entry[13]):
-    fprintf(fd, "  FFGE f[i] terms (==num)  : %a\n",     entry[14]):
-    fprintf(fd, "  FFGE g[i] terms (==den)  : %a\n",     entry[15]):
+    fprintf(fd, "  FFGE f[i] terms          : %a\n",     entry[14]):
+    fprintf(fd, "  FFGE g[i] terms          : %a\n",     entry[15]):
     fprintf(fd, "  FFGE y[i] terms (Pre GCD): %a\n",     entry[16]):
     fprintf(fd, "  FFGE det(A) terms        : %a\n",     entry[17]):
     fprintf(fd, "  FFGE Max Elim. step swell: %a  (numterms(num) before exact div)\n",
