@@ -1,0 +1,74 @@
+============================================================
+  Symmetric Toeplitz MRFI benchmark
+  Prime p = 2147483647
+  Range   n = 4 .. 5
+============================================================
+
+  n = 4
+  MRFI Status                           : ERROR: cppBerlekampMassey returned error code mBM(8,Array(0..7, [607219514,2103052951,59240929,858993463,1125577657,1436592616,947855389,858996151], datatype = integer[8]),2147483647,5,Array(0..4, [0,0,0,0,0], datatype = integer[8]),-1)
+  Total BB calls                        : 44  (NDSA = 12, MRFI = 32)
+  BB calls in NDSA                      : 12
+  BB calls in MRFI                      : 32
+  Total NDSA time for BB calls (s)      : 0.000126000
+  Total MRFI time for BB calls (s)      : 0.000319000
+  Total BB calls time (NDSA+MRFI)       : 0.000445000
+  Total time (s)                        : 0.009445000 
+  Time for MRFI Individual component - 
+  Time -> cppNewtonInterp (s)  : 0.000000000
+  Time -> MQRFR (s)            : 0.003000000
+  Time -> cppRR (s)            : 0.002000000
+  Time -> BMEA (s)             : 0.000000000
+  Time -> Vandermonde (s)      : 0.000000000
+  Deg_num (per equation)   : []
+  Deg_den (per equation)   : []
+  Terms_num (per equation) : []
+  Terms_den (per equation) : []
+ 
+  FFGE status              : OK
+  FFGE total time (s)      : 0.007200000
+  FFGE f[i] terms          : [2, 4, 4, 2]
+  FFGE g[i] terms          : [7, 7, 7, 7]
+  FFGE y[i] terms (Pre GCD): [13, 16, 16, 13]
+  FFGE det(A) terms        : 12
+  FFGE Max Elim. step swell: 19  (numterms(num) before exact div)
+  FFGE max Back sub swell  : 47  (numterms(N[i]) before exact div)
+  Term count comparison (MRFI vs FFGE)
+  Numerator terms MRFI     : []
+  Numerator terms FFGE     : [2, 4, 4, 2]
+  Denominator terms MRFI   : []
+  Denominator terms FFGE   : [7, 7, 7, 7]
+
+  n = 5
+  MRFI Status                           : ERROR: cppBerlekampMassey returned error code mBM(8,Array(0..7, [902409586,2090073892,1968078160,1659500612,240399367,954317129,2142288449,188801364], datatype = integer[8]),2147483647,5,Array(0..4, [0,0,0,0,0], datatype = integer[8]),-1)
+  Total BB calls                        : 60  (NDSA = 12, MRFI = 48)
+  BB calls in NDSA                      : 12
+  BB calls in MRFI                      : 48
+  Total NDSA time for BB calls (s)      : 0.000115000
+  Total MRFI time for BB calls (s)      : 0.000500000
+  Total BB calls time (NDSA+MRFI)       : 0.000615000
+  Total time (s)                        : 0.008615000 
+  Time for MRFI Individual component - 
+  Time -> cppNewtonInterp (s)  : 0.002000000
+  Time -> MQRFR (s)            : 0.002000000
+  Time -> cppRR (s)            : 0.000000000
+  Time -> BMEA (s)             : 0.000000000
+  Time -> Vandermonde (s)      : 0.000000000
+  Deg_num (per equation)   : []
+  Deg_den (per equation)   : []
+  Terms_num (per equation) : []
+  Terms_den (per equation) : []
+ 
+  FFGE status              : OK
+  FFGE total time (s)      : 0.008600000
+  FFGE f[i] terms          : [7, 8, 11, 8, 7]
+  FFGE g[i] terms          : [12, 12, 12, 12, 12]
+  FFGE y[i] terms (Pre GCD): [41, 41, 44, 41, 41]
+  FFGE det(A) terms        : 35
+  FFGE Max Elim. step swell: 89  (numterms(num) before exact div)
+  FFGE max Back sub swell  : 259  (numterms(N[i]) before exact div)
+  Term count comparison (MRFI vs FFGE)
+  Numerator terms MRFI     : []
+  Numerator terms FFGE     : [7, 8, 11, 8, 7]
+  Denominator terms MRFI   : []
+  Denominator terms FFGE   : [12, 12, 12, 12, 12]
+

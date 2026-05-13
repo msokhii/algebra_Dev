@@ -1,4 +1,3 @@
-restart:
 libN := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so":
 libR := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so":
 libV := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so": 
@@ -86,7 +85,7 @@ mVSOLVE := define_external('cppVSolve',
 
 (* Remove typechecking from mVSOLVE *)
 
-mVSOLVE := subsop(1=(
+(* mVSOLVE := subsop(1=(
                     mLen,
                     mIn,
                     yLen,
@@ -112,7 +111,7 @@ mBM := subsop(1=(
                 p,
                 outLen,
                 lOut,
-                degOut),op(mBM)):
+                degOut),op(mBM)): *)
 
 cppBMM := proc( a::{Vector,list}, p::prime )
 local N,n,i,aArr,L,deg,rc;

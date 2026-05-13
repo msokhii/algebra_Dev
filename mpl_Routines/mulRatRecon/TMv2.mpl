@@ -1,4 +1,4 @@
-read "./mapleWrapper.mpl":
+read "./mapleWrapperv2.mpl":
 
 with(LinearAlgebra):
 with(IntegerRelations):
@@ -208,6 +208,7 @@ BMEA := proc(v::list, p::posint, Z::name)
     local L, d, i;
     if numelems(v) = 0 then return 1; end if;
     L := cppBMM(v, p);
+    print(L);
     if L = [] then return 1; end if;
     d := nops(L) - 1;
     return add(L[i+1]*Z^i, i=0..d);
@@ -758,7 +759,7 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 12:
+n_max := 5:
 do_verify := true:
 do_ffge := true:
 summary := []:
