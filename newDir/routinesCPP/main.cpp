@@ -1672,6 +1672,73 @@ int BerlekampMassey64s(LONG *a,int N,LONG *L,LONG *W,LONG p)
     return dv1;
 }
 
+extern "C" int cppBM(int aLen,
+    const LONG *aIn,
+    const LONG p,
+    int outLen,
+    LONG *lOut,
+    int *degOut)
+{
+
+// INITIAL CHECKS:
+
+if (!aIn || !lOut || !degOut) {
+    return -1;
+}
+if (aLen <= 0 || outLen <= 0) {
+    return -2;
+}
+
+const int N = aLen;
+const int n = N / 2;
+
+// Lambda(x) has degree at most n = floor(N/2), so we need n+1 coefficient slots.
+if (outLen < n + 1) {
+    return -3;
+}
+
+// INITIALIZING OUTPUT ARRAY:
+
+*degOut = -1;
+for (int i = 0; i < outLen; ++i) {
+    lOut[i] = 0;
+}
+
+// local copy of the input sequence (kernel may strip trailing zeros etc.)
+vector<LONG> a(aIn, aIn + N);
+
+// L is used both as the final output AND as scratch (polmul64s writes q*v1
+// into L during the loop). Allocate an internal buffer big enough for the
+// intermediate products, then copy out only the final coefficients.
+vector<LONG> Lbuf(N + 2, 0);
+
+// Workspace W layout from the kernel:
+//   r0 : N+1 slots
+//   r1 : N   slots
+//   v0 : n+1 slots
+//   v1 : n+1 slots
+// total = 2N + 2n + 3  (with n = N/2)  ~  3N + 3. Allocate generously.
+vector<LONG> W(3 * N + 8, 0);
+
+int d = BerlekampMassey64s(a.data(), N, Lbuf.data(), W.data(), p);
+
+if (d < 0) {
+    // No connection polynomial (all-zero input or N==0 after stripping).
+    // Not an error: report via degOut = -1 and return success.
+    *degOut = -1;
+    return 0;
+}
+
+if (d >= outLen) {
+    *degOut = -1;
+    return -4;
+}
+
+std::copy_n(Lbuf.data(), d + 1, lOut);
+*degOut = d;
+return 0;
+}
+
 /*
 NEWTON INTERPOLATION ROUTINES:
 */

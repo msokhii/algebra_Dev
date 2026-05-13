@@ -2,6 +2,7 @@ restart:
 libN := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so":
 libR := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so":
 libV := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so": 
+libBM := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so": 
 
 mRATRECON := define_external(
                             'ratRECON_C',
@@ -94,6 +95,46 @@ mVSOLVE := subsop(1=(
                     pp,
                     outLen,
                     aOut),op(mVSOLVE)): 
+
+mBM := define_external('cppBM',
+  aLen::integer[4],
+  aIn::ARRAY(1..aLen, datatype=integer[8]),
+  p::integer[8],
+  outLen::integer[4],
+  lOut::ARRAY(1..outLen, datatype=integer[8]),
+  degOut::REF(integer[4]),
+  RETURN::integer[4],
+  LIB=libBM):
+
+mBM := subsop(1=(
+                aLen,
+                aIn,
+                p,
+                outLen,
+                lOut,
+                degOut),op(mBM)):
+
+cppBMM := proc( a::{Vector,list}, p::prime )
+local N,n,i,aArr,L,deg,rc;
+
+   N := numelems(a);
+   printf("C code Berlekamp-Massey: N=%d  p=%d\n",N,p);
+   if N <= 0 then error "input sequence must be non-empty"; fi;
+
+   aArr := Array(0..N-1,datatype=integer[8]);
+   for i from 1 to N do aArr[i-1] := a[i]; od;
+
+   n := iquo(N,2);
+   L := Array(0..n,datatype=integer[8]);
+   deg := -1;
+
+   rc := mBM(N,aArr,p,n+1,L,deg);
+   if rc <> 0 then error "cppBerlekampMassey returned error code %1", rc; fi;
+
+   if deg < 0 then return []; fi;
+   return [seq( L[i], i=0..deg )];
+
+end:
 
 cppVS := proc( v::{Vector,list}, m::{Vector,list}, p::prime, shift::integer:=0 )
 local t,i,a,R,y,rc;
