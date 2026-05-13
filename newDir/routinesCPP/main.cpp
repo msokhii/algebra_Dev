@@ -1572,7 +1572,7 @@ void VandermondeSolve64s(LONG *m,LONG *y,int n,LONG *a,LONG *M,int shift,LONG p)
     return;
 }
 
-extern "C" int cppVandermondeSolve(int mLen,
+extern "C" int cppVSolve(int mLen,
     const LONG *mIn,
     int yLen,
     const LONG *yIn,

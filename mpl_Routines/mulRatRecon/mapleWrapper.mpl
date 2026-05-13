@@ -1,6 +1,7 @@
-libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
-libR := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
-libV := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
+restart:
+libN := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so":
+libR := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so":
+libV := "/cecm/home/mss59/Desktop/MAY11/newDir/routinesCPP/cppObj.so": 
 
 mRATRECON := define_external(
                             'ratRECON_C',
@@ -21,7 +22,7 @@ mRATRECON := define_external(
                             degDOUT::REF(integer[4]),
                             RETURN::integer[4],
                             LIB=libR
-                            ):
+                            ): 
 
 (* Remove type checking from mRATRECON. *)
 
@@ -54,8 +55,8 @@ mNEWTONINTERP := define_external(
                                 yOut::ARRAY(0..outLen-1,datatype=integer[8]),
                                 degOut::REF(integer[4]),
                                 RETURN::integer[4],
-                                LIB=libNewton
-                                ):
+                                LIB=libN
+                                ): 
 
 (* Remove type checking from mNEWTONINTERP. *)
 
@@ -68,9 +69,9 @@ mNEWTONINTERP := subsop(1=(
                            outLen,
                            yOut,
                            degOut),
-                           op(mNEWTONINTERP)):
+                           op(mNEWTONINTERP)): 
 
-mVSOLVE := define_external('cppVandermondeSolve',
+mVSOLVE := define_external('cppVSolve',
   mLen::integer[4],
   mIn::ARRAY(1..mLen,datatype=integer[8]),
   yLen::integer[4],
@@ -82,6 +83,8 @@ mVSOLVE := define_external('cppVandermondeSolve',
   RETURN::integer[4],
   LIB=libV):
 
+(* Remove typechecking from mVSOLVE *)
+
 mVSOLVE := subsop(1=(
                     mLen,
                     mIn,
@@ -90,9 +93,9 @@ mVSOLVE := subsop(1=(
                     shiftInt,
                     pp,
                     outLen,
-                    aOut),op(mVSOLVE)):
+                    aOut),op(mVSOLVE)): 
 
-cppVSolve := proc( v::{Vector,list}, m::{Vector,list}, p::prime, shift::integer:=0 )
+cppVS := proc( v::{Vector,list}, m::{Vector,list}, p::prime, shift::integer:=0 )
 local t,i,a,R,y,rc;
 
    t := numelems(v);
@@ -105,7 +108,7 @@ local t,i,a,R,y,rc;
 
    a := Array(0..t-1,datatype=integer[8]);
 
-   rc := mVSOLVE(t,R,t,y,shiftInt,p,t,a);
+   rc := mVSOLVE(t,R,t,y,shift,p,t,a);
    if rc <> 0 then error "cppVandermondeSolve returned error code %1", rc; fi;
 
    return [seq( a[i], i=0..t-1 )];
@@ -294,3 +297,51 @@ cppNewtonInterp := proc(xVals,yVals,var,p) option inline:
     poly := add(yOut[i]*var^i,i=0..degOut) mod p:
     return poly:
 end proc:
+
+(*
+VSMAPLE := proc(v::{Vector,list},m::{Vector,list},p::prime,shift::integer:=0)
+local t,i,j,M,x,a,q,r,s,temp;
+   t := numelems(v);
+   if numelems(m) <> t then 
+       error "v and m must be the same size"; 
+   fi;
+   printf("Maple Vandermonde solver: t=%d  p=%d\n",t,p);
+   M := 1;
+   for r in m do 
+       M := Expand(M*(x-r)) mod p; 
+   od;
+   a := Vector(t);
+   for j to t do
+       q := Quo(M,x-m[j],x) mod p;
+       r := 1/Eval(q,x=m[j]) mod p;
+       s := 0;
+       for i to t do 
+           s := s + v[i]*coeff(q,x,i-1); 
+       od;
+       a[j] := r*s mod p;
+       if shift=0 then 
+           next 
+       fi;
+       r := 1/m[j] mod p;
+       r := r &^ shift mod p;
+       a[j] := r*a[j] mod p;
+   od;
+   if type(v,list) then 
+       a := convert(a,list); 
+   fi;
+   return a;
+end:
+
+p := 1153:
+alpha := numtheory[primroot](p):
+e := [11,45,61,72,95,116,201,234,301,310,411,454]:
+t := nops(e):
+m := [seq( alpha &^ e[i] mod p, i=1..t )]:
+c := rand(1000):
+f := add( c()*x^e[i], i=1..t );
+v := [seq( Eval(f,x=modp(alpha &^ i,p)) mod p, i=0..t-1 )]:
+a := VSMAPLE( v, m, p );
+add( a[i]*x^e[i], i=1..t ) - f;
+a := cppVS( v, m, p );
+add( a[i]*x^e[i], i=1..t ) - f;
+*)
