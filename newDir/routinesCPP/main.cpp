@@ -233,6 +233,27 @@ temp=v;
 return temp;
 };
 
+void vecfill64s( LONG x, LONG *A, int n )
+{   int i;
+    for( i=0; i<n; i++ ) A[i] = x;
+    return;
+}
+
+void polcopy64s( LONG *A, int d, LONG *B )
+{   int i;
+    for( i=0; i<=d; i++) B[i]=A[i];
+    return;
+}
+
+void monic64s(LONG *A,int d,LONG p) {
+    int i; LONG inv;
+    if(d<0 || A[d]==1) return;
+    inv = modinv64b(A[d],p);
+    for(i=0; i<d; i++) A[i] = mul64b(inv,A[i],p);
+    A[d] = 1;
+    return;
+}
+
 void dispVEC64(const vector<LONG> &v){
 if(v.size()==0) cout<<"O"<<"\n";
 cout<<"[ ";
@@ -365,6 +386,15 @@ int pSUBIP64(LONG *a,
 	return maxDeg;
 }
 
+int polsub64s(LONG *a, LONG *b, LONG *c, int da, int db, LONG p) {
+       int i,m;
+       m = min(da,db);
+       for( i=0; i<=m; i++ ) c[i] = sub64b(a[i],b[i],p);
+       if( da==db ) { while( da>=0 && c[da]==0 ) da--; return da; }
+       if( da>db ) { for ( i=db+1; i<=da; i++ ) c[i] = a[i]; return da; }
+       for( i=da+1; i<=db; i++ ) c[i] = neg64s(b[i],p); return db;
+    }
+
 // Returns a pair containing the new vector c=(a*b) mod p
 // and the degree of c. 
 
@@ -476,6 +506,46 @@ int polMUL64P(LONG *a,
     return degC;
 }
 
+int polmul64s( LONG * A, LONG * B, LONG * C, int da, int db, LONG p)
+{
+    int i,k,m;
+    if( da<0 || db<0 ) return -1;
+    int dc = da+db;
+if( p<2147483648ll ) { LONG t, p2;
+    p2 = p<<32;
+    for( k=dc; k>=0; k-- ) {
+       i = max(0,k-db);
+       m = min(k,da);
+       t = 0ll;
+       while( i<m ) {
+           t -= A[i]*B[k-i]; i++;
+           t -= A[i]*B[k-i]; i++;
+           t += (t>>63) & p2;
+       }
+       if( i==m ) t -= A[i]*B[k-i];
+       t = (-t) % p;
+       t += (t>>63) & p;
+       C[k] = t;
+    }
+} else {ULNG z[2];
+    for( k=dc; k>=0; k-- ) {
+       i = max(0,k-db);
+       m = min(k,da);
+       z[0] = z[1] = 0ll;
+       while( i<m ) {
+           ZFMA(z,A[i],B[k-i]); i++;
+           ZFMA(z,A[i],B[k-i]); i++;
+           if( z[1]>=p ) z[1] -= p;
+       }
+       if( i==m ) ZFMA(z,A[i],B[k-i]);
+       ZMOD(z,p);
+       C[k] = z[0];
+    }
+}
+    for( ; dc>=0 && C[dc]==0; dc-- );
+    return( dc );
+}
+
 int polfms64s(LONG *A, LONG *B, LONG *C, int da, int db, int dc, LONG p)
 {   // polynomial fused multiply subtract: C -= A*B
     int i,k,m; ULNG z[2];
@@ -505,8 +575,6 @@ int polfms64s(LONG *A, LONG *B, LONG *C, int da, int db, int dc, LONG p)
     for( dc=max(dc, da+db); dc>=0 && C[dc]==0; dc-- );
     return dc;
 }
-
-
 
 int pMULIP64VANDER(vector<LONG> &a, vector<LONG> &b, int degA, int degB, const LONG p) {
     // Computes: b <- a * b   (in-place on b)
@@ -1468,6 +1536,141 @@ int ratRecon2(const vector<LONG> &m,
     degTOut=-1;
     return -20;
 };
+
+/* VANDERMONDE SOLVER ROUTINES: */
+
+void VandermondeSolve64s(LONG *m,LONG *y,int n,LONG *a,LONG *M,int shift,LONG p)
+{  
+    int i,j;
+    LONG u,s,A[2];
+    M[0] = 1;
+    A[1] = 1;
+    for( i=0; i<n; i++ ){ 
+         A[0] = neg64s(m[i],p);
+         polmul64s(A,M,M,1,i,p);
+    }
+    for( j=0; j<n; j++ ){
+         A[0] = neg64s(m[j],p);
+         i = polDIVIP64(M,A,n,1,p); // M = M / (x-m[j])
+         for( i=0; i<n; i++ ) M[i] = M[i+1]; // move quotient to front of M
+         u = pEVAL64(M,n-1,m[j],p);
+         if( u==0 ) { printf("Roots are not distinct!\n"); return; }
+         u = modinv64b(u,p);
+         // compute a[j] = M dot y
+         for( s=0,i=0; i<n; i++ ) s = add64b(s,mul64b(M[i],y[i],p),p);
+         s = mul64b(u,s,p);
+         //s = mulrec64(u,s,P);
+         if( shift!=0 ) {
+             u = modinv64b(m[j],p);
+             u = powmod64s(u,shift,p);
+             //s = mulrec64(u,s,P);
+             s = mul64b(u,s,p);
+         }
+         a[j] = s;
+         polmul64s(A,M,M,1,n-1,p); // restore M = M x (x-m[j])
+    }
+    return;
+}
+
+extern "C" int cppVandermondeSolve(int mLen,
+    const LONG *mIn,
+    int yLen,
+    const LONG *yIn,
+    int shift,
+    const LONG p,
+    int outLen,
+    LONG *aOut)
+{
+
+// INITIAL CHECKS:
+
+if (!mIn || !yIn || !aOut) {
+    return -1;
+}
+if (mLen <= 0 || yLen <= 0 || outLen <= 0) {
+    return -2;
+}
+if (mLen != yLen) {
+    return -3;
+}
+if (outLen < mLen) {
+    return -4;
+}
+
+const int n = mLen;
+
+// INITIALIZING OUTPUT ARRAY:
+
+for (int i = 0; i < outLen; ++i) {
+    aOut[i] = 0;
+}
+
+// local working copies since kernel overwrites m, y, and M
+vector<LONG> m(mIn, mIn + n);
+vector<LONG> y(yIn, yIn + n);
+
+// M holds the master polynomial prod_i (x - m[i]) of degree n,
+// so it needs n+1 coefficient slots.
+vector<LONG> M(n + 1, 0);
+
+VandermondeSolve64s(m.data(), y.data(), n, aOut, M.data(), shift, p);
+
+return 0;
+}
+
+/*
+BERLEKAMP MASSEY ROUTINES:
+*/
+
+int BerlekampMassey64s(LONG *a,int N,LONG *L,LONG *W,LONG p)
+{
+    // Input sequence a = [a1,a2,a3,...,aN]
+    // Output polynomial Lambda(x) is written to L
+    // Uses the half extended Euclidean algorithm
+    int i,m,n,dr,dq,dr0,dr1,dv0,dv1,dt;
+    LONG *r,*q,*r0,*r1,*v0,*v1,*t,u,A,b;
+    while( N>0 && a[N-1]==0 ) N--; // ignore leading zeroes
+    n = N/2;
+    N = 2*n;
+    if( N==0 ) return -1;
+    m = N-1;
+    // W is space for r0 = x^N and r1 of degree m and v0 and v1 of degree at most n
+    r0 = W; r1 = r0+N+1; v0 = r1+N; v1 = v0+n+1;
+    vecfill64s(0,r0,N); r0[N] = 1; dr0 = N;             // r0 = x^(2*n)
+    for(i=0; i<N; i++) r1[i] = a[m-i];
+    for(dr1=m; dr1>=0 && r1[dr1]==0; dr1--);            // r1 = sum(a[m-i]*x^i,i=0..m)
+    if( dr1==-1 ) return -1;
+    dv0 = -1;                                           // v0 = 0
+    v1[0] = 1; dv1 = 0;                                 // v1 = 1
+    while( n <= dr1 ) {
+        if( dr1>0 && dr0-dr1==1 ) { // normal case
+            u = modinv64b(r1[dr1],p);
+            A = mul64b(r0[dr0],u,p);
+            b = mul64b(A,r1[dr1-1],p);
+            b = mul64b(u,sub64b(r0[dr0-1],b,p),p);             // quotient q = A x + b
+            //dr = polsubmulP(r0,r1,A,b,dr0,dr1,p,P);            // r0 = r0 - (A x + b) r1
+            dr = polSUBMUL64(r0,r1,A,b,dr0,dr1,p);            // r0 = r0 - (A x + b) r1
+            //dt = polsubmulP(v0,v1,A,b,dv0,dv1,p,P);            // v0 = v0 - (A x + b) v1
+            dt = polSUBMUL64(v0,v1,A,b,dv0,dv1,p);            // v0 = v0 - (A x + b) v1
+        } else {
+           dr = polDIVIP64(r0,r1,dr0,dr1,p);
+           q = r0+dr1; dq = dr0-dr1;                           // q = quo(r0,r1)
+           dt = polmul64s(q,v1,L,dq,dv1,p);
+           dt = polsub64s(v0,L,v0,dv0,dt,p);
+        }
+        r = r0; r0 = r1; r1 = r; dr0 = dr1; dr1 = dr;         // r0,r1 = r1,rem(r0,r1)
+        t = v0; v0 = v1; v1 = t; dv0 = dv1; dv1 = dt;         // v0,v1 = v1,v0 - q*v1
+        //printf("r0 = "); polprint64s(r0,dr0);
+        //printf("r1 = "); polprint64s(r1,dr1);
+        //printf("v0 = "); polprint64s(v0,dv0);
+        //printf("v1 = "); polprint64s(v1,dv1);
+    }
+    if( dv1>=0 ) {
+        polcopy64s(v1,dv1,L);
+        monic64s(L,dv1,p);
+    }
+    return dv1;
+}
 
 /*
 NEWTON INTERPOLATION ROUTINES:

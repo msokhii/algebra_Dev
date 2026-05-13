@@ -1,5 +1,6 @@
 libNewton := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
 libR := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
+libV := "/cecm/home/mss59/Desktop/newDir/newDir/routinesCPP/cppObj.so":
 
 mRATRECON := define_external(
                             'ratRECON_C',
@@ -68,6 +69,48 @@ mNEWTONINTERP := subsop(1=(
                            yOut,
                            degOut),
                            op(mNEWTONINTERP)):
+
+mVSOLVE := define_external('cppVandermondeSolve',
+  mLen::integer[4],
+  mIn::ARRAY(1..mLen,datatype=integer[8]),
+  yLen::integer[4],
+  yIn::ARRAY(1..yLen,datatype=integer[8]),
+  shiftInt::integer[4],
+  pp::integer[8],
+  outLen::integer[4],
+  aOut::ARRAY(1..outLen,datatype=integer[8]),
+  RETURN::integer[4],
+  LIB=libV):
+
+mVSOLVE := subsop(1=(
+                    mLen,
+                    mIn,
+                    yLen,
+                    yIn,
+                    shiftInt,
+                    pp,
+                    outLen,
+                    aOut),op(mVSOLVE)):
+
+cppVSolve := proc( v::{Vector,list}, m::{Vector,list}, p::prime, shift::integer:=0 )
+local t,i,a,R,y,rc;
+
+   t := numelems(v);
+   printf("Quadratic C code Vandermonde solver: t=%d  p=%d\n",t,p);
+   if numelems(m) <> t then error "v and m must be the same size"; fi;
+
+   R := Array(0..t-1,datatype=integer[8]);
+   y := Array(0..t-1,datatype=integer[8]);
+   for i from 1 to t do R[i-1] := m[i]; y[i-1] := v[i]; od;
+
+   a := Array(0..t-1,datatype=integer[8]);
+
+   rc := mVSOLVE(t,R,t,y,shiftInt,p,t,a);
+   if rc <> 0 then error "cppVandermondeSolve returned error code %1", rc; fi;
+
+   return [seq( a[i], i=0..t-1 )];
+
+end:
 
 (* Check if deg(A[i])=0 *)
 checkZeroPY := proc(A,len) option inline:
