@@ -849,7 +849,7 @@ for n_test from n_min to n_max do
 
             # FFGE timing benchmark — same methodology as BB above.
             # Run FFGE ffge_bench_calls times at the same input, average.
-            ffge_bench_calls := 2:
+            ffge_bench_calls := 1:
             t_ffge_start := time():
             to ffge_bench_calls do
                 FFGE(A_ffge, b_ffge, Y_ffge):

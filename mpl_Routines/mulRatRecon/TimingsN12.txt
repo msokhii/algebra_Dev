@@ -1,0 +1,40 @@
+============================================================
+  Symmetric Toeplitz MRFI benchmark
+  Prime p = 2147483647
+  Range   n = 12 .. 12
+============================================================
+
+  n = 12
+  MRFI Status                           : PASS
+  Total BB calls                        : 196636  (NDSA = 28, MRFI = 196608)
+  BB calls in NDSA                      : 28
+  BB calls in MRFI                      : 196608
+  Total NDSA time for BB calls (s)      : 0.000396000
+  Total MRFI time for BB calls (s)      : 3.853053000
+  Total BB calls time (NDSA+MRFI)       : 3.853449000
+  Total time (s)                        : 111.672449000 
+  Time for MRFI Individual component - 
+  Time -> cppNewtonInterp (s)  : 9.878000000
+  Time -> MQRFR (s)            : 0.020000000
+  Time -> cppRR (s)            : 11.363000000
+  Time -> BMEA (s)             : 1.413000000
+  Time -> Vandermonde (s)      : 2.236000000
+  Deg_num (per equation)   : [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+  Deg_den (per equation)   : [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+  Terms_num (per equation) : [849, 1854, 2193, 2414, 2563, 2546, 2546, 2563, 2414, 2193, 1854, 849]
+  Terms_den (per equation) : [5579, [], [], [], [], [], [], [], [], [], [], []]
+ 
+  FFGE status              : OK
+  FFGE total time (s)      : 100806.401000000
+  FFGE f[i] terms          : [849, 1854, 2193, 2414, 2563, 2546, 2546, 2563, 2414, 2193, 1854, 849]
+  FFGE g[i] terms          : [5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579]
+  FFGE y[i] terms (Pre GCD): [337450, 389044, 412634, 427360, 436558, 440662, 440662, 436558, 427360, 412634, 389044, 337450]
+  FFGE det(A) terms        : 350726
+  FFGE Max Elim. step swell: 32031013  (numterms(num) before exact div)
+  FFGE max Back sub swell  : 82990563  (numterms(N[i]) before exact div)
+  Term count comparison (MRFI vs FFGE)
+  Numerator terms MRFI     : [849, 1854, 2193, 2414, 2563, 2546, 2546, 2563, 2414, 2193, 1854, 849]
+  Numerator terms FFGE     : [849, 1854, 2193, 2414, 2563, 2546, 2546, 2563, 2414, 2193, 1854, 849]
+  Denominator terms MRFI   : [5579, [], [], [], [], [], [], [], [], [], [], []]
+  Denominator terms FFGE   : [5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579, 5579]
+
