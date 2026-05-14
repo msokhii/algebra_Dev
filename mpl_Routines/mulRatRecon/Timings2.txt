@@ -12,7 +12,8 @@
   Total NDSA time for BB calls (s)      : 0.000125000
   Total MRFI time for BB calls (s)      : 0.000640000
   Total BB calls time (NDSA+MRFI)       : 0.000765000
-  Total time (s)                        : 0.017765000 
+  Total time (s)                        : 0.014772000 
+  Total time without cpp (s)            : 0.014769000 
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 0.001000000
   Time -> MQRFR (s)            : 0.002000000
@@ -47,6 +48,7 @@
   Total MRFI time for BB calls (s)      : 0.001967000
   Total BB calls time (NDSA+MRFI)       : 0.002095000
   Total time (s)                        : 0.029095000 
+  Total time without cpp (s)            : 0.035091000 
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 0.002000000
   Time -> MQRFR (s)            : 0.002000000
@@ -81,6 +83,7 @@
   Total MRFI time for BB calls (s)      : 0.008222000
   Total BB calls time (NDSA+MRFI)       : 0.008352000
   Total time (s)                        : 0.109352000 
+  Total time without cpp (s)            : 0.220434000 
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 0.018000000
   Time -> MQRFR (s)            : 0.002000000
@@ -114,7 +117,8 @@
   Total NDSA time for BB calls (s)      : 0.000317000
   Total MRFI time for BB calls (s)      : 0.011816000
   Total BB calls time (NDSA+MRFI)       : 0.012133000
-  Total time (s)                        : 0.207133000 
+  Total time (s)                        : 0.207133000
+  Total time without cpp (s)            : 0.226995000 
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 0.029000000
   Time -> MQRFR (s)            : 0.005000000
@@ -148,7 +152,8 @@
   Total NDSA time for BB calls (s)      : 0.000331000
   Total MRFI time for BB calls (s)      : 0.050203000
   Total BB calls time (NDSA+MRFI)       : 0.050534000
-  Total time (s)                        : 0.768534000 
+  Total time (s)                        : 0.768534000
+  Total time without cpp (s)            : 0.935237000 
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 0.105000000
   Time -> MQRFR (s)            : 0.006000000
@@ -183,6 +188,7 @@
   Total MRFI time for BB calls (s)      : 0.131075000
   Total BB calls time (NDSA+MRFI)       : 0.131424000
   Total time (s)                        : 1.884424000 
+  Total time without cpp (s)            : 3.949195000
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 0.304000000
   Time -> MQRFR (s)            : 0.008000000
@@ -216,7 +222,8 @@
   Total NDSA time for BB calls (s)      : 0.000402000
   Total MRFI time for BB calls (s)      : 0.288791000
   Total BB calls time (NDSA+MRFI)       : 0.289193000
-  Total time (s)                        : 4.712193000 
+  Total time (s)                        : 4.712193000
+  Total time without cpp (s)            : 15.840540000
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 0.742000000
   Time -> MQRFR (s)            : 0.007000000
@@ -250,7 +257,8 @@
   Total NDSA time for BB calls (s)      : 0.000569000
   Total MRFI time for BB calls (s)      : 0.770586000
   Total BB calls time (NDSA+MRFI)       : 0.771155000
-  Total time (s)                        : 17.940155000 
+  Total time (s)                        : 17.940155000
+  Total time without cpp (s)            : 291.037463000 
   Time for MRFI Individual component - 
   Time -> cppNewtonInterp (s)  : 1.762000000
   Time -> MQRFR (s)            : 0.011000000

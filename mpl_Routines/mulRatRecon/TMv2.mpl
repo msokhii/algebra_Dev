@@ -757,7 +757,7 @@ get_data := proc(test_case)
 end proc:
 
 test_prime := 2^31 - 1:  
-n_min := 4:
+n_min := 12:
 n_max := 12:
 do_verify := true:
 do_ffge := true:
