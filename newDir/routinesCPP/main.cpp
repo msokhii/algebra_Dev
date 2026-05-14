@@ -1720,7 +1720,20 @@ vector<LONG> Lbuf(N + 2, 0);
 // total = 2N + 2n + 3  (with n = N/2)  ~  3N + 3. Allocate generously.
 vector<LONG> W(3 * N + 8, 0);
 
+/* fprintf(stderr, "cppBM IN:  aLen=%d  outLen=%d  p=%lld  a=[",
+        aLen, outLen, (long long)p);
+for (int i = 0; i < N; ++i)
+    fprintf(stderr, "%lld%s", (long long)a[i], i+1<N?",":"");
+fprintf(stderr, "]\n"); */
+
 int d = BerlekampMassey64s(a.data(), N, Lbuf.data(), W.data(), p);
+
+/* fprintf(stderr, "cppBM OUT: d=%d  Lbuf=[", d);
+int show = (d >= 0 ? d : (int)(W.size() > 0 ? std::min(N+1, 8) : 0));
+for (int i = 0; i <= show && i < (int)Lbuf.size(); ++i)
+    fprintf(stderr, "%lld%s", (long long)Lbuf[i], i<show?",":"");
+fprintf(stderr, "]\n");
+fflush(stderr); */
 
 if (d < 0) {
     // No connection polynomial (all-zero input or N==0 after stripping).

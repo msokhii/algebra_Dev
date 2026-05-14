@@ -208,7 +208,6 @@ BMEA := proc(v::list, p::posint, Z::name)
     local L, d, i;
     if numelems(v) = 0 then return 1; end if;
     L := cppBMM(v, p);
-    print(L);
     if L = [] then return 1; end if;
     d := nops(L) - 1;
     return add(L[i+1]*Z^i, i=0..d);
@@ -759,7 +758,7 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 5:
+n_max := 12:
 do_verify := true:
 do_ffge := true:
 summary := []:
@@ -850,7 +849,7 @@ for n_test from n_min to n_max do
 
             # FFGE timing benchmark — same methodology as BB above.
             # Run FFGE ffge_bench_calls times at the same input, average.
-            ffge_bench_calls := 5:
+            ffge_bench_calls := 2:
             t_ffge_start := time():
             to ffge_bench_calls do
                 FFGE(A_ffge, b_ffge, Y_ffge):

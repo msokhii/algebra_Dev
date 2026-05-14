@@ -73,9 +73,9 @@ mNEWTONINTERP := subsop(1=(
 
 mVSOLVE := define_external('cppVSolve',
   mLen::integer[4],
-  mIn::ARRAY(1..mLen,datatype=integer[8]),
+  mIn::ARRAY(0..mLen-1,datatype=integer[8]),
   yLen::integer[4],
-  yIn::ARRAY(1..yLen,datatype=integer[8]),
+  yIn::ARRAY(0..yLen-1,datatype=integer[8]),
   shiftInt::integer[4],
   pp::integer[8],
   outLen::integer[4],
@@ -85,7 +85,7 @@ mVSOLVE := define_external('cppVSolve',
 
 (* Remove typechecking from mVSOLVE *)
 
-(* mVSOLVE := subsop(1=(
+mVSOLVE := subsop(1=(
                     mLen,
                     mIn,
                     yLen,
@@ -97,10 +97,10 @@ mVSOLVE := define_external('cppVSolve',
 
 mBM := define_external('cppBM',
   aLen::integer[4],
-  aIn::ARRAY(1..aLen, datatype=integer[8]),
+  aIn::ARRAY(0..aLen-1, datatype=integer[8]),
   p::integer[8],
   outLen::integer[4],
-  lOut::ARRAY(1..outLen, datatype=integer[8]),
+  lOut::ARRAY(0..outLen-1, datatype=integer[8]),
   degOut::REF(integer[4]),
   RETURN::integer[4],
   LIB=libBM):
@@ -111,9 +111,9 @@ mBM := subsop(1=(
                 p,
                 outLen,
                 lOut,
-                degOut),op(mBM)): *)
+                degOut),op(mBM)): 
 
-cppBMM := proc( a::{Vector,list}, p::prime )
+cppBMM := proc( a::{Vector,list}, p::prime ) option inline:
 local N,n,i,aArr,L,deg,rc;
 
    N := numelems(a);
@@ -125,16 +125,21 @@ local N,n,i,aArr,L,deg,rc;
    n := iquo(N,2);
    L := Array(0..n,datatype=integer[8]);
    deg := -1;
-
+   
    rc := mBM(N,aArr,p,n+1,L,deg);
    if rc <> 0 then error "cppBerlekampMassey returned error code %1", rc; fi;
-
+   
+   deg := -1;
+   for i from n by -1 to 0 do
+       if L[i] <> 0 then deg := i; break end if;
+   end do;
+  
    if deg < 0 then return []; fi;
    return [seq( L[i], i=0..deg )];
 
 end:
 
-cppVS := proc( v::{Vector,list}, m::{Vector,list}, p::prime, shift::integer:=0 )
+cppVS := proc( v::{Vector,list}, m::{Vector,list}, p::prime, shift::integer:=0 ) option inline:
 local t,i,a,R,y,rc;
 
    t := numelems(v);

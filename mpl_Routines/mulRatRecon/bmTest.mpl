@@ -8,6 +8,7 @@ BMEA := proc(v::list, p::posint, Z::name)
     local L, d, i;
     if numelems(v) = 0 then return 1; end if;
     L := cppBMM(v, p);
+    print(L);
     if L = [] then return 1; end if;
     d := nops(L) - 1;
     return add(L[i+1]*Z^i, i=0..d);
