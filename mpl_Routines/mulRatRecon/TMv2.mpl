@@ -758,7 +758,7 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 20:
+n_max := 30:
 do_verify := false:
 do_ffge := false:
 summary := []:
@@ -776,7 +776,7 @@ for n_test from n_min to n_max do
     counter         := 0:
     num_lines       := 0:
     bb_phase        := "MRFI":       # default phase; flipped to "NDSA" around NDSA calls
-    bb_bench_calls  := 100:         # iterations per BB call for inline timing
+    bb_bench_calls  := 1000:         # iterations per BB call for inline timing
     bb_calls_ndsa   := 0:
     bb_calls_mrfi   := 0:
     t_ndsa_total    := 0.0:
