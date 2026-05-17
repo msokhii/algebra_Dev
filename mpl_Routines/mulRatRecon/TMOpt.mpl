@@ -1,4 +1,4 @@
-kernelopts(numcpus=1):
+kernelopts(numcpus=1);
 read "./mapleWrapper.mpl":
 
 with(LinearAlgebra):
@@ -243,32 +243,47 @@ end proc:
 Zippel_Transpose_Vandermonde_solver := proc(y::list, terms::integer,
                                             roots_::list, lambda_::polynom,
                                             p::integer)
-    local M, fin_coeff, q, q_coeffs, q_eval, q_inv, V_inv_b, i, j, r;
-    M := lambda_ mod p;
+    uses PolynomialTools;
+    local M, M_coeffs, M_prime_coeffs, fin_coeff, q_coeffs,
+          q_eval, q_lambda_inv, V_inv_b,
+          i, j, r_i, deg_M, c;
+    M       := lambda_ mod p;
+    deg_M   := degree(M, Z);                                     # equals `terms`
+    # All coefficients of M as a list in increasing-Z-degree order.
+    # Avoids per-(i,j) coeff(q, Z, j-1) which is O(deg) each call -> O(deg^3) total.
+    M_coeffs := CoefficientList(M, Z) mod p;
+    while nops(M_coeffs) < deg_M + 1 do
+        M_coeffs := [op(M_coeffs), 0];                           # pad if needed
+    end do;
+    # Derivative: (M')_k = (k+1) * M_{k+1}, length deg_M.  Uses Lagrange trick
+    # q_i(r_i) = M'(r_i) where q_i(Z) = M(Z)/(Z - r_i).  Avoids a per-i Eval(quo(...)).
+    M_prime_coeffs := [seq(j * M_coeffs[j + 1] mod p, j=1..deg_M)];
+
     fin_coeff := Vector(terms, 0);
+    q_coeffs  := Array(0..deg_M - 1);
+
     for i from 1 to terms do
-        r := roots_[i];
-        q := quo(M, Z - r, Z) mod p;
-        # OPTIMIZATION: extract all coefficients of q ONCE per root.
-        # The original code called coeff(q, Z, j-1) in the inner loop, which is
-        # O(deg q) per access on Maple's polynomial representation -- making the
-        # whole solver O(terms^3) rather than O(terms^2).  PolynomialTools:-
-        # CoefficientList returns the dense coefficient vector in one pass.
-        q_coeffs := PolynomialTools:-CoefficientList(q, Z);
-        # CoefficientList returns length degree(q)+1; pad to length `terms`.
-        while nops(q_coeffs) < terms do q_coeffs := [op(q_coeffs), 0]; end do;
-        # Evaluate q(r) by Horner on the extracted coefficient list -- avoids
-        # another internal scan by Eval.
-        q_eval := q_coeffs[terms];
-        for j from terms - 1 to 1 by -1 do
-            q_eval := (q_eval * r + q_coeffs[j]) mod p;
+        r_i := roots_[i];
+        # Synthetic division of M by (Z - r_i):  q(Z) = M(Z) / (Z - r_i).
+        # Walk top-down: q_{deg-1} = M_{deg}; q_{k-1} = M_k + q_k * r_i  (mod p).
+        # Simultaneously accumulate inner product V_inv_b = sum_k q_k * y[k+1] mod p.
+        c := M_coeffs[deg_M + 1];                                # q_{deg-1}
+        q_coeffs[deg_M - 1] := c;
+        V_inv_b := c * y[deg_M] mod p;                           # k = deg-1, y[k+1]=y[deg]
+        for j from deg_M - 2 by -1 to 0 do
+            c := (M_coeffs[j + 2] + c * r_i) mod p;
+            q_coeffs[j] := c;
+            V_inv_b := (V_inv_b + c * y[j + 1]) mod p;
         end do;
-        q_inv := 1/q_eval mod p;
-        # Inner sum via Maple's add() builtin (faster than manual for-loop).
-        # Per-term mod keeps the accumulator bounded by terms*(p-1), well
-        # within 64-bit.
-        V_inv_b := add(q_coeffs[j]*y[j] mod p, j=1..terms) mod p;
-        fin_coeff[i] := V_inv_b * q_inv mod p;
+
+        # Evaluate M' at r_i via Horner — gives q_i(r_i) directly.
+        q_eval := M_prime_coeffs[deg_M];
+        for j from deg_M - 1 by -1 to 1 do
+            q_eval := (q_eval * r_i + M_prime_coeffs[j]) mod p;
+        end do;
+        q_lambda_inv := 1/q_eval mod p;
+
+        fin_coeff[i] := V_inv_b * q_lambda_inv mod p;
     end do;
     return convert(fin_coeff, list);
 end proc:
@@ -789,12 +804,15 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 15:
+n_max := 20:
 do_verify := true:
 do_ffge := true:
+n_ffge_max         := 12:    # skip FFGE entirely for n_test > n_ffge_max
+ffge_bench_budget  := 60.0:  # max wall-seconds to spend benchmarking FFGE
 summary := []:
 
 for n_test from n_min to n_max do
+try    # outer try: catastrophic failure on this n shouldn't kill the sweep
     #print("=================================================================="):
     #printf("  TEST: symmetric Toeplitz, n = %d\n", n_test):
     #print("=================================================================="):
@@ -857,11 +875,12 @@ for n_test from n_min to n_max do
         stats_common    := false: stats_mMax := 0:
     end if;
 
-    if do_ffge then
+    if do_ffge and n_test <= n_ffge_max then
         Y_ffge := [seq(y||i, i=1..n_test)]:
         A_ffge := LinearAlgebra:-ToeplitzMatrix(Y_ffge, symmetric):
         b_ffge := Vector(n_test, fill=1):
         ffge_status := "OK":
+        t_first_ffge := time():
         try
             det_ffge, f_ffge, g_ffge := FFGE(A_ffge, b_ffge, Y_ffge):
         catch:
@@ -869,6 +888,7 @@ for n_test from n_min to n_max do
                                StringTools:-FormatMessage(lastexception[2..-1])):
             print("FFGE threw: ", ffge_status):
         end try:
+        t_first_ffge := time() - t_first_ffge:
 
         if ffge_status = "OK" then
             ffge_terms_num   := ffge_stats["f_terms"]:
@@ -878,22 +898,42 @@ for n_test from n_min to n_max do
             ffge_elim_swell  := ffge_stats["elim_num_max"]:
             ffge_backsub_swell := ffge_stats["backsub_N_max"]:
 
-            # FFGE timing benchmark — same methodology as BB above.
-            # Run FFGE ffge_bench_calls times at the same input, average.
-            ffge_bench_calls := 1000:
-            t_ffge_start := time():
-            to ffge_bench_calls do
-                FFGE(A_ffge, b_ffge, Y_ffge):
-            end do:
-            t_ffge := evalf((time() - t_ffge_start) / ffge_bench_calls):
+            # Adaptive FFGE timing benchmark.
+            # Don't spend more than ffge_bench_budget seconds on it.
+            # If single FFGE call already exceeds the budget, just use that timing.
+            if t_first_ffge >= ffge_bench_budget or t_first_ffge < 1e-9 then
+                ffge_bench_calls := 1:
+                t_ffge := t_first_ffge:
+            else
+                ffge_bench_calls := max(1,
+                                        min(1000,
+                                            floor(ffge_bench_budget / t_first_ffge))):
+                if ffge_bench_calls > 1 then
+                    t_ffge_start := time():
+                    try
+                        to ffge_bench_calls - 1 do
+                            FFGE(A_ffge, b_ffge, Y_ffge):
+                        end do:
+                        t_ffge := evalf((t_first_ffge + (time() - t_ffge_start))
+                                        / ffge_bench_calls):
+                    catch:
+                        # Benchmark threw mid-run — fall back to single-call timing
+                        print("FFGE bench threw mid-run; using single-call timing"):
+                        t_ffge := t_first_ffge:
+                    end try:
+                else
+                    t_ffge := t_first_ffge:
+                end if:
+            end if:
         else
             ffge_terms_num     := []:  ffge_terms_den     := []:
             ffge_y_terms       := []:  ffge_det_terms     := -1:
             ffge_elim_swell    := -1:  ffge_backsub_swell := -1:
             t_ffge             := 0.0:
         end if:
+        gc():    # release whatever FFGE allocated, even if it failed
     else
-        ffge_status        := "SKIPPED":
+        ffge_status        := `if`(do_ffge, "SKIPPED (n>n_ffge_max)", "SKIPPED"):
         t_ffge             := 0.0:
         ffge_terms_num     := []:  ffge_terms_den     := []:
         ffge_y_terms       := []:  ffge_det_terms     := -1:
@@ -1023,7 +1063,13 @@ for n_test from n_min to n_max do
                                  t_cppNewton_total, t_mqrfr_total, t_cppRR_total,
                                  t_bmea_total,      t_zippel_total, t_iratrecon_total]]:
     end if;
-end do;
+catch:
+    printf("  ITERATION ERROR  n=%2d  %s\n",
+           n_test, StringTools:-FormatMessage(lastexception[2..-1])):
+    print("  ... continuing with next n"):
+end try;
+gc():        # release memory accumulated during this iteration before the next one
+end do:
 
 print("=================================================================="):
 print("  SUMMARY"):
