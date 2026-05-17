@@ -1,6 +1,5 @@
 kernelopts(numcpus=1):
-
-read "./mapleWrapperv2.mpl":
+read "./mapleWrapper.mpl":
 
 with(LinearAlgebra):
 with(IntegerRelations):
@@ -203,16 +202,18 @@ MQRFR := proc(r0::polynom, r1::polynom, t0::integer, t1::integer, p::prime)
 end proc:
 
 BMEA := proc(v::list, p::posint, Z::name)
-    # Wraps the C++ Berlekamp-Massey via cppBMM, lifting the returned
-    # coefficient list [Lambda_0, Lambda_1, ..., Lambda_deg] into a polynomial
-    # in Z. Empty / all-zero input returns 1 so Roots(...) and degree(...)
-    # downstream stay well-behaved.
-    local L, d, i;
-    if numelems(v) = 0 then return 1; end if;
-    L := cppBMM(v, p);
-    if L = [] then return 1; end if;
-    d := nops(L) - 1;
-    return add(L[i+1]*Z^i, i=0..d);
+    local n, m, R0, R1, V0, V1, i, Q;
+    n := iquo(nops(v), 2);
+    m := 2*n - 1;
+    R0 := Z^(2*n);
+    R1 := add(v[m+1-i]*Z^i, i=0..m) mod p;
+    V0 := 0; V1 := 1;
+    while n <= degree(R1, Z) do
+        R0, R1 := R1, Rem(R0, R1, Z, 'Q') mod p;
+        V0, V1 := V1, Expand(V0 - Q*V1) mod p;
+    end do;
+    i := 1/lcoeff(V1, Z) mod p;
+    return i*V1 mod p;
 end:
 
 generate_monomials := proc(roots_, num_var, prime_points, vars)
@@ -242,12 +243,34 @@ end proc:
 Zippel_Transpose_Vandermonde_solver := proc(y::list, terms::integer,
                                             roots_::list, lambda_::polynom,
                                             p::integer)
-    # Wraps the C++ transposed Vandermonde solve via cppVS. lambda_ is unused:
-    # cppVS builds the master polynomial M(x) = prod(x-roots_[i]) internally.
-    # shift=1 folds in the trailing 1/roots_[i] factor (the three MRFI call
-    # sites no longer apply that division as a post-step).
-    if terms = 0 then return []; end if;
-    return cppVS(y[1..terms], roots_[1..terms], p, 1);
+    local M, fin_coeff, q, q_coeffs, q_eval, q_inv, V_inv_b, i, j, r;
+    M := lambda_ mod p;
+    fin_coeff := Vector(terms, 0);
+    for i from 1 to terms do
+        r := roots_[i];
+        q := quo(M, Z - r, Z) mod p;
+        # OPTIMIZATION: extract all coefficients of q ONCE per root.
+        # The original code called coeff(q, Z, j-1) in the inner loop, which is
+        # O(deg q) per access on Maple's polynomial representation -- making the
+        # whole solver O(terms^3) rather than O(terms^2).  PolynomialTools:-
+        # CoefficientList returns the dense coefficient vector in one pass.
+        q_coeffs := PolynomialTools:-CoefficientList(q, Z);
+        # CoefficientList returns length degree(q)+1; pad to length `terms`.
+        while nops(q_coeffs) < terms do q_coeffs := [op(q_coeffs), 0]; end do;
+        # Evaluate q(r) by Horner on the extracted coefficient list -- avoids
+        # another internal scan by Eval.
+        q_eval := q_coeffs[terms];
+        for j from terms - 1 to 1 by -1 do
+            q_eval := (q_eval * r + q_coeffs[j]) mod p;
+        end do;
+        q_inv := 1/q_eval mod p;
+        # Inner sum via Maple's add() builtin (faster than manual for-loop).
+        # Per-term mod keeps the accumulator bounded by terms*(p-1), well
+        # within 64-bit.
+        V_inv_b := add(q_coeffs[j]*y[j] mod p, j=1..terms) mod p;
+        fin_coeff[i] := V_inv_b * q_inv mod p;
+    end do;
+    return convert(fin_coeff, list);
 end proc:
 
 construct_final_polynomial := proc(coeff_, Monomials)
@@ -641,6 +664,8 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         coeff_num[k] := Zippel_Transpose_Vandermonde_solver(num_eval[k],
                               terms_num[k], Roots_num_eval[k], lambda_num[k], p):
         t_zippel_total := t_zippel_total + (time() - t_helper):
+        coeff_num[k] := [seq(coeff_num[k][i] / Roots_num_eval[k][i] mod p,
+                             i=1..terms_num[k])]:
     end do;
 
     if common_den_flag then
@@ -651,6 +676,8 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
         coeff_den[1] := Zippel_Transpose_Vandermonde_solver(den_eval[1],
                               terms_den[1], Roots_den_eval[1], lambda_den[1], p):
         t_zippel_total := t_zippel_total + (time() - t_helper):
+        coeff_den[1] := [seq(coeff_den[1][i] / Roots_den_eval[1][i] mod p,
+                             i=1..terms_den[1])]:
         for k from 2 to num_eqn do
             den_mono[k]  := den_mono[1]:
             coeff_den[k] := coeff_den[1]:
@@ -664,6 +691,8 @@ MRFI := proc(B, num_vars::integer, num_eqn::integer, vars::list, p::integer)
             coeff_den[k] := Zippel_Transpose_Vandermonde_solver(den_eval[k],
                               terms_den[k], Roots_den_eval[k], lambda_den[k], p):
             t_zippel_total := t_zippel_total + (time() - t_helper):
+            coeff_den[k] := [seq(coeff_den[k][i] / Roots_den_eval[k][i] mod p,
+                                 i=1..terms_den[k])]:
         end do;
     end if;
 
@@ -760,9 +789,9 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 30 :
-do_verify := false:
-do_ffge := false:
+n_max := 15:
+do_verify := true:
+do_ffge := true:
 summary := []:
 
 for n_test from n_min to n_max do
@@ -851,7 +880,7 @@ for n_test from n_min to n_max do
 
             # FFGE timing benchmark — same methodology as BB above.
             # Run FFGE ffge_bench_calls times at the same input, average.
-            ffge_bench_calls := 1:
+            ffge_bench_calls := 1000:
             t_ffge_start := time():
             to ffge_bench_calls do
                 FFGE(A_ffge, b_ffge, Y_ffge):
@@ -1036,34 +1065,38 @@ fprintf(fd, "============================================================\n\n"):
 
 for entry in summary do
     fprintf(fd, "  n = %d\n",                  entry[1]):
-    fprintf(fd, "  MRFI Status                           : %s\n",     entry[2]):
-    fprintf(fd, "  Total BB calls                        : %d  (NDSA = %d, MRFI = %d)\n",
+    fprintf(fd, "  MRFI Status              : %s\n",     entry[2]):
+    fprintf(fd, "  Total BB calls           : %d  (NDSA=%d, MRFI=%d)\n",
             entry[3], entry[4], entry[5]):
-    fprintf(fd, "  BB calls in NDSA                      : %d\n",     entry[4]):
-    fprintf(fd, "  BB calls in MRFI                      : %d\n",     entry[5]):
-    fprintf(fd, "  Total NDSA time for BB calls (s)      : %.9f\n",
+    fprintf(fd, "  BB calls in NDSA         : %d\n",     entry[4]):
+    fprintf(fd, "  BB calls in MRFI         : %d\n",     entry[5]):
+    fprintf(fd, "  Total NDSA time (s)      : %.9f  (incl. failed-T attempts)\n",
             entry[20]):
-    fprintf(fd, "  Total MRFI time for BB calls (s)      : %.9f\n",   entry[21]):
-    fprintf(fd, "  Total BB calls time (NDSA+MRFI)       : %.9f\n",
+    fprintf(fd, "  Total MRFI time (s)      : %.9f\n",   entry[21]):
+    fprintf(fd, "  Total BB time (NDSA+MRFI): %.9f\n",
             entry[20] + entry[21]):
-    fprintf(fd, "  Total time (s)                        : %.9f \n",
+    fprintf(fd, "  MRFI wall-clock (s)      : %.9f  (FULL solve, includes 1000x BB amplification)\n",
+            entry[22]):
+    fprintf(fd, "  MRFI wall-clock corrected: %.9f  (= wall-clock - 999*(t_NDSA+t_MRFI))\n",
             entry[22] - 999.0 * (entry[20] + entry[21])):
-    fprintf(fd, "  Time for MRFI Individual component - \n"):
-    fprintf(fd, "  Time -> cppNewtonInterp (s)  : %.9f\n",   entry[23]):
-    fprintf(fd, "  Time -> MQRFR (s)            : %.9f\n",   entry[24]):
-    fprintf(fd, "  Time -> cppRR (s)            : %.9f\n",   entry[25]):
-    fprintf(fd, "  Time -> BMEA (s)             : %.9f\n",   entry[26]):
-    fprintf(fd, "  Time -> Vandermonde (s)      : %.9f\n",   entry[27]):
+    fprintf(fd, "  --- Component breakdown (MRFI symbolic work) ---\n"):
+    fprintf(fd, "    t_cppNewtonInterp (s)  : %.9f\n",   entry[23]):
+    fprintf(fd, "    t_MQRFR (s)            : %.9f\n",   entry[24]):
+    fprintf(fd, "    t_cppRR (s)            : %.9f\n",   entry[25]):
+    fprintf(fd, "    t_BMEA (s)             : %.9f\n",   entry[26]):
+    fprintf(fd, "    t_Vandermonde (s)      : %.9f\n",   entry[27]):
+    fprintf(fd, "    t_iratrecon (s)        : %.9f  (post-MRFI lift to Q)\n",
+            entry[28]):
     fprintf(fd, "  Deg_num (per equation)   : %a\n",     entry[8]):
     fprintf(fd, "  Deg_den (per equation)   : %a\n",     entry[9]):
     fprintf(fd, "  Terms_num (per equation) : %a\n",     entry[6]):
     fprintf(fd, "  Terms_den (per equation) : %a\n",     entry[7]):
     fprintf(fd, " \n"):
     fprintf(fd, "  FFGE status              : %s\n",     entry[12]):
-    fprintf(fd, "  FFGE total time (s)      : %.9f\n",
+    fprintf(fd, "  FFGE total time (s)      : %.9f  (avg of 1000 calls)\n",
             entry[13]):
-    fprintf(fd, "  FFGE f[i] terms          : %a\n",     entry[14]):
-    fprintf(fd, "  FFGE g[i] terms          : %a\n",     entry[15]):
+    fprintf(fd, "  FFGE f[i] terms (==num)  : %a\n",     entry[14]):
+    fprintf(fd, "  FFGE g[i] terms (==den)  : %a\n",     entry[15]):
     fprintf(fd, "  FFGE y[i] terms (Pre GCD): %a\n",     entry[16]):
     fprintf(fd, "  FFGE det(A) terms        : %a\n",     entry[17]):
     fprintf(fd, "  FFGE Max Elim. step swell: %a  (numterms(num) before exact div)\n",
