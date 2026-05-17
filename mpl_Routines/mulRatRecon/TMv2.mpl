@@ -1,5 +1,4 @@
 kernelopts(numcpus=1):
-
 read "./mapleWrapperv2.mpl":
 
 with(LinearAlgebra):
@@ -760,9 +759,9 @@ end proc:
 
 test_prime := 2^31 - 1:  
 n_min := 4:
-n_max := 30 :
-do_verify := false:
-do_ffge := false:
+n_max := 12:
+do_verify := true:
+do_ffge := true:
 summary := []:
 
 for n_test from n_min to n_max do
